@@ -1,8 +1,8 @@
-import { Table } from "antd";
+import { Table, Typography } from "antd";
 import React from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
-
+const { Title, Text } = Typography;
 const { Column } = Table;
 
 function Staffs() {
@@ -13,7 +13,7 @@ function Staffs() {
     await Axios.get("/api/staff", {
       headers: {
         Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzM4NjhiN2RkODFiMDkwYWRkOGQ1YTciLCJpYXQiOjE2NjQ2NDEyMDd9.oB7vpO68LDoTbtQ9vZef8hUe0rQmUss32CxguC9kmy0",
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzM4NWM4MjkyNzFiMzQ5ZDY4NzQ1MDYiLCJpYXQiOjE2NjYwODY4NjN9.pD3Jes5RcPy-73DaBtqEDn6JLX7KZ90ZzO1sn07j4wk",
       },
     }).then((res) => setData(res.data));
   }
@@ -23,8 +23,12 @@ function Staffs() {
   }, []);
   return (
     <>
-      <h2>Danh sách nhân viên</h2>
-      <Table dataSource={data} pagination={{ pageSize: 6 }}>
+      <Title>Danh sách nhân viên</Title>
+      <Table
+        dataSource={data}
+        pagination={{ pageSize: 6 }}
+        rowKey={(data) => data.email}
+      >
         <Column
           title="Họ và tên"
           dataIndex="fullName"

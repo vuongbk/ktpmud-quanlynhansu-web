@@ -3,10 +3,13 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./Pages/Home";
 import Staffs from "./Pages/Staffs";
 import "./App.css";
-import EditPage from "./Pages/EditPage";
+import EditStaffPage from "./Pages/EditStaffPage";
+import EditProjectPage from "./Pages/EditProjectPage";
 
 import { Layout, Col, Row, Space } from "antd";
 import { Outlet, NavLink } from "react-router-dom";
+import ProjectPage from "./Pages/ProjectPage";
+import AssignmentPage from "./Pages/AssignmentPage";
 
 const { Header, Footer, Content } = Layout;
 
@@ -90,7 +93,10 @@ const App = () => (
       <Routes>
         <Route index element={<Home />} />
         <Route path="/staff" element={<Staffs />} />
-        <Route path="/edit-staff" element={<EditPage />} />
+        <Route path="/project" element={<ProjectPage />} />
+        <Route path="/assignment" element={<AssignmentPage />} />
+        <Route path="/edit-staff" element={<EditStaffPage />} />
+        <Route path="/edit-project" element={<EditProjectPage />} />
         <Route path="*" element={<p>There's nothing here!</p>} />
       </Routes>
       <Outlet />
