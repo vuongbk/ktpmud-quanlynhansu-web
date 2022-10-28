@@ -9,12 +9,11 @@ import {
   Popconfirm,
 } from "antd";
 import { useState, useEffect } from "react";
-import { PlusOutlined } from "@ant-design/icons";
-import { Divider, Space } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
 import workingDay from "../utils";
+import Loading from "../Components/Modal/Loading";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
@@ -23,23 +22,29 @@ const EditProjectPage = () => {
   const [dataProjectChange, setDataProjectChange] = useState({});
   const [leaderChange, setLeaderChange] = useState("");
   const [managers, setManagers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (JSON.stringify(dataProjectChange) === "{}" && leaderChange === "") {
       window.alert("ko co thay doi");
     }
 
+    //thay đổi bảng project
     if (JSON.stringify(dataProjectChange) !== "{}") {
+      setLoading(true);
       await Axios.put(`/api/project/${data._id}`, dataProjectChange, {
         headers: {
           Authorization:
             "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
         },
       });
+      setLoading(false);
     }
 
+    //thay đổi bảng leader
     if (leaderChange !== "") {
       if (data.idAssignment) {
+        setLoading(true);
         await Axios.put(
           `/api/assignment/${data.idAssignment}`,
           { idStaff: leaderChange },
@@ -50,7 +55,9 @@ const EditProjectPage = () => {
             },
           }
         );
+        setLoading(false);
       } else {
+        setLoading(true);
         await Axios.post(
           `/api/assignment`,
           {
@@ -68,11 +75,13 @@ const EditProjectPage = () => {
             },
           }
         );
+        setLoading(false);
       }
     }
   };
 
   const handleDelete = async () => {
+    setLoading(true);
     await Axios.delete(`/api/project/${data._id}`, {
       headers: {
         Authorization:
@@ -98,9 +107,11 @@ const EditProjectPage = () => {
         },
       });
     });
+    setLoading(false);
   };
 
   async function getManagers() {
+    setLoading(true);
     let listManagers = await Axios.get(`/api/staff`, {
       headers: {
         Authorization:
@@ -108,11 +119,16 @@ const EditProjectPage = () => {
       },
     });
     setManagers(listManagers.data);
+    setLoading(false);
   }
 
   useEffect(() => {
     getManagers();
   }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <>

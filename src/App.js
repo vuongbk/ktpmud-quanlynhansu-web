@@ -10,6 +10,7 @@ import { Layout, Col, Row, Space } from "antd";
 import { Outlet, NavLink } from "react-router-dom";
 import ProjectPage from "./Pages/ProjectPage";
 import AssignmentPage from "./Pages/AssignmentPage";
+import DetailAssignment from "./Pages/DetailAssignment";
 
 const { Header, Footer, Content } = Layout;
 
@@ -95,6 +96,7 @@ const App = () => (
         <Route path="/staff" element={<Staffs />} />
         <Route path="/project" element={<ProjectPage />} />
         <Route path="/assignment" element={<AssignmentPage />} />
+        <Route path="/detail-assignment" element={<DetailAssignment />} />
         <Route path="/edit-staff" element={<EditStaffPage />} />
         <Route path="/edit-project" element={<EditProjectPage />} />
         <Route path="*" element={<p>There's nothing here!</p>} />

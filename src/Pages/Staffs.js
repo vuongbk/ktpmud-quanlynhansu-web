@@ -1,29 +1,43 @@
 import { Table, Typography } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
+import Loading from "../Components/Modal/Loading";
 const { Title, Text } = Typography;
 const { Column } = Table;
 
 function Staffs() {
   const emailRef = React.useRef(null);
-  const [data, setData] = React.useState(null);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   async function getStaff() {
+    setLoading(true);
     await Axios.get("/api/staff", {
       headers: {
         Authorization:
           "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzM4NWM4MjkyNzFiMzQ5ZDY4NzQ1MDYiLCJpYXQiOjE2NjYwODY4NjN9.pD3Jes5RcPy-73DaBtqEDn6JLX7KZ90ZzO1sn07j4wk",
       },
-    }).then((res) => setData(res.data));
+    })
+      .then((res) => {
+        setLoading(false);
+        setData(res.data);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log("error getStaff", error);
+      });
   }
 
   React.useEffect(() => {
     getStaff();
   }, []);
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <>
-      <Title>Danh sách nhân viên</Title>
+      <Title level={3}>Danh sách nhân viên</Title>
       <Table
         dataSource={data}
         pagination={{ pageSize: 6 }}

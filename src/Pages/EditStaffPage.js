@@ -14,6 +14,7 @@ import { Divider, Space } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
+import Loading from "../Components/Modal/Loading.js";
 const { Option } = Select;
 
 const EditPage = () => {
@@ -21,6 +22,7 @@ const EditPage = () => {
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   const [data, setData] = useState(useLocation().state.data);
   const [skill, setSkill] = useState([]);
+  const [loading, setLoading] = useState(false);
   let [idSkill, setIdSkill] = useState();
 
   //state dùng để thêm department
@@ -30,23 +32,32 @@ const EditPage = () => {
   const inputRef = useRef(null);
 
   async function getLevelSkillAndIdSkill() {
+    setLoading(true);
     await Axios(`/api/level-skill/${data._id}`, {
       headers: {
         Authorization:
           "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ4NzExODB9.w9lDK7NrD2kFOhqKciQQKxjmbXK7i_Tr1hlMeAXKlgM",
       },
-    }).then((res) => {
-      setIdSkill(
-        res.data.levelSkill.reduce((result, value, index) => {
-          return { ...result, [`id${index}`]: value.idSkill };
-        }, {})
-      );
-      setSkill(
-        res.data.levelSkill.map((value) => {
-          return { idLevelSkill: value._id, levelSkill: value.level };
-        })
-      );
-    });
+    })
+      .then((res) => {
+        console.log("edtstaff 41", loading);
+        setIdSkill(
+          res.data.levelSkill.reduce((result, value, index) => {
+            return { ...result, [`id${index}`]: value.idSkill };
+          }, {})
+        );
+        console.log("edtstaff 47", loading);
+        setSkill(
+          res.data.levelSkill.map((value) => {
+            return { idLevelSkill: value._id, levelSkill: value.level };
+          })
+        );
+      })
+      .catch((error) => {
+        setLoading(false);
+
+        console.log("error editstaffpage 55", error);
+      });
   }
 
   async function getNameSkill(idSkill) {
@@ -56,16 +67,21 @@ const EditPage = () => {
           "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ4NzExODB9.w9lDK7NrD2kFOhqKciQQKxjmbXK7i_Tr1hlMeAXKlgM",
       },
     })
-      .then((res) => {
+      .then(async (res) => {
         let skillNameArray = res.data.skill.map((value) => value.skillName);
+        console.log("edtstaff 41", loading);
+
         setSkill((s) => {
           let skill = s.map((value, index) => {
             return { ...value, nameSkill: skillNameArray[index] };
           });
           return skill;
         });
+        console.log("editstaff 69", loading);
+        setLoading(false);
       })
       .catch(function (error) {
+        setLoading(false);
         if (error.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
@@ -106,17 +122,22 @@ const EditPage = () => {
       window.alert("ko co thay doi");
     }
 
+    //thay đổi bảng staff
     if (JSON.stringify(dataStaffChange) !== "{}") {
+      setLoading(true);
       await Axios.put(`/api/staff/${data._id}`, dataStaffChange, {
         headers: {
           Authorization:
             "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
         },
       });
+      setLoading(false);
     }
 
+    //thay đổi bảng skill
     if (JSON.stringify(levelSkillChange) !== "[]") {
       levelSkillChange.forEach(async (value, index) => {
+        setLoading(true);
         await Axios.put(
           `/api/level-skill/${value.idLevelSkill}`,
           { levelSkill: value.levelSkill },
@@ -127,21 +148,20 @@ const EditPage = () => {
             },
           }
         );
+        setLoading(false);
       });
     }
   };
 
   const handleDelete = async () => {
+    setLoading(true);
     await Axios.delete(`/api/staff/${data._id}`, {
       headers: {
         Authorization:
           "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
       },
     });
-  };
-
-  const addSkill = () => {
-    console.log("chua lam");
+    setLoading(false);
   };
 
   //Lấy arraySkill của staff đc click
@@ -154,9 +174,14 @@ const EditPage = () => {
     }
   }, [idSkill]);
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <>
       <Row>
+        {console.log("edtstaff 168", loading)}
         <Col span={24}>
           <Row>
             <Col span={20} offset={5}>
@@ -372,9 +397,6 @@ const EditPage = () => {
                       </Col>
                     );
                   })}
-                <Button type="primary" onClick={addSkill}>
-                  Add skill
-                </Button>
               </Row>
               <Row style={{ marginTop: "50px" }}>
                 <Col span={6}>

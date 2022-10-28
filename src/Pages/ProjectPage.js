@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
 import workingDay from "../utils";
+import Loading from "../Components/Modal/Loading";
 const { Title, Text } = Typography;
 const { Column } = Table;
 
 function ProjectPage() {
   const [data, setData] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   function checkStatus(date1, date2) {
     let dt1 = new Date(date1);
     let dt2 = new Date(date2);
@@ -23,22 +24,29 @@ function ProjectPage() {
   }
 
   async function getProjects() {
+    setLoading(true);
     await Axios.get("/api/project", {
       headers: {
         Authorization:
           "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzRjY2M3ODE4YmJjNjE2ZmUxMWM0YTciLCJpYXQiOjE2NjU5Nzc0NjR9.AMpdLJ8HvGU5cz0mzVLhVxm9fQSlkMYK_77tLE-M2n0",
       },
-    }).then((res) => {
-      let projects = res.data.infoProjects.map((value) => {
-        return {
-          ...value,
-          thoigiandukien: workingDay(value.dateStart, value.dateEnd),
-          status: checkStatus(value.dateStart, value.dateEnd),
-        };
-      });
+    })
+      .then((res) => {
+        let projects = res.data.infoProjects.map((value) => {
+          return {
+            ...value,
+            thoigiandukien: workingDay(value.dateStart, value.dateEnd),
+            status: checkStatus(value.dateStart, value.dateEnd),
+          };
+        });
 
-      setData(projects);
-    });
+        setData(projects);
+      })
+      .catch((error) => {
+        setLoading(false);
+
+        console.log("error getProjects", error);
+      });
   }
 
   const getLeader = async () => {
@@ -52,14 +60,20 @@ function ProjectPage() {
         },
       });
     });
-    await Promise.all(getAssignmentById).then((values) => {
-      //rút ra mảng các assignment cua leader
-      leaders = values.map((value) => {
-        return value.data.infoAssignment.find((assign) => {
-          return assign.role === "manager";
+    await Promise.all(getAssignmentById)
+      .then((values) => {
+        //rút ra mảng các assignment cua leader
+        leaders = values.map((value) => {
+          return value.data.infoAssignment.find((assign) => {
+            return assign.role === "manager";
+          });
         });
+      })
+      .catch((error) => {
+        setLoading(false);
+
+        console.log("error getAssignmentById", error);
       });
-    });
 
     //lấy thông tin leader từ bảng staffs
     const getInfoLeader = leaders.map(async (value, index) => {
@@ -74,25 +88,31 @@ function ProjectPage() {
         return "chua co leader";
       }
     });
-    Promise.all(getInfoLeader).then((values) => {
-      setData((d) => {
-        return d.map((value, index) => {
-          return {
-            ...value,
-            leader:
-              typeof values[index] === "object"
-                ? values[index].data.infoStaff.fullName
-                : values[index],
-            idAssignment:
-              typeof values[index] === "object" ? leaders[index]._id : "",
-            idStaff:
-              typeof values[index] === "object"
-                ? values[index]?.data.infoStaff._id
-                : "",
-          };
+    Promise.all(getInfoLeader)
+      .then((values) => {
+        setData((d) => {
+          return d.map((value, index) => {
+            return {
+              ...value,
+              leader:
+                typeof values[index] === "object"
+                  ? values[index].data.infoStaff.fullName
+                  : values[index],
+              idAssignment:
+                typeof values[index] === "object" ? leaders[index]._id : "",
+              idStaff:
+                typeof values[index] === "object"
+                  ? values[index]?.data.infoStaff._id
+                  : "",
+            };
+          });
         });
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log("error getInfoLeader", error);
       });
-    });
   };
 
   useEffect(() => {
@@ -103,9 +123,13 @@ function ProjectPage() {
       getLeader();
     }
   }, [data]);
+
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <>
-      <Title>Danh sách dự án</Title>
+      <Title level={3}>Danh sách dự án</Title>
       <Table
         dataSource={data}
         pagination={{ pageSize: 6 }}
