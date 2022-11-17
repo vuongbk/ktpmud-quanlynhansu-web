@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import Axios from "axios";
 import workingDay from "../utils";
 import Loading from "../Components/Modal/Loading";
+import { getToken } from "../Components/useToken";
 const { Title, Text } = Typography;
 const { Column } = Table;
 
 function ProjectPage() {
   const [data, setData] = useState(null);
+  console.log("pj 12", data);
   const [loading, setLoading] = useState(false);
   function checkStatus(date1, date2) {
     let dt1 = new Date(date1);
@@ -27,8 +29,7 @@ function ProjectPage() {
     setLoading(true);
     await Axios.get("/api/project", {
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzRjY2M3ODE4YmJjNjE2ZmUxMWM0YTciLCJpYXQiOjE2NjU5Nzc0NjR9.AMpdLJ8HvGU5cz0mzVLhVxm9fQSlkMYK_77tLE-M2n0",
+        Authorization: "Bearer " + getToken(),
       },
     })
       .then((res) => {
@@ -55,8 +56,7 @@ function ProjectPage() {
     const getAssignmentById = data.map(async (value, index) => {
       return await Axios.get(`/api/assignment-id-project/${value._id}`, {
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzRjY2M3ODE4YmJjNjE2ZmUxMWM0YTciLCJpYXQiOjE2NjU5Nzc0NjR9.AMpdLJ8HvGU5cz0mzVLhVxm9fQSlkMYK_77tLE-M2n0",
+          Authorization: "Bearer " + getToken(),
         },
       });
     });
@@ -80,8 +80,7 @@ function ProjectPage() {
       if (value) {
         return await Axios.get(`/api/staff/${value.idStaff}`, {
           headers: {
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzRjY2M3ODE4YmJjNjE2ZmUxMWM0YTciLCJpYXQiOjE2NjU5Nzc0NjR9.AMpdLJ8HvGU5cz0mzVLhVxm9fQSlkMYK_77tLE-M2n0",
+            Authorization: "Bearer " + getToken(),
           },
         });
       } else {

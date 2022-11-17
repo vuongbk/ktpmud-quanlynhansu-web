@@ -1,4 +1,4 @@
-import { Table, Typography, Input, Space, Button } from "antd";
+import { Table, Typography, Input, Space, Button, InputNumber } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import React, { useRef, useState } from "react";
@@ -8,13 +8,13 @@ import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 const { Title, Text } = Typography;
 
-function Staffs() {
-  const emailRef = React.useRef(null);
+function SkillPage() {
   const [data, setData] = useState(null);
   const searchInput = useRef(null);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [loading, setLoading] = useState(false);
+  const [levelSkillChange, setLevelSkillChange] = useState([]);
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -105,7 +105,7 @@ function Staffs() {
     render: (text, record) => {
       if (dataIndex === "fullName") {
         return (
-          <Link to={`/edit-staff/${record._id}`} state={{ data: record }}>
+          <Link to="/edit-staff" state={{ data: record }}>
             {searchedColumn === dataIndex ? (
               <Highlighter
                 highlightStyle={{
@@ -124,192 +124,136 @@ function Staffs() {
       }
     },
   });
+  const skillArray = [
+    "Java",
+    ".Net",
+    "PHP",
+    "Android",
+    "iOS",
+    "Angular",
+    "NodeJS",
+    "MongoDB",
+    "Python",
+    "React",
+    "React-Native",
+    "Xamarin",
+    "C/ C++",
+  ];
 
   const columns = [
     {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
-      // render: (fullName, record) => (
-      //   <>
-      //     <Link to="/edit-staff/444" state={{ data: record }}>
-      //       {fullName}
-      //     </Link>
-      //   </>
-      // ),
+      width: 200,
+      fixed: "left",
+      render: (fullName, record) => (
+        <>
+          <Link to="/edit-staff" state={{ data: record }}>
+            {fullName}
+          </Link>
+        </>
+      ),
       ...getColumnSearchProps("fullName"),
     },
+    ...getSkill(),
     {
-      title: "Điện thoại",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-    },
-    {
-      title: "Vị trí",
-      dataIndex: "role",
-      filters: [
-        {
-          text: "manager",
-          value: "manager",
-        },
-        {
-          text: "boss",
-          value: "boss",
-        },
-        {
-          text: "developer",
-          value: "developer",
-        },
-      ],
-      onFilter: (value, record) => {
-        return record.role === value;
-      },
-      key: "role",
-      responsive: ["sm"],
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      ref: { emailRef },
-    },
-    {
-      title: "Cấp bậc",
-      dataIndex: "level",
-      key: "level",
-      responsive: ["md"],
-      filters: [
-        {
-          text: "Fresher",
-          value: "Fresher",
-        },
-        {
-          text: "Junior",
-          value: "Junior",
-        },
-        {
-          text: "Senior",
-          value: "Senior",
-        },
-      ],
-      onFilter: (value, record) => {
-        return record.level === value;
-      },
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      responsive: ["lg"],
-      filters: [
-        {
-          text: "Nhân viên chính thức",
-          value: "Nhân viên chính thức",
-        },
-        {
-          text: "Thực tập",
-          value: "Thực tập",
-        },
-        {
-          text: "Đã nghỉ",
-          value: "Đã nghỉ",
-        },
-        {
-          text: "Tạm nghỉ",
-          value: "Tạm nghỉ",
-        },
-        {
-          text: "Cộng tác viên",
-          value: "Cộng tác viên",
-        },
-      ],
-      onFilter: (value, record) => {
-        return record.status === value;
-      },
-    },
-    {
-      title: "Phòng ban",
-      dataIndex: "department",
-      key: "department",
-      responsive: ["lg"],
-      filters: [
-        {
-          text: "Thanh Hóa",
-          value: "Thanh Hóa",
-        },
-        {
-          text: "Hà nội",
-          value: "HN",
-        },
-      ],
-      onFilter: (value, record) => {
-        return record.department === value;
-      },
-    },
-    {
-      title: "Ngày vào làm",
-      dataIndex: "startTL",
-      key: "startTL",
-      responsive: ["xl"],
-      sorter: (a, b) => {
-        return Date.parse(a.startTL) - Date.parse(b.startTL);
-      },
-    },
-    {
-      title: "Giới tính",
-      dataIndex: "sex",
-      key: "sex",
-      responsive: ["xl"],
-      filters: [
-        {
-          text: "Nam",
-          value: "male",
-        },
-        {
-          text: "Nữ",
-          value: "female",
-        },
-      ],
-      onFilter: (value, record) => {
-        return record.sex === value;
+      title: "Thao tác",
+      fixed: "right",
+      width: 125,
+      render: () => {
+        return <Button onClick={handleSubmit}>Cập nhật</Button>;
       },
     },
   ];
-
-  async function getStaff() {
+  function handleSubmit() {
+    if (JSON.stringify(levelSkillChange) !== "[]") {
+      levelSkillChange.forEach(async (value, index) => {
+        setLoading(true);
+        console.log("172", value);
+        await Axios.put(
+          `/api/level-skill/${value.idLevelSkill}`,
+          { levelSkill: value.levelSkill },
+          {
+            headers: {
+              Authorization: "Bearer " + getToken(),
+            },
+          }
+        );
+        setLoading(false);
+      });
+    } else {
+      window.alert("ko co thay doi");
+    }
+  }
+  function handleChange(value, idLevelSkill) {
+    setLevelSkillChange((d) => [
+      ...d,
+      { levelSkill: value, idLevelSkill: idLevelSkill },
+    ]);
+  }
+  function getSkill() {
+    return skillArray.map((nameSkill, index) => {
+      return {
+        title: nameSkill,
+        width: 150,
+        dataIndex: "idSkills",
+        render: (idSkills, record) => {
+          let isSkill = idSkills.find((skill) => skill.skillName === nameSkill);
+          if (isSkill) {
+            return (
+              <InputNumber
+                min={0}
+                max={5}
+                defaultValue={isSkill.level}
+                onChange={(value) => {
+                  handleChange(value, isSkill._id);
+                }}
+              />
+            );
+          }
+        },
+      };
+    });
+  }
+  async function getNameSkillAndStaff() {
     setLoading(true);
-    await Axios.get("/api/staff", {
+    await Axios.get("/api/name-of-staff-and-skill", {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
     })
       .then((res) => {
         setLoading(false);
-        setData(res.data);
+        setData(res.data.staffSkill);
       })
       .catch((error) => {
         setLoading(false);
-        console.log("error getStaff", error);
+        console.log("error getNameSkillAndStaff", error);
       });
   }
 
+  console.log("skillpage 160", data);
   React.useEffect(() => {
-    getStaff();
+    getNameSkillAndStaff();
   }, []);
   if (loading) {
     return <Loading />;
   }
   return (
     <>
-      <Title level={3}>Danh sách nhân viên</Title>
+      <Title level={3}>Danh sách các kỹ năng của nhân viên</Title>
       <Table
         dataSource={data}
-        pagination={{ pageSize: 6 }}
-        rowKey="email"
+        pagination={{ pageSize: 4 }}
+        rowKey={(data) => data.email}
         columns={columns}
+        scroll={{
+          x: 1000,
+        }}
       />
     </>
   );
 }
 
-export default Staffs;
+export default SkillPage;

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
+import { getToken } from "../Components/useToken";
 const { Title, Text } = Typography;
 
 function AssignmentPage() {
@@ -38,7 +39,6 @@ function AssignmentPage() {
       monthArray.push(j);
     }
 
-    // console.log("assignment 39", monthArray);
     //trả về một mảng các column
     return monthArray.map((month, index) => {
       let currentMonth = Date.parse(
@@ -72,9 +72,9 @@ function AssignmentPage() {
             let dateStart = Date.parse(value.dateStart);
             let dateEnd = Date.parse(value.dateEnd);
             //làm tiếp ở đoạn này, lấy tổng effort theo từng khoảng
-            if (dateStart > nextMonth || dateEnd < currentMonth) {
+            if (dateStart >= nextMonth || dateEnd <= currentMonth) {
               return (total += 0);
-            } else if (dateStart < currentMonth) {
+            } else if (dateStart <= currentMonth) {
               if (dateEnd >= nextMonth) {
                 return (total += getTotalEffort(
                   currentMonth,
@@ -88,7 +88,7 @@ function AssignmentPage() {
                   value.effort
                 ));
               }
-            } else if (dateStart > currentMonth) {
+            } else {
               if (dateEnd < nextMonth) {
                 return (total += getTotalEffort(
                   dateStart,
@@ -119,8 +119,7 @@ function AssignmentPage() {
     setLoading(true);
     await Axios.get("/api/assignment-staff", {
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzM4NWM4MjkyNzFiMzQ5ZDY4NzQ1MDYiLCJpYXQiOjE2NjYwODY4NjN9.pD3Jes5RcPy-73DaBtqEDn6JLX7KZ90ZzO1sn07j4wk",
+        Authorization: "Bearer " + getToken(),
       },
     })
       .then((res) => {
@@ -136,6 +135,8 @@ function AssignmentPage() {
                   dateStart: value[i].dateStart,
                   dateEnd: value[i].dateEnd,
                   effort: value[i].effort,
+                  role: value[i].role,
+                  idAssignment: value[i]._id,
                 });
               }
               return effortArrayByMonth;

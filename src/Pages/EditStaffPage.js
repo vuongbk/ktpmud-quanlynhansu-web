@@ -7,24 +7,53 @@ import {
   Select,
   Typography,
   Popconfirm,
+  message,
+  Modal,
 } from "antd";
 import { useState, useEffect, useRef } from "react";
-import { PlusOutlined } from "@ant-design/icons";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { Divider, Space } from "antd";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading.js";
+import Upload from "antd/lib/upload/Upload.js";
+import { getToken } from "../Components/useToken.js";
 const { Option } = Select;
 
-const EditPage = () => {
+const getBase64 = (img, callback) => {
+  console.log("editstaff 23 img", img);
+  const reader = new FileReader();
+  reader.addEventListener("load", () => callback(reader.result));
+  reader.readAsDataURL(img);
+};
+const beforeUpload = (file) => {
+  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+  if (!isJpgOrPng) {
+    message.error("You can only upload JPG/PNG file!");
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error("Image must smaller than 2MB!");
+  }
+  return isJpgOrPng && isLt2M;
+};
+
+function EditPage() {
   const [dataStaffChange, setDataStaffChange] = useState({});
   const [levelSkillChange, setLevelSkillChange] = useState([]);
-  const [data, setData] = useState(useLocation().state.data);
+  const [fileList, setFileList] = useState([]);
+  const { idStaff } = useParams();
+  // const [data, setData] = useState(null);
+  const [data, setData] = useState(useLocation()?.state?.data);
   const [skill, setSkill] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
   let [idSkill, setIdSkill] = useState();
-
+  const [imageUrl, setImageUrl] = useState(
+    data?.imageUrl ? data?.imageUrl : ""
+  );
+  console.log("edit staff 57", imageUrl);
   //state dùng để thêm department
   const [departments, setDepartments] = useState(["Thanh Hóa", "Hà Nội"]);
   const [nameDepartment, setNameDepartment] = useState("");
@@ -33,20 +62,17 @@ const EditPage = () => {
 
   async function getLevelSkillAndIdSkill() {
     setLoading(true);
-    await Axios(`/api/level-skill/${data._id}`, {
+    await Axios(`/api/level-skill/${data?._id}`, {
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ4NzExODB9.w9lDK7NrD2kFOhqKciQQKxjmbXK7i_Tr1hlMeAXKlgM",
+        Authorization: "Bearer " + getToken(),
       },
     })
       .then((res) => {
-        console.log("edtstaff 41", loading);
         setIdSkill(
           res.data.levelSkill.reduce((result, value, index) => {
             return { ...result, [`id${index}`]: value.idSkill };
           }, {})
         );
-        console.log("edtstaff 47", loading);
         setSkill(
           res.data.levelSkill.map((value) => {
             return { idLevelSkill: value._id, levelSkill: value.level };
@@ -55,21 +81,17 @@ const EditPage = () => {
       })
       .catch((error) => {
         setLoading(false);
-
-        console.log("error editstaffpage 55", error);
       });
   }
 
   async function getNameSkill(idSkill) {
     await Axios.post("/api/skills", idSkill, {
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ4NzExODB9.w9lDK7NrD2kFOhqKciQQKxjmbXK7i_Tr1hlMeAXKlgM",
+        Authorization: "Bearer " + getToken(),
       },
     })
       .then(async (res) => {
         let skillNameArray = res.data.skill.map((value) => value.skillName);
-        console.log("edtstaff 41", loading);
 
         setSkill((s) => {
           let skill = s.map((value, index) => {
@@ -77,7 +99,6 @@ const EditPage = () => {
           });
           return skill;
         });
-        console.log("editstaff 69", loading);
         setLoading(false);
       })
       .catch(function (error) {
@@ -117,7 +138,8 @@ const EditPage = () => {
   const handleSubmit = async () => {
     if (
       JSON.stringify(dataStaffChange) === "{}" &&
-      JSON.stringify(levelSkillChange) === "[]"
+      JSON.stringify(levelSkillChange) === "[]" &&
+      imageUrl === data.imageUrl
     ) {
       window.alert("ko co thay doi");
     }
@@ -127,8 +149,7 @@ const EditPage = () => {
       setLoading(true);
       await Axios.put(`/api/staff/${data._id}`, dataStaffChange, {
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+          Authorization: "Bearer " + getToken(),
         },
       });
       setLoading(false);
@@ -143,13 +164,31 @@ const EditPage = () => {
           { levelSkill: value.levelSkill },
           {
             headers: {
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+              Authorization: "Bearer " + getToken(),
             },
           }
         );
         setLoading(false);
       });
+    }
+
+    //upload image
+    if (imageUrl !== data.imageUrl) {
+      let formData = new FormData();
+      formData.append("file", fileList.pop().originFileObj);
+      formData.append("idStaff", data._id);
+
+      await Axios.post("api/image", formData, {
+        headers: {
+          Authorization: "Bearer " + getToken(),
+        },
+      })
+        .then((res) => {
+          console.log("edit 237 res", res);
+        })
+        .catch((err) => {
+          console.log("edit 240 err", err);
+        });
     }
   };
 
@@ -157,12 +196,66 @@ const EditPage = () => {
     setLoading(true);
     await Axios.delete(`/api/staff/${data._id}`, {
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+        Authorization: "Bearer " + getToken(),
       },
     });
     setLoading(false);
   };
+
+  const uploadButton = (
+    <div>
+      {loadingAvatar ? <LoadingOutlined /> : <PlusOutlined />}
+      <div
+        style={{
+          marginTop: 8,
+        }}
+      >
+        Upload
+      </div>
+    </div>
+  );
+
+  //dùng cho component Upload
+  const handleChange = (info) => {
+    setFileList(info.fileList);
+    if (info.file.status === "uploading") {
+      setLoadingAvatar(true);
+      return;
+    }
+    //đoạn này ko kiểm tra dk error thì ko thể hiển thị ảnh ra luôn được
+    if (info.file.status === "done" || info.file.status === "error") {
+      // Get this url from response in real world.
+      getBase64(info.file.originFileObj, (url) => {
+        setLoadingAvatar(false);
+        setImageUrl(url);
+      });
+    }
+  };
+
+  //lấy data Staff từ api
+  // async function getStaff() {
+  //   console.log("editstaff 237", data);
+  //   setLoading(true);
+  //   await Axios.get(`/api/staff/${idStaff}`, {
+  //     headers: {
+  //       Authorization: "Bearer " + getToken(),
+  //     },
+  //   })
+  //     .then((res) => {
+  //       setLoading(false);
+  //       setData(res.data.infoStaff);
+  //       setImageUrl(res.data.infoStaff.imageUrl);
+  //     })
+  //     .catch((error) => {
+  //       setLoading(false);
+  //       console.log("error getStaff", error);
+  //     });
+  // }
+  // useEffect(() => {
+  //   if (!data) {
+  //     getStaff();
+  //   }
+  // }, []);
 
   //Lấy arraySkill của staff đc click
   useEffect(() => {
@@ -181,12 +274,31 @@ const EditPage = () => {
   return (
     <>
       <Row>
-        {console.log("edtstaff 168", loading)}
         <Col span={24}>
           <Row>
             <Col span={20} offset={5}>
-              <Typography.Title level={3}>{data.fullName}</Typography.Title>
+              <Typography.Title level={3}>{data?.fullName}</Typography.Title>
               <Typography.Title level={4}>Thông tin cơ bản</Typography.Title>
+              <Upload
+                name="avatar"
+                listType="picture-card"
+                className="avatar-uploader"
+                showUploadList={false}
+                beforeUpload={beforeUpload}
+                onChange={handleChange}
+              >
+                {imageUrl ? (
+                  <img
+                    src={`../${imageUrl}`}
+                    alt="avatar"
+                    style={{
+                      width: "100%",
+                    }}
+                  />
+                ) : (
+                  uploadButton
+                )}
+              </Upload>
             </Col>
           </Row>
           <Row>
@@ -200,7 +312,7 @@ const EditPage = () => {
             >
               <Typography.Title level={5}>Họ và tên</Typography.Title>
               <Input
-                defaultValue={data.fullName}
+                defaultValue={data?.fullName}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, fullName: e.target.value };
@@ -209,7 +321,7 @@ const EditPage = () => {
               />
               <Typography.Title level={5}>Điện thoại</Typography.Title>
               <Input
-                defaultValue={data.phoneNumber}
+                defaultValue={data?.phoneNumber}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, phoneNumber: e.target.value };
@@ -218,7 +330,7 @@ const EditPage = () => {
               />
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
               <DatePicker
-                defaultValue={moment(data.birthYear)}
+                defaultValue={moment(data?.birthYear)}
                 style={{ width: "100%" }}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
@@ -228,7 +340,7 @@ const EditPage = () => {
               />
               <Typography.Title level={5}>Phòng ban</Typography.Title>
               <Select
-                defaultValue={data.department}
+                defaultValue={data?.department}
                 style={{
                   width: "100%",
                 }}
@@ -273,7 +385,7 @@ const EditPage = () => {
               </Select>
               <Typography.Title level={5}>Cấp bậc</Typography.Title>
               <Select
-                defaultValue={data.level}
+                defaultValue={data?.level}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, level: e };
@@ -292,7 +404,7 @@ const EditPage = () => {
             <Col xs={24} md={{ span: 6, offset: 2 }}>
               <Typography.Title level={5}>Email</Typography.Title>
               <Input
-                defaultValue={data.email}
+                defaultValue={data?.email}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, email: e.target.value };
@@ -301,7 +413,7 @@ const EditPage = () => {
               />
               <Typography.Title level={5}>Giới tính</Typography.Title>
               <Select
-                defaultValue={data.sex}
+                defaultValue={data?.sex}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, sex: e };
@@ -317,7 +429,7 @@ const EditPage = () => {
               </Select>
               <Typography.Title level={5}>Vị trí</Typography.Title>
               <Select
-                defaultValue={data.role}
+                defaultValue={data?.role}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, role: e };
@@ -338,7 +450,7 @@ const EditPage = () => {
               </Select>
               <Typography.Title level={5}>Trạng thái</Typography.Title>
               <Select
-                defaultValue={data.status}
+                defaultValue={data?.status}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, status: e };
@@ -357,7 +469,9 @@ const EditPage = () => {
               </Select>
               <Typography.Title level={5}>Ngày vào làm</Typography.Title>
               <DatePicker
-                defaultValue={moment(data.startTL)}
+                defaultValue={
+                  moment(dataStaffChange.startTL) || moment(data?.startTL)
+                }
                 style={{ width: "100%" }}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
@@ -398,7 +512,7 @@ const EditPage = () => {
                     );
                   })}
               </Row>
-              <Row style={{ marginTop: "50px" }}>
+              <Row style={{ marginTop: "50px" }} justify="space-between">
                 <Col span={6}>
                   <Button style={{ width: "100%" }}>
                     <Link to="/staff">Quay lại</Link>
@@ -431,6 +545,6 @@ const EditPage = () => {
       </Row>
     </>
   );
-};
+}
 
 export default EditPage;

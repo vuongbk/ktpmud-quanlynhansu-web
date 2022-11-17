@@ -14,6 +14,7 @@ import moment from "moment";
 import Axios from "axios";
 import workingDay from "../utils";
 import Loading from "../Components/Modal/Loading";
+import { getToken } from "../Components/useToken";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
@@ -34,8 +35,7 @@ const EditProjectPage = () => {
       setLoading(true);
       await Axios.put(`/api/project/${data._id}`, dataProjectChange, {
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+          Authorization: "Bearer " + getToken(),
         },
       });
       setLoading(false);
@@ -50,8 +50,7 @@ const EditProjectPage = () => {
           { idStaff: leaderChange },
           {
             headers: {
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+              Authorization: "Bearer " + getToken(),
             },
           }
         );
@@ -70,8 +69,7 @@ const EditProjectPage = () => {
           },
           {
             headers: {
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+              Authorization: "Bearer " + getToken(),
             },
           }
         );
@@ -84,8 +82,7 @@ const EditProjectPage = () => {
     setLoading(true);
     await Axios.delete(`/api/project/${data._id}`, {
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+        Authorization: "Bearer " + getToken(),
       },
     });
 
@@ -94,16 +91,14 @@ const EditProjectPage = () => {
       `/api/assignment-id-project/${data._id}`,
       {
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+          Authorization: "Bearer " + getToken(),
         },
       }
     );
     listAssignment.data.infoAssignment.map(async (value) => {
       await Axios.delete(`/api/assignment/${value._id}`, {
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+          Authorization: "Bearer " + getToken(),
         },
       });
     });
@@ -114,8 +109,7 @@ const EditProjectPage = () => {
     setLoading(true);
     let listManagers = await Axios.get(`/api/staff`, {
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzNiZTQxOTEwODVjY2Q1MTYyMTA5MDgiLCJpYXQiOjE2NjQ5MDExNTR9.W6DseyJQsEOk-bdi9XPTQKRG1TeK_5Pc1Xbe11PPLaM",
+        Authorization: "Bearer " + getToken(),
       },
     });
     setManagers(listManagers.data);
@@ -211,7 +205,7 @@ const EditProjectPage = () => {
               <Text>Còn lại: {workingDay(new Date(), data.dateEnd)}</Text>
             </Col>
           </Row>
-          <Row>
+          <Row justify="space-between">
             <Col span={16} offset={5}>
               <Row style={{ marginTop: "50px" }}>
                 <Col span={6}>
