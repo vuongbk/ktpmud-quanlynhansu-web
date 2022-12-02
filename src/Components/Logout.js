@@ -2,10 +2,10 @@ import { getToken, removeToken } from "./useToken";
 import Axios from "axios";
 import { Button } from "antd";
 
-export default function Lougout({ setToken }) {
-  const lougoutOne = async (e) => {
+export default function Lougout({ setToken, setInfoAccount }) {
+  const logoutOne = async (e) => {
     e.preventDefault();
-    Axios("/logout-one", {
+    await Axios("/logout-one", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + getToken(),
@@ -13,11 +13,12 @@ export default function Lougout({ setToken }) {
     });
     removeToken();
     setToken(getToken());
+    setInfoAccount("");
   };
 
-  const lougoutAll = async (e) => {
+  const logoutAll = async (e) => {
     e.preventDefault();
-    Axios({
+    await Axios({
       url: "/logout-all",
       method: "POST",
       headers: {
@@ -27,14 +28,8 @@ export default function Lougout({ setToken }) {
     removeToken();
     setToken(getToken());
   };
-  return (
-    <>
-      <Button type="primary" danger onClick={lougoutOne}>
-        Đăng xuất khỏi thiết bị này
-      </Button>
-      <Button type="primary" danger onClick={lougoutAll}>
-        Đăng xuất khỏi mọi thiết bị
-      </Button>
-    </>
-  );
+  return {
+    logoutOne,
+    logoutAll,
+  };
 }

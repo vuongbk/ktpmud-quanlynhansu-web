@@ -1,14 +1,16 @@
-import { Table, Typography, Input, Space, Button } from "antd";
+import { Table, Typography, Input, Space, Button, Row } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
+import moment from "moment";
 const { Title, Text } = Typography;
 
 function Staffs() {
+  const navigate = useNavigate();
   const emailRef = React.useRef(null);
   const [data, setData] = useState(null);
   const searchInput = useRef(null);
@@ -130,13 +132,6 @@ function Staffs() {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
-      // render: (fullName, record) => (
-      //   <>
-      //     <Link to="/edit-staff/444" state={{ data: record }}>
-      //       {fullName}
-      //     </Link>
-      //   </>
-      // ),
       ...getColumnSearchProps("fullName"),
     },
     {
@@ -251,6 +246,7 @@ function Staffs() {
       dataIndex: "startTL",
       key: "startTL",
       responsive: ["xl"],
+      render: (text) => moment(text).format("DD-MM-YYYY"),
       sorter: (a, b) => {
         return Date.parse(a.startTL) - Date.parse(b.startTL);
       },
@@ -284,12 +280,12 @@ function Staffs() {
       },
     })
       .then((res) => {
-        setLoading(false);
         setData(res.data);
+        setLoading(false);
       })
       .catch((error) => {
-        setLoading(false);
         console.log("error getStaff", error);
+        setLoading(false);
       });
   }
 
@@ -301,7 +297,12 @@ function Staffs() {
   }
   return (
     <>
-      <Title level={3}>Danh sách nhân viên</Title>
+      <Row justify="space-between">
+        <Title level={3}>Danh sách nhân viên</Title>
+        <Button type="primary" onClick={() => navigate("../../create-staff")}>
+          Thêm mới
+        </Button>
+      </Row>
       <Table
         dataSource={data}
         pagination={{ pageSize: 6 }}

@@ -12,7 +12,13 @@ import {
   Modal,
 } from "antd";
 import { useState, useEffect } from "react";
-import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useParams,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
 import workingDay from "../utils";
@@ -21,16 +27,38 @@ import { getToken } from "../Components/useToken";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
-const EditAssignment = () => {
+const CreateAssignment = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation()?.state?.data);
-  const { idAssignment } = useParams();
   const [error, setError] = useState();
-  const [indexAssign, setIndexAssign] = useState(0);
-  const [dataChange, setDataChange] = useState({});
-  const [managers, setManagers] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [dataChange, setDataChange] = useState({
+    idStaff: searchParams.get("idStaff"),
+  });
+  console.log("createassign 36", dataChange);
+  const [projects, setProjects] = useState([]);
+  console.log("createassign 38", projects);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  let optionsStaffs = Array.isArray(data) ? getOptionsStaffs() : [];
+  function getOptionsStaffs() {
+    return data?.map((value, index) => {
+      return {
+        value: value._id,
+        label: value.fullName,
+      };
+    });
+  }
+  let optionsProjects = projects ? getOptionsProjects() : [];
+  function getOptionsProjects() {
+    return projects.map((value, index) => {
+      return {
+        value: value._id,
+        label: value.projectName,
+      };
+    });
+  }
   const handleOk = () => {
     setIsModalOpen(false);
   };
@@ -40,73 +68,73 @@ const EditAssignment = () => {
   const handleSubmit = async () => {
     if (JSON.stringify(dataChange) === "{}") {
       window.alert("ko co thay doi");
-    }
-
-    if (JSON.stringify(dataChange) !== "{}") {
+    } else {
       setLoading(true);
-      await Axios.put(`../api/assignment/${data?.asignment._id}`, dataChange, {
+      await Axios.post(`../api/assignment`, dataChange, {
         headers: {
           Authorization: "Bearer " + getToken(),
         },
       })
         .then((res) => {
-          console.log("editAssign 46", res);
+          console.log("createAssign 63", res);
           setLoading(false);
           navigate(-1);
         })
         .catch((error) => {
           setError(error.response.data);
-          console.log("editAssign 62", error);
+          console.log("createAssign 68", error);
           setIsModalOpen(true);
           setLoading(false);
         });
     }
   };
 
-  const handleDelete = async () => {
+  async function getStaff() {
     setLoading(true);
-    await Axios({
-      method: "delete",
-      url: `../../api/assignment/${idAssignment}`,
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        console.log("editAssignment 81", res.data);
-        navigate(-1);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error.response.data);
-        console.log("editAssign 87", error);
-        setIsModalOpen(true);
-        setLoading(false);
-      });
-  };
-
-  async function getAssignment() {
-    setLoading(true);
-    await Axios({
-      method: "get",
-      url: `../api/assignment-staff-project/${idAssignment}`,
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
+    await Axios.get(
+      `/api/staff/${
+        searchParams.get("idStaff") ? searchParams.get("idStaff") : ""
+      }`,
+      {
+        headers: {
+          Authorization: "Bearer " + getToken(),
+        },
+      }
+    )
       .then((res) => {
         setData(res.data);
         setLoading(false);
       })
       .catch((error) => {
-        console.log("message error", error);
+        console.log("error createAssignment 106", error);
         setLoading(false);
       });
   }
+
+  async function getProjects() {
+    setLoading(true);
+    await Axios({
+      method: "get",
+      url: "/api/project",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setProjects(res.data.infoProjects);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log("createAssign 127", error);
+        setLoading(false);
+      });
+  }
+
   useEffect(() => {
     if (!data) {
-      getAssignment();
+      getStaff();
     }
+    getProjects();
   }, []);
 
   if (loading) {
@@ -120,7 +148,7 @@ const EditAssignment = () => {
         <Col span={24}>
           <Row>
             <Col span={19} offset={5}>
-              <Title level={3}>Chỉnh sửa phân công</Title>
+              <Title level={3}>Thêm phân công</Title>
             </Col>
             <Col>
               {/* <Dropdown overlay={menu}>
@@ -138,22 +166,26 @@ const EditAssignment = () => {
               }}
             >
               <Title level={5}>Nhân viên</Title>
-              <Input
-                defaultValue={data?.fullName}
-                disabled
-                // onChange={(e) => {
-                //   setDataChange((d) => {
-                //     return { ...d, projectName: e.target.value };
-                //   });
-                // }}
-              />
+              {searchParams.get("idStaff") ? (
+                <Input defaultValue={data?.fullName} disabled />
+              ) : (
+                <Select
+                  labelInValue
+                  onChange={(e) => {
+                    console.log("createProject 230", e);
+                    setDataChange((d) => {
+                      return { ...d, idStaff: e.value };
+                    });
+                  }}
+                  style={{
+                    width: "100%",
+                  }}
+                  options={optionsStaffs}
+                ></Select>
+              )}
+
               <Title level={5}>Từ ngày</Title>
               <DatePicker
-                value={moment(
-                  dataChange.dateStart
-                    ? dataChange.dateStart
-                    : data?.asignment.dateStart
-                )}
                 style={{ width: "100%" }}
                 onChange={(date, dateString) => {
                   setDataChange((d) => {
@@ -163,11 +195,7 @@ const EditAssignment = () => {
               />
               <Title level={5}>Phân công dự án</Title>
               <Input
-                value={
-                  dataChange.effort !== undefined
-                    ? dataChange.effort
-                    : data?.asignment.effort
-                }
+                value={dataChange?.effort}
                 onChange={(e) => {
                   setDataChange((d) => {
                     return { ...d, effort: Number(e.target.value) };
@@ -178,22 +206,21 @@ const EditAssignment = () => {
             {/* cột 2 */}
             <Col xs={24} md={{ span: 6, offset: 2 }}>
               <Title level={5}>Dự án</Title>
-              <Input
-                defaultValue={data?.projectName}
-                disabled
-                // onChange={(e) => {
-                //   setDataChange((d) => {
-                //     return { ...d, projectName: e.target.value };
-                //   });
-                // }}
-              />
+              <Select
+                labelInValue
+                onChange={(e) => {
+                  console.log("createProject 230", e);
+                  setDataChange((d) => {
+                    return { ...d, idProject: e.value };
+                  });
+                }}
+                style={{
+                  width: "100%",
+                }}
+                options={optionsProjects}
+              ></Select>
               <Title level={5}>Đến ngày</Title>
               <DatePicker
-                value={moment(
-                  dataChange.dateEnd
-                    ? dataChange.dateEnd
-                    : data?.asignment.dateEnd
-                )}
                 style={{ width: "100%" }}
                 onChange={(date, dateString) => {
                   setDataChange((d) => {
@@ -202,15 +229,22 @@ const EditAssignment = () => {
                 }}
               />
               <Title level={5}>Vai trò</Title>
-              <Input
-                defaultValue={data?.asignment.role}
-                disabled
-                // onChange={(e) => {
-                //   setDataChange((d) => {
-                //     return { ...d, projectName: e.target.value };
-                //   });
-                // }}
-              />
+              <Select
+                defaultValue={dataChange.role}
+                onSelect={(e) => {
+                  setDataChange((d) => {
+                    return { ...d, role: e };
+                  });
+                }}
+                style={{
+                  width: "100%",
+                }}
+              >
+                <Option value="developer">Lập trình viên</Option>
+                {/* <Option value="Leader">Leader</Option> */}
+                {/* leader là gì khi đã có manager */}
+                <Option value="manager">Quản lý dự án</Option>
+              </Select>
             </Col>
           </Row>
           <Row>
@@ -255,21 +289,6 @@ const EditAssignment = () => {
                   </Modal>
                 </Col>
               </Row>
-              <Row justify="space-between">
-                <Col span={6} offset={14}>
-                  <Popconfirm
-                    title="Bạn có chắc muốn xóa nhân viên？"
-                    cancelText="Hủy"
-                    okText="Xóa"
-                    okButtonProps={{ type: "danger" }}
-                    onConfirm={handleDelete}
-                  >
-                    <Button type="link" danger>
-                      Xóa phân công
-                    </Button>
-                  </Popconfirm>
-                </Col>
-              </Row>
             </Col>
           </Row>
         </Col>
@@ -278,4 +297,4 @@ const EditAssignment = () => {
   );
 };
 
-export default EditAssignment;
+export default CreateAssignment;

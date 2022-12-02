@@ -19,28 +19,19 @@ import { getToken } from "../Components/useToken";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
-function EditProjectPage() {
+function CreateProject() {
   const navigate = useNavigate();
-  const [data, setData] = useState(useLocation().state?.data);
+  const [data, setData] = useState(useLocation()?.state?.data);
   const { idProject } = useParams();
   const [error, setError] = useState();
   const [dataProjectChange, setDataProjectChange] = useState({});
-  // console.log("editpj 29", dataProjectChange);
+  console.log("editpj 27", dataProjectChange);
   const [leaderChange, setLeaderChange] = useState("");
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   let options = managers ? getOptions() : [];
-  const [assignments, setAssignments] = useState([]);
-  const timeWorkingEstimation = workingDay(
-    dataProjectChange.dateStart || data?.dateStart,
-    dataProjectChange.dateEnd || data?.dateEnd
-  );
-  //Tính tổng thời gian nhân viên đã được phân công làm cho tới hiện tại
-  const currentDay = moment().startOf("day");
-  const totalTimeWorking = assignments.reduce((total, value) => {
-    return (total += workingDay(value.dateStart, currentDay));
-  }, 0);
+  console.log("createproject 34", options);
   function getOptions() {
     return managers.map((value, index) => {
       return {
@@ -63,7 +54,7 @@ function EditProjectPage() {
     //thay đổi bảng project
     if (JSON.stringify(dataProjectChange) !== "{}") {
       setLoading(true);
-      await Axios.put(`/api/project/${data?._id}`, dataProjectChange, {
+      await Axios.post(`/api/project`, dataProjectChange, {
         headers: {
           Authorization: "Bearer " + getToken(),
         },
@@ -83,7 +74,7 @@ function EditProjectPage() {
 
   const handleDelete = async () => {
     setLoading(true);
-    await Axios.delete(`/api/project/${data?._id}`, {
+    await Axios.delete(`/api/project/${data._id}`, {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -102,14 +93,14 @@ function EditProjectPage() {
 
     //lấy danh sách assignment có liên quan để xóa luôn
     let listAssignment = await Axios.get(
-      `/api/assignment-id-project/${data?._id}`,
+      `/api/assignment-id-project/${data._id}`,
       {
         headers: {
           Authorization: "Bearer " + getToken(),
         },
       }
     );
-    listAssignment.data?.infoAssignment
+    listAssignment.data.infoAssignment
       .map(async (value) => {
         await Axios.delete(`/api/assignment/${value._id}`, {
           headers: {
@@ -138,12 +129,11 @@ function EditProjectPage() {
       },
     })
       .then((res) => {
+        console.log("editpjpage 116", res.data);
         setManagers(res.data);
-        setLoading(false);
       })
       .catch((error) => {
         console.log("message error", error.config);
-        setLoading(false);
       });
   }
   function checkStatus(date1, date2) {
@@ -159,46 +149,7 @@ function EditProjectPage() {
     }
   }
 
-  async function getProject() {
-    setLoading(true);
-    await Axios.get(`/api/project/${idProject}`, {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        const infoProject = res.data?.infoProject;
-        setData({
-          ...infoProject,
-        });
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log("message error", error);
-        setLoading(false);
-      });
-  }
-  async function getAssignments() {
-    setLoading(true);
-    await Axios.get(`/api/assignment-id-project/${data?._id}`, {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        setAssignments(res.data?.infoAssignment);
-      })
-      .catch((error) => {
-        console.log("message error", error);
-      });
-  }
-
   useEffect(() => {
-    if (!data) {
-      console.log("get data");
-      getProject();
-    }
-    getAssignments();
     getManagers();
   }, []);
 
@@ -212,9 +163,7 @@ function EditProjectPage() {
         <Col span={24}>
           <Row>
             <Col span={19} offset={5}>
-              <Title level={3}>
-                {dataProjectChange.projectName || data?.projectName}
-              </Title>
+              <Title level={3}>Thông tin dự án mới</Title>
             </Col>
           </Row>
           <Row>
@@ -228,9 +177,7 @@ function EditProjectPage() {
             >
               <Title level={5}>Tên dự án</Title>
               <Input
-                defaultValue={
-                  dataProjectChange.projectName || data?.projectName
-                }
+                defaultValue={dataProjectChange.projectName}
                 onChange={(e) => {
                   setDataProjectChange((d) => {
                     return { ...d, projectName: e.target.value };
@@ -239,9 +186,7 @@ function EditProjectPage() {
               />
               <Title level={5}>Ngày bắt đầu</Title>
               <DatePicker
-                defaultValue={moment(
-                  dataProjectChange.dateStart || data?.dateStart
-                )}
+                defaultValue={moment(dataProjectChange.dateStart)}
                 style={{ width: "100%" }}
                 onBlur={(e) => {
                   setDataProjectChange((d) => {
@@ -249,39 +194,6 @@ function EditProjectPage() {
                   });
                 }}
               />
-              <Title level={5}>Dự kiến kết thúc</Title>
-              <DatePicker
-                defaultValue={moment(
-                  dataProjectChange.dateEnd || data?.dateEnd
-                )}
-                style={{ width: "100%" }}
-                onBlur={(e) => {
-                  setDataProjectChange((d) => {
-                    return { ...d, dateEnd: e.target.value };
-                  });
-                }}
-              />
-              <Text>
-                Ước tính: {Math.round(timeWorkingEstimation * 100) / 100} mm
-              </Text>
-            </Col>
-            {/* cột 2 */}
-            <Col xs={24} md={{ span: 6, offset: 2 }}>
-              <Title level={5}>PM/Leader</Title>
-              <Select
-                labelInValue
-                defaultValue={data?.nameLeader}
-                onChange={(e) => {
-                  console.log("createProject 230", e);
-                  setDataProjectChange((d) => {
-                    return { ...d, idLeader: e.value, nameLeader: e.label };
-                  });
-                }}
-                style={{
-                  width: "100%",
-                }}
-                options={options}
-              ></Select>
               <Title level={5}>Trạng thái</Title>
               <Select
                 defaultValue={data?.status}
@@ -313,24 +225,45 @@ function EditProjectPage() {
                   },
                 ]}
               ></Select>
-              <Title level={5}>Đã chạy</Title>
-              <Input
-                defaultValue={() => {
-                  return Math.round(totalTimeWorking * 100) / 100 + " mm";
+            </Col>
+            {/* cột 2 */}
+            <Col xs={24} md={{ span: 6, offset: 2 }}>
+              <Title level={5}>PM/Leader</Title>
+              <Select
+                labelInValue
+                onChange={(e) => {
+                  console.log("createProject 230", e);
+                  setDataProjectChange((d) => {
+                    return { ...d, idLeader: e.value, nameLeader: e.label };
+                  });
                 }}
-                disabled
+                style={{
+                  width: "100%",
+                }}
+                options={options}
+              ></Select>
+              <Title level={5}>Dự kiến kết thúc</Title>
+              <DatePicker
+                defaultValue={moment(dataProjectChange.dateEnd)}
+                style={{ width: "100%" }}
+                onBlur={(e) => {
+                  setDataProjectChange((d) => {
+                    return { ...d, dateEnd: e.target.value };
+                  });
+                }}
               />
               <Text>
-                Còn lại:{" "}
-                {Math.round((timeWorkingEstimation - totalTimeWorking) * 100) /
-                  100}{" "}
-                {" mm"}
+                Ước tính:{" "}
+                {workingDay(
+                  dataProjectChange.dateStart || data?.dateStart,
+                  dataProjectChange.dateEnd || data?.dateEnd
+                )}
               </Text>
             </Col>
           </Row>
-          <Row justify="space-between">
+          <Row>
             <Col span={16} offset={5}>
-              <Row style={{ marginTop: "50px" }}>
+              <Row gutter={80} style={{ marginTop: "50px" }}>
                 <Col span={6}>
                   <Button
                     style={{ width: "100%" }}
@@ -370,21 +303,6 @@ function EditProjectPage() {
                   </Modal>
                 </Col>
               </Row>
-              <Row>
-                <Col span={6} offset={14}>
-                  <Popconfirm
-                    title="Bạn có chắc muốn xóa dự án？"
-                    cancelText="Hủy"
-                    okText="Xóa"
-                    okButtonProps={{ type: "danger" }}
-                    onConfirm={handleDelete}
-                  >
-                    <Button type="link" danger>
-                      Xóa dự án
-                    </Button>
-                  </Popconfirm>
-                </Col>
-              </Row>
             </Col>
           </Row>
         </Col>
@@ -393,4 +311,4 @@ function EditProjectPage() {
   );
 }
 
-export default EditProjectPage;
+export default CreateProject;

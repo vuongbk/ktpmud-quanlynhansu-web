@@ -1,6 +1,6 @@
-import { Table, Typography, Row, DatePicker } from "antd";
+import { Table, Typography, Row, DatePicker, Button } from "antd";
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import moment from "moment";
@@ -9,8 +9,9 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 function DetailAssignment() {
-  let curDate = moment();
-  const [data, setData] = useState(useLocation().state.data);
+  let curDate = moment().startOf("day");
+  const [data, setData] = useState(null);
+  const { idStaff } = useParams();
   const [dateColumnStart, setDateColumnStart] = useState(
     moment(curDate).subtract(25, "days")
   );
@@ -18,7 +19,6 @@ function DetailAssignment() {
     moment(curDate).add(35, "days")
   );
   const [projects, setProjects] = useState([]);
-  console.log("detailassign 21", projects);
   const [loading, setLoading] = useState(false);
   const columnAssignments = [
     {
@@ -29,27 +29,33 @@ function DetailAssignment() {
       render: (projectName, record) => {
         return (
           <Link
-            to="/edit-assignment"
-            state={{
-              data: {
-                projectName: record.projectName,
-                fullName: data.fullName,
-                asignmentsList: record.totalEffort,
-              },
-            }}
+            to={`/assignments-of-staff?idStaff=${idStaff}&idProject=${record._id}`}
           >
             {projectName}
           </Link>
         );
       },
     },
-    ...getEffortInMonth(),
+    ...getEffortInDay(),
   ];
-  function getEffortInMonth() {
+  const navigate = useNavigate();
+  function removeDuplicateIds(listId) {
+    let obj = {};
+    let out = [];
+    let leng = listId?.length;
+    for (let x = 0; x < leng; x++) {
+      obj[listId[x].idProject] = 0;
+    }
+    for (let x in obj) {
+      out.push(x);
+    }
+    return out;
+  }
+  function getEffortInDay() {
     let dateColumnList = [];
     for (
       let i = dateColumnStart;
-      i.isBefore(dateColumnEnd);
+      i.isSameOrBefore(dateColumnEnd);
       i = moment(i).add(1, "days")
     ) {
       dateColumnList.push({
@@ -57,112 +63,84 @@ function DetailAssignment() {
         title: i.format("DD-MM"),
         dataIndex: "totalEffort",
         render: (totalEffort, record) => {
-          // console.log("detail 59", totalEffort);
-          // console.log("detail 60", record);
-          let indexOfAssignment = 0; //kiểm tra xem ngày cột đang xét (= i) nằm ở assignment nào
-          totalEffort.forEach((value, index) => {
-            if (
-              moment(value.dateStart).isBefore(i) &&
-              i.isBefore(moment(value.dateEnd))
-            ) {
-              indexOfAssignment = index;
+          //kiểm tra xem ngày cột đang xét (= i) nằm ở assignment nào
+          function checkAssign(iTest) {
+            //duyệt các assign của dự án dòng này
+            let len = totalEffort.length;
+            let x = 0;
+            for (; x < len; x++) {
+              let value = totalEffort[x];
+              if (
+                moment(value.dateStart).isSameOrBefore(iTest) &&
+                iTest.isBefore(moment(value.dateEnd))
+              ) {
+                break;
+              } else {
+                continue;
+              }
             }
-          });
-          let dateStart = moment(totalEffort[indexOfAssignment].dateStart);
-          let dateEnd = moment(totalEffort[indexOfAssignment].dateEnd);
+            if (x === len) {
+              return -1;
+            } else {
+              return x;
+            }
+          }
+
+          //xem tổng effort trong ngày có lớn hơn 100 ko
+          function checkTotalEffortInDay(dateCurrentColumn) {
+            //duyệt cả các assign của các dự án trên dòng khác
+            let arr = data?.totalEffort;
+            let sum = 0;
+            arr.forEach((value, index) => {
+              if (
+                moment(value.dateStart).isSameOrBefore(dateCurrentColumn) &&
+                dateCurrentColumn.isBefore(moment(value.dateEnd))
+              ) {
+                sum += value.effort;
+              }
+            });
+            return sum;
+          }
+          let indexOfAssignment = checkAssign(i);
+          let sumEffort = checkTotalEffortInDay(i);
           //làm tiếp ở đoạn này, lấy tổng effort theo từng khoảng
-          if (dateStart.isBefore(i) && i.isBefore(dateEnd)) {
+          if (indexOfAssignment !== -1) {
             return (
-              <Text
+              <Link
+                to={`/edit-assignment/${totalEffort[indexOfAssignment]?._id}`}
+                state={{
+                  data: {
+                    projectName: record.projectName,
+                    fullName: data?.fullName,
+                    asignment: totalEffort[indexOfAssignment],
+                  },
+                }}
                 style={{
-                  color:
-                    totalEffort[indexOfAssignment].effort < 100 ? "red" : "",
+                  color: sumEffort < 100 ? "red" : "blue",
                 }}
               >
-                {totalEffort[indexOfAssignment].effort}%
-              </Text>
+                {totalEffort[indexOfAssignment]?.effort}%
+              </Link>
             );
           } else {
-            return <Text style={{ color: "red" }}>0%</Text>;
+            return (
+              <Text style={{ color: sumEffort < 100 ? "red" : "blue" }}>
+                0%
+              </Text>
+            );
           }
         },
       });
     }
     return dateColumnList;
-    // console.log("assignment 39", monthArray);
-    //trả về một mảng các column
-    // return monthArray.map((month, index) => {
-    //   //lấy tháng hiện tại cột đang xet
-    //   let currentMonth = Date.parse(
-    //     `${month > 12 ? curDate.getFullYear() + 1 : curDate.getFullYear()}-${
-    //       month <= 9 ? "0" + month : month > 12 ? "0" + (month - 12) : month
-    //     }`
-    //   );
-    //   let nextMonth = Date.parse(
-    //     `${
-    //       month + 1 > 12 ? curDate.getFullYear() + 1 : curDate.getFullYear()
-    //     }-${
-    //       month + 1 <= 9
-    //         ? "0" + (month + 1)
-    //         : month + 1 > 12
-    //         ? "0" + (month + 1 - 12)
-    //         : month + 1
-    //     }`
-    //   );
-    //   function getTitle() {
-    //     let date = new Date(currentMonth);
-    //     let title = date.getMonth() + 1 + "/" + date.getFullYear();
-    //     return title;
-    //   }
-
-    //   //mỗi column có title, effort
-    //   return {
-    //     title: getTitle(),
-    //     dataIndex: "totalEffort",
-    //     render: (totalEffort) => {
-    //       let total = 0;
-    //       let dateStart = Date.parse(totalEffort.dateStart);
-    //       let dateEnd = Date.parse(totalEffort.dateEnd);
-    //       //làm tiếp ở đoạn này, lấy tổng effort theo từng khoảng
-    //       if (dateStart > nextMonth || dateEnd < currentMonth) {
-    //         total += 0;
-    //       } else if (dateStart < currentMonth) {
-    //         if (dateEnd >= nextMonth) {
-    //           total += getTotalEffort(
-    //             currentMonth,
-    //             nextMonth,
-    //             totalEffort.effort
-    //           );
-    //         } else {
-    //           total += getTotalEffort(
-    //             currentMonth,
-    //             dateEnd,
-    //             totalEffort.effort
-    //           );
-    //         }
-    //       } else if (dateStart > currentMonth) {
-    //         if (dateEnd < nextMonth) {
-    //           total += getTotalEffort(dateStart, dateEnd, totalEffort.effort);
-    //         } else {
-    //           total += getTotalEffort(dateStart, nextMonth, totalEffort.effort);
-    //         }
-    //       }
-    //       //lấy số ngày trong tháng curMonth
-    //       let dateAmount = (nextMonth - currentMonth) / millisecondsPerDay;
-    //       total = Math.round(total / dateAmount);
-    //       return (
-    //         <Text style={{ color: total < 100 ? "red" : "" }}>{total}%</Text>
-    //       );
-    //     },
-    //   };
-    // });
   }
 
   async function getProjectName() {
     setLoading(true);
     let urlGet = "/api/project?";
-    data.totalEffort.forEach((value, index, array) => {
-      urlGet += "id" + index + "=" + value.idProject;
+    let listId = removeDuplicateIds(data?.totalEffort);
+    listId.forEach((value, index, array) => {
+      urlGet += "id" + index + "=" + value;
       if (index !== array.length - 1) {
         urlGet += "&";
       }
@@ -178,39 +156,72 @@ function DetailAssignment() {
         let projects = res.data.infoProjects.map((value, index) => {
           return {
             ...value,
-            totalEffort: data.totalEffort.filter((assign) => {
+            //lấy ra những assignment của staff này, trong dự án này
+            totalEffort: data?.totalEffort.filter((assign) => {
               return assign.idProject === value._id;
             }),
           };
         });
+
         setProjects(projects);
+        setLoading(false);
       })
       .catch((error) => {
         console.log("error detail 41", error);
+        setLoading(false);
       });
-    setLoading(false);
   }
 
+  async function getAssignmentAndStaff() {
+    setLoading(true);
+    await Axios.get("/api/assignment-staff", {
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        let rawData = res.data.find((value, index) => {
+          return idStaff === value.idStaff;
+        });
+        setData(rawData);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log("error getAssignmentAndStaff", error);
+        setLoading(false);
+      });
+  }
   useEffect(() => {
-    getProjectName();
-  }, []);
+    if (!data) {
+      getAssignmentAndStaff();
+    }
+    if (data) {
+      getProjectName();
+    }
+  }, [data]);
 
   if (loading) {
     return <Loading />;
   }
   return (
     <>
-      <Row justify="space-between" style={{ marginBottom: "30px" }}>
-        <Title level={3}>Phân công {data.fullName}</Title>
+      <Row style={{ marginBottom: "20px" }}>
+        <Title level={3}>Phân công {data?.fullName}</Title>
+      </Row>
+      <Row justify="space-between" style={{ marginBottom: "10px" }}>
         <RangePicker
           defaultValue={[moment(dateColumnStart), moment(dateColumnEnd)]}
           placement="bottomRight"
           onChange={(dates) => {
             setDateColumnStart(dates[0]);
             setDateColumnEnd(dates[1]);
-            console.log("detail 179", dates[0].format());
           }}
         />
+        <Button type="primary">
+          <Link to={`/create-assignment?idStaff=${idStaff}`} state={{ data }}>
+            Thêm mới
+          </Link>
+        </Button>
       </Row>
 
       <Table
@@ -219,9 +230,18 @@ function DetailAssignment() {
         }}
         dataSource={projects}
         pagination={{ pageSize: 6 }}
-        rowKey={(data) => data.projectName}
+        rowKey={(data) => data?.projectName}
         columns={columnAssignments}
       />
+      <Row justify="space-between">
+        <Button
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          Quay lại
+        </Button>
+      </Row>
     </>
   );
 }

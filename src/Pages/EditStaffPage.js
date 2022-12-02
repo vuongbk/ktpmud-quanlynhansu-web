@@ -7,121 +7,135 @@ import {
   Select,
   Typography,
   Popconfirm,
-  message,
   Modal,
 } from "antd";
 import { useState, useEffect, useRef } from "react";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { Divider, Space } from "antd";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading.js";
-import Upload from "antd/lib/upload/Upload.js";
+// import Upload from "antd/lib/upload/Upload.js";
 import { getToken } from "../Components/useToken.js";
+import md5 from "md5";
 const { Option } = Select;
+// const { Text, Title } = Typography;
 
-const getBase64 = (img, callback) => {
-  console.log("editstaff 23 img", img);
-  const reader = new FileReader();
-  reader.addEventListener("load", () => callback(reader.result));
-  reader.readAsDataURL(img);
-};
-const beforeUpload = (file) => {
-  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-  if (!isJpgOrPng) {
-    message.error("You can only upload JPG/PNG file!");
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error("Image must smaller than 2MB!");
-  }
-  return isJpgOrPng && isLt2M;
-};
+// const getBase64 = (img, callback) => {
+//   console.log("editstaff 23 img", img);
+//   const reader = new FileReader();
+//   reader.addEventListener("load", () => callback(reader.result));
+//   reader.readAsDataURL(img);
+// };
+// const beforeUpload = (file) => {
+//   const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+//   if (!isJpgOrPng) {
+//     message.error("You can only upload JPG/PNG file!");
+//   }
+//   const isLt2M = file.size / 1024 / 1024 < 2;
+//   if (!isLt2M) {
+//     message.error("Image must smaller than 2MB!");
+//   }
+//   console.log("editStaff 39", isJpgOrPng && isLt2M);
+//   return isJpgOrPng && isLt2M;
+// };
 
 function EditPage() {
+  const navigate = useNavigate();
   const [dataStaffChange, setDataStaffChange] = useState({});
   const [levelSkillChange, setLevelSkillChange] = useState([]);
-  const [fileList, setFileList] = useState([]);
+  // const [fileList, setFileList] = useState([]);
+  const [error, setError] = useState();
   const { idStaff } = useParams();
   // const [data, setData] = useState(null);
   const [data, setData] = useState(useLocation()?.state?.data);
-  const [skill, setSkill] = useState([]);
+  const [skillsOfStaff, setSkillsOfStaff] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingAvatar, setLoadingAvatar] = useState(false);
-  let [idSkill, setIdSkill] = useState();
+  // const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [imageUrl, setImageUrl] = useState(
     data?.imageUrl ? data?.imageUrl : ""
   );
-  console.log("edit staff 57", imageUrl);
   //state dùng để thêm department
   const [departments, setDepartments] = useState(["Thanh Hóa", "Hà Nội"]);
   const [nameDepartment, setNameDepartment] = useState("");
-
   const inputRef = useRef(null);
-
-  async function getLevelSkillAndIdSkill() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
+  const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
+  const [password, setPassword] = useState({});
+  const [newSkill, setNewSkill] = useState({});
+  const [skills, setSkills] = useState();
+  let options = skills ? getOptions() : [];
+  function getOptions() {
+    return skills.map((value, index) => {
+      return {
+        value: value._id,
+        label: value.skillName,
+      };
+    });
+  }
+  const handleOkSkillModal = async () => {
     setLoading(true);
-    await Axios(`/api/level-skill/${data?._id}`, {
+    await Axios({
+      method: "post",
+      url: "/api/level-skill",
+      data: { ...newSkill, idStaff: idStaff },
       headers: {
         Authorization: "Bearer " + getToken(),
       },
     })
       .then((res) => {
-        setIdSkill(
-          res.data.levelSkill.reduce((result, value, index) => {
-            return { ...result, [`id${index}`]: value.idSkill };
-          }, {})
-        );
-        setSkill(
-          res.data.levelSkill.map((value) => {
-            return { idLevelSkill: value._id, levelSkill: value.level };
-          })
-        );
+        console.log("editStaff 91", res);
+        setLoading(false);
       })
       .catch((error) => {
+        console.log("editStaff 94", error);
         setLoading(false);
       });
-  }
-
-  async function getNameSkill(idSkill) {
-    await Axios.post("/api/skills", idSkill, {
+    setIsModalSkillOpen(false);
+    navigate(0);
+  };
+  const handleCancelSkillModal = () => {
+    setIsModalSkillOpen(false);
+  };
+  const handleOkPasswordModal = async () => {
+    if (!password.hasOwnProperty("newPassword")) {
+      window.alert("Nhập thiếu");
+      return;
+    }
+    setLoading(true);
+    await Axios.put(`/api/staff/${data._id}`, password, {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
     })
-      .then(async (res) => {
-        let skillNameArray = res.data.skill.map((value) => value.skillName);
-
-        setSkill((s) => {
-          let skill = s.map((value, index) => {
-            return { ...value, nameSkill: skillNameArray[index] };
-          });
-          return skill;
-        });
+      .then((res) => {
+        console.log("editStaff 106", res);
+        setPassword({});
         setLoading(false);
       })
-      .catch(function (error) {
+      .catch((error) => {
+        setError(error.response.data);
+        console.log("editStaff 111", error);
+        setIsModalOpen(true);
         setLoading(false);
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log("Error", error.message);
-        }
-        console.log(error.config);
       });
-  }
+    setIsModalPasswordOpen(false);
+  };
+  const handleCancelPasswordModal = () => {
+    setIsModalPasswordOpen(false);
+  };
 
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+  function getDefaultLevelSkillValue(nameSkill) {
+    return levelSkillChange.find((value) => value.nameSkill === nameSkill);
+  }
   const onNameDepartmentChange = (event) => {
     setNameDepartment(event.target.value);
   };
@@ -143,7 +157,9 @@ function EditPage() {
     ) {
       window.alert("ko co thay doi");
     }
-
+    console.log("editStaff 97", imageUrl === data.imageUrl);
+    console.log("editStaff 97", JSON.stringify(dataStaffChange) === "{}");
+    console.log("editStaff 97", JSON.stringify(levelSkillChange) === "[]");
     //thay đổi bảng staff
     if (JSON.stringify(dataStaffChange) !== "{}") {
       setLoading(true);
@@ -151,11 +167,20 @@ function EditPage() {
         headers: {
           Authorization: "Bearer " + getToken(),
         },
-      });
-      setLoading(false);
+      })
+        .then((res) => {
+          console.log("editStaff 106", res);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError(error.response.data);
+          console.log("editStaff 111", error);
+          setIsModalOpen(true);
+          setLoading(false);
+        });
     }
 
-    //thay đổi bảng skill
+    //thay đổi bảng levelSkill
     if (JSON.stringify(levelSkillChange) !== "[]") {
       levelSkillChange.forEach(async (value, index) => {
         setLoading(true);
@@ -167,29 +192,39 @@ function EditPage() {
               Authorization: "Bearer " + getToken(),
             },
           }
-        );
-        setLoading(false);
+        )
+          .then((res) => {
+            console.log("editStaff 131", res);
+            setLoading(false);
+          })
+          .catch((error) => {
+            setError(error.response.data);
+            console.log("editStaff 136", error);
+            setIsModalOpen(true);
+            setLoading(false);
+          });
       });
     }
 
     //upload image
-    if (imageUrl !== data.imageUrl) {
-      let formData = new FormData();
-      formData.append("file", fileList.pop().originFileObj);
-      formData.append("idStaff", data._id);
+    // if (imageUrl !== data.imageUrl) {
+    //   let formData = new FormData();
+    //   formData.append("file", fileList.pop().originFileObj);
+    //   formData.append("idStaff", data._id);
 
-      await Axios.post("api/image", formData, {
-        headers: {
-          Authorization: "Bearer " + getToken(),
-        },
-      })
-        .then((res) => {
-          console.log("edit 237 res", res);
-        })
-        .catch((err) => {
-          console.log("edit 240 err", err);
-        });
-    }
+    //   await Axios.post("api/image", formData, {
+    //     headers: {
+    //       Authorization: "Bearer " + getToken(),
+    //     },
+    //   })
+    //     .then((res) => {
+    //       console.log("edit 237 res", res);
+    //     })
+    //     .catch((err) => {
+    //       console.log("edit 240 err", err);
+    //     });
+    // }
+    navigate(0);
   };
 
   const handleDelete = async () => {
@@ -198,74 +233,113 @@ function EditPage() {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
-    });
-    setLoading(false);
+    })
+      .then((res) => {
+        console.log("editAssignment 81", res.data);
+        navigate(-1);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error.response.data);
+        console.log("editAssign 87", error);
+        setIsModalOpen(true);
+        setLoading(false);
+      });
   };
-
-  const uploadButton = (
-    <div>
-      {loadingAvatar ? <LoadingOutlined /> : <PlusOutlined />}
-      <div
-        style={{
-          marginTop: 8,
-        }}
-      >
-        Upload
-      </div>
-    </div>
-  );
+  //vẫn đang dùng cho upload ảnh
+  // const uploadButton = (
+  //   <div>
+  //     {loadingAvatar ? <LoadingOutlined /> : <PlusOutlined />}
+  //     <div
+  //       style={{
+  //         marginTop: 8,
+  //       }}
+  //     >
+  //       Upload
+  //     </div>
+  //   </div>
+  // );
 
   //dùng cho component Upload
-  const handleChange = (info) => {
-    setFileList(info.fileList);
-    if (info.file.status === "uploading") {
-      setLoadingAvatar(true);
-      return;
-    }
-    //đoạn này ko kiểm tra dk error thì ko thể hiển thị ảnh ra luôn được
-    if (info.file.status === "done" || info.file.status === "error") {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (url) => {
-        setLoadingAvatar(false);
-        setImageUrl(url);
-      });
-    }
-  };
+  // const handleChange = (info) => {
+  //   console.log("editStaff 198", info);
+  //   setFileList(info.fileList);
+  //   if (info.file.status === "uploading") {
+  //     setLoadingAvatar(true);
+  //     return;
+  //   }
+  //   //đoạn này ko kiểm tra dk error thì ko thể hiển thị ảnh ra luôn được
+  //   // || info.file.status === "error"
+  //   if (info.file.status === "done") {
+  //     // Get this url from response in real world.
+  //     getBase64(info.file.originFileObj, (url) => {
+  //       setLoadingAvatar(false);
+  //       setImageUrl(url);
+  //     });
+  //   } else if (info.file.status === "error") {
+  //     console.log("editStaffPage 214 loi");
+  //   }
+  // };
 
   //lấy data Staff từ api
-  // async function getStaff() {
-  //   console.log("editstaff 237", data);
-  //   setLoading(true);
-  //   await Axios.get(`/api/staff/${idStaff}`, {
-  //     headers: {
-  //       Authorization: "Bearer " + getToken(),
-  //     },
-  //   })
-  //     .then((res) => {
-  //       setLoading(false);
-  //       setData(res.data.infoStaff);
-  //       setImageUrl(res.data.infoStaff.imageUrl);
-  //     })
-  //     .catch((error) => {
-  //       setLoading(false);
-  //       console.log("error getStaff", error);
-  //     });
-  // }
-  // useEffect(() => {
-  //   if (!data) {
-  //     getStaff();
-  //   }
-  // }, []);
-
-  //Lấy arraySkill của staff đc click
+  async function getStaff() {
+    console.log("editstaff 237", data);
+    setLoading(true);
+    await Axios.get(`/api/staff/${idStaff}`, {
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setLoading(false);
+        setData(res.data.infoStaff);
+        setImageUrl(res.data.infoStaff.imageUrl);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log("error getStaff", error);
+      });
+  }
+  async function getLevelSkillAndIdSkill() {
+    await Axios(`/api/level-skill/${data?._id}`, {
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setSkillsOfStaff(res.data.skill);
+      })
+      .catch((error) => {
+        console.log("error.config", error.config);
+      });
+  }
+  function getSkills() {
+    Axios({
+      method: "get",
+      url: "/api/skill",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        console.log("editstaff 319", res.data.skill);
+        setSkills(res.data.skill);
+      })
+      .catch((error) => {
+        console.log("editStaff 322", error);
+      });
+  }
   useEffect(() => {
-    if (!idSkill) {
+    if (!data) {
+      getStaff();
+    }
+    if (data) {
       getLevelSkillAndIdSkill();
     }
-    if (idSkill instanceof Object) {
-      getNameSkill(idSkill);
+    if (!skills) {
+      getSkills();
     }
-  }, [idSkill]);
+  }, [data]);
 
   if (loading) {
     return <Loading />;
@@ -277,9 +351,12 @@ function EditPage() {
         <Col span={24}>
           <Row>
             <Col span={20} offset={5}>
-              <Typography.Title level={3}>{data?.fullName}</Typography.Title>
+              <Typography.Title level={3}>
+                {dataStaffChange.fullName || data?.fullName}
+              </Typography.Title>
               <Typography.Title level={4}>Thông tin cơ bản</Typography.Title>
-              <Upload
+              {/* upload đang lỗi, tạm thời comment để deploy */}
+              {/* <Upload
                 name="avatar"
                 listType="picture-card"
                 className="avatar-uploader"
@@ -298,7 +375,46 @@ function EditPage() {
                 ) : (
                   uploadButton
                 )}
-              </Upload>
+              </Upload> */}
+              <Button
+                type="primary"
+                onClick={() => setIsModalPasswordOpen(true)}
+              >
+                Đặt lại mật khẩu
+              </Button>
+              <Modal
+                open={isModalPasswordOpen}
+                title="Đặt lại mật khẩu"
+                onOk={handleOkPasswordModal}
+                onCancel={handleCancelPasswordModal}
+                footer={[
+                  <Button key="back" onClick={handleCancelPasswordModal}>
+                    Hủy
+                  </Button>,
+                  <Button
+                    key="submit"
+                    type="primary"
+                    loading={loading}
+                    onClick={handleOkPasswordModal}
+                  >
+                    Đặt lại
+                  </Button>,
+                ]}
+              >
+                {/* <Text>Mật khẩu mới</Text> */}
+                <Input.Password
+                  style={{ marginTop: "20px" }}
+                  placeholder="Mật khẩu mới"
+                  onChange={(e) =>
+                    setPassword((p) => {
+                      return {
+                        ...p,
+                        newPassword: md5(e.target.value),
+                      };
+                    })
+                  }
+                />
+              </Modal>
             </Col>
           </Row>
           <Row>
@@ -312,8 +428,8 @@ function EditPage() {
             >
               <Typography.Title level={5}>Họ và tên</Typography.Title>
               <Input
-                defaultValue={data?.fullName}
-                onBlur={(e) => {
+                defaultValue={dataStaffChange.fullName || data?.fullName}
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, fullName: e.target.value };
                   });
@@ -321,8 +437,8 @@ function EditPage() {
               />
               <Typography.Title level={5}>Điện thoại</Typography.Title>
               <Input
-                defaultValue={data?.phoneNumber}
-                onBlur={(e) => {
+                defaultValue={dataStaffChange.phoneNumber || data?.phoneNumber}
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, phoneNumber: e.target.value };
                   });
@@ -330,9 +446,11 @@ function EditPage() {
               />
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
               <DatePicker
-                defaultValue={moment(data?.birthYear)}
+                defaultValue={moment(
+                  dataStaffChange.birthYear || data?.birthYear
+                )}
                 style={{ width: "100%" }}
-                onBlur={(e) => {
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, birthYear: e.target.value };
                   });
@@ -340,7 +458,7 @@ function EditPage() {
               />
               <Typography.Title level={5}>Phòng ban</Typography.Title>
               <Select
-                defaultValue={data?.department}
+                defaultValue={dataStaffChange.department || data?.department}
                 style={{
                   width: "100%",
                 }}
@@ -385,7 +503,7 @@ function EditPage() {
               </Select>
               <Typography.Title level={5}>Cấp bậc</Typography.Title>
               <Select
-                defaultValue={data?.level}
+                defaultValue={dataStaffChange.level || data?.level}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, level: e };
@@ -404,8 +522,8 @@ function EditPage() {
             <Col xs={24} md={{ span: 6, offset: 2 }}>
               <Typography.Title level={5}>Email</Typography.Title>
               <Input
-                defaultValue={data?.email}
-                onBlur={(e) => {
+                defaultValue={dataStaffChange.email || data?.email}
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, email: e.target.value };
                   });
@@ -413,7 +531,7 @@ function EditPage() {
               />
               <Typography.Title level={5}>Giới tính</Typography.Title>
               <Select
-                defaultValue={data?.sex}
+                defaultValue={dataStaffChange.sex || data?.sex}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, sex: e };
@@ -429,7 +547,7 @@ function EditPage() {
               </Select>
               <Typography.Title level={5}>Vị trí</Typography.Title>
               <Select
-                defaultValue={data?.role}
+                defaultValue={dataStaffChange.role || data?.role}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, role: e };
@@ -450,7 +568,7 @@ function EditPage() {
               </Select>
               <Typography.Title level={5}>Trạng thái</Typography.Title>
               <Select
-                defaultValue={data?.status}
+                defaultValue={dataStaffChange.status || data?.status}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, status: e };
@@ -473,7 +591,7 @@ function EditPage() {
                   moment(dataStaffChange.startTL) || moment(data?.startTL)
                 }
                 style={{ width: "100%" }}
-                onBlur={(e) => {
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, startTL: e.target.value };
                   });
@@ -484,19 +602,80 @@ function EditPage() {
           <Row>
             <Col span={16} offset={5}>
               <Typography.Title level={4}>Kinh nghiệm</Typography.Title>
+              <Button type="primary" onClick={() => setIsModalSkillOpen(true)}>
+                Thêm skill
+              </Button>
+              <Modal
+                open={isModalSkillOpen}
+                title="Thêm skill mới"
+                onOk={handleOkSkillModal}
+                onCancel={handleCancelSkillModal}
+                footer={[
+                  <Button key="back" onClick={handleCancelSkillModal}>
+                    Hủy
+                  </Button>,
+                  <Button
+                    key="submit"
+                    type="primary"
+                    loading={loading}
+                    onClick={handleOkSkillModal}
+                  >
+                    Thêm skill
+                  </Button>,
+                ]}
+              >
+                {/* <Text>Thêm levelSkill mới</Text> */}
+                <Select
+                  labelInValue
+                  defaultValue={data?.nameLeader}
+                  onChange={(e) => {
+                    console.log("createProject 230", e);
+                    setNewSkill((d) => {
+                      return { ...d, idSkill: e.value };
+                    });
+                  }}
+                  style={{
+                    width: "100%",
+                  }}
+                  options={options}
+                ></Select>
+                <Select
+                  onSelect={(e) => {
+                    setNewSkill((d) => {
+                      return { ...d, level: e };
+                    });
+                  }}
+                >
+                  <Option value={0}>0</Option>
+                  <Option value={1}>1</Option>
+                  <Option value={2}>2</Option>
+                  <Option value={3}>3</Option>
+                  <Option value={4}>4</Option>
+                  <Option value={5}>5</Option>
+                </Select>
+              </Modal>
               <Row>
-                {skill &&
-                  typeof skill[0] === "object" &&
-                  skill.map((value, index) => {
+                {skillsOfStaff &&
+                  typeof skillsOfStaff[0] === "object" &&
+                  skillsOfStaff.map((value, index) => {
                     return (
                       <Col xs={24} sm={12} lg={6} key={index}>
                         <Typography.Title level={5}>
                           {value.nameSkill}
                         </Typography.Title>
                         <Select
-                          defaultValue={value.levelSkill}
+                          defaultValue={
+                            getDefaultLevelSkillValue(value.nameSkill)
+                              ?.levelSkill || value.levelSkill
+                          }
                           onSelect={(e) => {
                             setLevelSkillChange((d) => {
+                              //Lọc skill đã change trước đó ra, để không bị trùng khi chỉnh sửa 1 skill nhiều lần
+                              d = d.filter((dValue) => {
+                                return (
+                                  dValue.idLevelSkill !== value.idLevelSkill
+                                );
+                              });
                               return [...d, { ...value, levelSkill: e }];
                             });
                           }}
@@ -514,14 +693,44 @@ function EditPage() {
               </Row>
               <Row style={{ marginTop: "50px" }} justify="space-between">
                 <Col span={6}>
-                  <Button style={{ width: "100%" }}>
-                    <Link to="/staff">Quay lại</Link>
+                  <Button
+                    style={{ width: "100%" }}
+                    onClick={() => {
+                      navigate(-1);
+                    }}
+                  >
+                    Quay lại
                   </Button>
                 </Col>
                 <Col span={6} offset={5}>
                   <Button style={{ width: "100%" }} onClick={handleSubmit}>
                     Cập nhật
                   </Button>
+                  <Modal
+                    title="Thông báo"
+                    open={isModalOpen}
+                    onOk={handleOk}
+                    onCancel={handleCancel}
+                  >
+                    <p>{error?.message}</p>
+                    {error?.assignment && (
+                      <>
+                        <hr></hr>
+                        <p>effort: {error?.assignment?.effort}</p>
+                        <p>
+                          {`dateStart: ${moment(
+                            error?.assignment?.dateStart
+                          ).format("DD-MM-YYYY")}`}
+                        </p>
+                        <p>
+                          {"dateEnd: " +
+                            moment(error?.assignment?.dateEnd).format(
+                              "DD-MM-YYYY"
+                            )}
+                        </p>
+                      </>
+                    )}
+                  </Modal>
                 </Col>
               </Row>
               <Row>

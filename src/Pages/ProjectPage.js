@@ -1,31 +1,80 @@
-import { Table, Typography } from "antd";
+import { Button, Row, Table, Typography } from "antd";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import workingDay from "../utils";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
+import moment from "moment";
 const { Title, Text } = Typography;
 const { Column } = Table;
 
 function ProjectPage() {
   const [data, setData] = useState(null);
-  console.log("pj 12", data);
   const [loading, setLoading] = useState(false);
-  function checkStatus(date1, date2) {
-    let dt1 = new Date(date1);
-    let dt2 = new Date(date2);
-    let curDate = new Date();
-    if (curDate < dt1) {
-      return "Chưa bắt đầu";
-    } else if (curDate < dt2 && curDate > dt1) {
-      return "Đang thực hiện";
-    } else {
-      return "Đã kết thúc";
-    }
-  }
+  const columns = [
+    {
+      title: "Tên dự án",
+      dataIndex: "projectName",
+      key: "projectName",
+      render: (projectName, record) => (
+        <>
+          <Link to={`/edit-project/${record._id}`} state={{ data: record }}>
+            {projectName}
+          </Link>
+        </>
+      ),
+    },
+    {
+      title: "Thời gian dự kiến",
+      dataIndex: "thoigiandukien",
+      render: (text) => text + " mm",
+    },
+    {
+      title: "Đã chạy",
+      dataIndex: "dachay",
+      key: "dachay",
+      render: (text) => text + " mm",
+    },
+    {
+      title: "Còn lại",
+      render: (text, record) => {
+        return (
+          Math.round((record.thoigiandukien - record.dachay) * 100) / 100 +
+          " mm"
+        );
+      },
+    },
+    {
+      title: "PM/Leader",
+      dataIndex: "nameLeader",
+    },
+    {
+      title: "Ngày bắt đầu",
+      dataIndex: "dateStart",
+      render: (dateStart) => {
+        let dtStart = new Date(dateStart);
+        return <Text>{moment(dateStart).format("DD-MM-YYYY")}</Text>;
+      },
+      key: "dateStart",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+    },
+  ];
+  const navigate = useNavigate();
+  const [assignments, setAssignments] = useState();
+  //Tính tổng thời gian nhân viên đã được phân công làm cho tới hiện tại
+  const currentDay = moment().startOf("day");
+  const totalTimeWorking = (listAssignments) => {
+    return listAssignments.reduce((total, value) => {
+      return (total += workingDay(value.dateStart, currentDay));
+    }, 0);
+  };
 
-  async function getProjects() {
+  async function getProjects(assignments) {
     setLoading(true);
     await Axios.get("/api/project", {
       headers: {
@@ -33,15 +82,19 @@ function ProjectPage() {
       },
     })
       .then((res) => {
-        let projects = res.data.infoProjects.map((value) => {
+        let projects = res.data.infoProjects.map((value, index) => {
           return {
             ...value,
-            thoigiandukien: workingDay(value.dateStart, value.dateEnd),
-            status: checkStatus(value.dateStart, value.dateEnd),
+            thoigiandukien:
+              Math.round(workingDay(value.dateStart, value.dateEnd) * 100) /
+              100,
+            dachay:
+              Math.round(totalTimeWorking(assignments[index]) * 100) / 100,
           };
         });
 
         setData(projects);
+        setLoading(false);
       })
       .catch((error) => {
         setLoading(false);
@@ -50,123 +103,50 @@ function ProjectPage() {
       });
   }
 
-  const getLeader = async () => {
-    let leaders;
-    //lấy assignment của leader
-    const getAssignmentById = data.map(async (value, index) => {
-      return await Axios.get(`/api/assignment-id-project/${value._id}`, {
-        headers: {
-          Authorization: "Bearer " + getToken(),
-        },
-      });
-    });
-    await Promise.all(getAssignmentById)
-      .then((values) => {
-        //rút ra mảng các assignment cua leader
-        leaders = values.map((value) => {
-          return value.data.infoAssignment.find((assign) => {
-            return assign.role === "manager";
-          });
-        });
-      })
-      .catch((error) => {
-        setLoading(false);
-
-        console.log("error getAssignmentById", error);
-      });
-
-    //lấy thông tin leader từ bảng staffs
-    const getInfoLeader = leaders.map(async (value, index) => {
-      if (value) {
-        return await Axios.get(`/api/staff/${value.idStaff}`, {
-          headers: {
-            Authorization: "Bearer " + getToken(),
-          },
-        });
-      } else {
-        return "chua co leader";
-      }
-    });
-    Promise.all(getInfoLeader)
-      .then((values) => {
-        setData((d) => {
-          return d.map((value, index) => {
-            return {
-              ...value,
-              leader:
-                typeof values[index] === "object"
-                  ? values[index].data.infoStaff.fullName
-                  : values[index],
-              idAssignment:
-                typeof values[index] === "object" ? leaders[index]._id : "",
-              idStaff:
-                typeof values[index] === "object"
-                  ? values[index]?.data.infoStaff._id
-                  : "",
-            };
-          });
-        });
+  async function getAssignments() {
+    setLoading(true);
+    await Axios.get(`/api/assignments-of-projects`, {
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setAssignments(res.data);
         setLoading(false);
       })
       .catch((error) => {
+        console.log("message error", error);
         setLoading(false);
-        console.log("error getInfoLeader", error);
       });
-  };
+  }
 
+  //Làm tiếp chỗ này
   useEffect(() => {
-    if (!data) {
-      getProjects();
+    if (!assignments) {
+      getAssignments();
     }
-    if (data && !data[0].hasOwnProperty("leader")) {
-      getLeader();
+    if (assignments) {
+      getProjects(assignments);
     }
-  }, [data]);
+  }, [assignments]);
 
   if (loading) {
     return <Loading />;
   }
   return (
     <>
-      <Title level={3}>Danh sách dự án</Title>
+      <Row justify="space-between">
+        <Title level={3}>Danh sách dự án</Title>
+        <Button type="primary" onClick={() => navigate("../create-project")}>
+          Thêm mới
+        </Button>
+      </Row>
       <Table
         dataSource={data}
         pagination={{ pageSize: 6 }}
         rowKey={(data) => data.projectName}
-      >
-        <Column
-          title="Tên dự án"
-          dataIndex="projectName"
-          key="projectName"
-          render={(projectName, record) => (
-            <>
-              <Link to="/edit-project" state={{ data: record }}>
-                {projectName}
-              </Link>
-            </>
-          )}
-        />
-        <Column title="Thời gian dự kiến" dataIndex="thoigiandukien" />
-        <Column title="PM/Leader" dataIndex="leader" />
-        <Column
-          title="Ngày bắt đầu"
-          dataIndex="dateStart"
-          render={(dateStart) => {
-            let dtStart = new Date(dateStart);
-            return (
-              <Text>
-                {dtStart.getDate() +
-                  "/" +
-                  (dtStart.getMonth() + 1) +
-                  "/" +
-                  dtStart.getFullYear()}
-              </Text>
-            );
-          }}
-          key="dateStart"
-        />
-        <Column title="Trạng thái" dataIndex="status" key="status" />
-      </Table>
+        columns={columns}
+      ></Table>
     </>
   );
 }

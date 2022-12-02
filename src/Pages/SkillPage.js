@@ -1,20 +1,89 @@
-import { Table, Typography, Input, Space, Button, InputNumber } from "antd";
+import {
+  Table,
+  Typography,
+  Input,
+  Space,
+  Button,
+  InputNumber,
+  Row,
+  Col,
+  Modal,
+  Select,
+  Popconfirm,
+} from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
+const { Option } = Select;
 const { Title, Text } = Typography;
 
 function SkillPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const searchInput = useRef(null);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [loading, setLoading] = useState(false);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
+  const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
+  const [newSkill, setNewSkill] = useState({});
+  const [skills, setSkills] = useState();
+  let options = skills ? getOptions() : [];
+  function getOptions() {
+    return skills.map((value, index) => {
+      return {
+        value: value._id,
+        label: value.skillName,
+      };
+    });
+  }
+  const handleDelete = async (idSkill) => {
+    setLoading(true);
+    await Axios({
+      method: "delete",
+      url: `api/skill/${idSkill}`,
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        console.log("skillPage 53", res);
+        setLoading(false);
+        navigate(0);
+      })
+      .catch((error) => {
+        console.log("skillPage 57", error);
+        setLoading(false);
+      });
+  };
+  const handleOkSkillModal = async () => {
+    setLoading(true);
+    await Axios({
+      method: "post",
+      url: "/api/level-skill",
+      data: { ...newSkill },
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        console.log("skillpage 55", res);
+        setLoading(false);
+        setIsModalSkillOpen(false);
+        navigate(0);
+      })
+      .catch((error) => {
+        console.log("skillpage 59", error);
+        setLoading(false);
+      });
+  };
+  const handleCancelSkillModal = () => {
+    setIsModalSkillOpen(false);
+  };
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -105,7 +174,7 @@ function SkillPage() {
     render: (text, record) => {
       if (dataIndex === "fullName") {
         return (
-          <Link to="/edit-staff" state={{ data: record }}>
+          <Text>
             {searchedColumn === dataIndex ? (
               <Highlighter
                 highlightStyle={{
@@ -119,58 +188,149 @@ function SkillPage() {
             ) : (
               text
             )}
-          </Link>
+          </Text>
         );
       }
     },
   });
-  const skillArray = [
-    "Java",
-    ".Net",
-    "PHP",
-    "Android",
-    "iOS",
-    "Angular",
-    "NodeJS",
-    "MongoDB",
-    "Python",
-    "React",
-    "React-Native",
-    "Xamarin",
-    "C/ C++",
-  ];
 
   const columns = [
     {
       title: "Họ và tên",
       dataIndex: "fullName",
       key: "fullName",
-      width: 200,
+      width: 170,
       fixed: "left",
-      render: (fullName, record) => (
-        <>
-          <Link to="/edit-staff" state={{ data: record }}>
-            {fullName}
-          </Link>
-        </>
-      ),
       ...getColumnSearchProps("fullName"),
     },
-    ...getSkill(),
+    {
+      title: "Danh sách kỹ năng",
+      dataIndex: "idSkills",
+      render: (idSkills, record) => {
+        return (
+          <Row>
+            {idSkills.map((skill, index) => {
+              return (
+                <Col style={{ marginRight: "20px" }} key={index}>
+                  <Row>
+                    <Text>{skill.skillName}</Text>
+                  </Row>
+                  <Row>
+                    <InputNumber
+                      min={0}
+                      max={5}
+                      style={{ width: "50px" }}
+                      defaultValue={skill.level}
+                      onChange={(value) => {
+                        handleChange(value, skill._id, record._id);
+                      }}
+                    />
+                  </Row>
+                </Col>
+              );
+            })}
+          </Row>
+        );
+      },
+    },
+    // ...getSkill(),
     {
       title: "Thao tác",
       fixed: "right",
       width: 125,
-      render: () => {
-        return <Button onClick={handleSubmit}>Cập nhật</Button>;
+      render: (record) => {
+        return (
+          <Row>
+            <Col span={12}>
+              <Row style={{ marginBottom: "5px" }}>
+                <Button
+                  ghost
+                  type="primary"
+                  onClick={() => handleSubmit(record._id)}
+                >
+                  Cập nhật
+                </Button>
+              </Row>
+              <Row>
+                <Button
+                  ghost
+                  type="primary"
+                  onClick={() => {
+                    setIsModalSkillOpen(true);
+                    setNewSkill((d) => {
+                      return { ...d, idStaff: record._id };
+                    });
+                  }}
+                >
+                  Thêm skill
+                </Button>
+              </Row>
+            </Col>
+            <Modal
+              // maskStyle={{ opacity: 0.5 }}
+              open={isModalSkillOpen}
+              title="Thêm skill mới"
+              onOk={() => handleOkSkillModal()}
+              onCancel={handleCancelSkillModal}
+              footer={[
+                <Button key="back" onClick={handleCancelSkillModal}>
+                  Hủy
+                </Button>,
+                <Button
+                  key="submit"
+                  type="primary"
+                  onClick={() => handleOkSkillModal()}
+                >
+                  Thêm skill
+                </Button>,
+              ]}
+            >
+              {/* <Text>Thêm levelSkill mới</Text> */}
+              <Select
+                labelInValue
+                defaultValue={data?.nameLeader}
+                onChange={(e) => {
+                  console.log("createProject 230", e);
+                  setNewSkill((d) => {
+                    return { ...d, idSkill: e.value };
+                  });
+                }}
+                style={{
+                  width: "100%",
+                }}
+                options={options}
+              ></Select>
+              <Select
+                onSelect={(e) => {
+                  setNewSkill((d) => {
+                    return { ...d, level: e };
+                  });
+                }}
+              >
+                <Option value={0}>0</Option>
+                <Option value={1}>1</Option>
+                <Option value={2}>2</Option>
+                <Option value={3}>3</Option>
+                <Option value={4}>4</Option>
+                <Option value={5}>5</Option>
+              </Select>
+            </Modal>
+          </Row>
+        );
       },
     },
   ];
-  function handleSubmit() {
+  async function handleSubmit(idStaff) {
     if (JSON.stringify(levelSkillChange) !== "[]") {
-      levelSkillChange.forEach(async (value, index) => {
-        setLoading(true);
-        console.log("172", value);
+      const levelSkillOfStaff = levelSkillChange.filter((value) => {
+        return value.idStaff === idStaff;
+      });
+      console.log("skillpage 308", levelSkillOfStaff);
+      if (JSON.stringify(levelSkillOfStaff) === "[]") {
+        return window.alert("không có thay đổi");
+      }
+      setLoading(true);
+      await levelSkillOfStaff.forEach(async (value, index) => {
         await Axios.put(
           `/api/level-skill/${value.idLevelSkill}`,
           { levelSkill: value.levelSkill },
@@ -179,42 +339,26 @@ function SkillPage() {
               Authorization: "Bearer " + getToken(),
             },
           }
-        );
-        setLoading(false);
+        )
+          .then((res) => {
+            console.log("skillpage 205", res);
+            setLoading(false);
+            navigate(0);
+          })
+          .catch((error) => {
+            console.log("skillpage 208", error);
+            setLoading(false);
+          });
       });
     } else {
-      window.alert("ko co thay doi");
+      window.alert("không có thay đổi");
     }
   }
-  function handleChange(value, idLevelSkill) {
+  function handleChange(levelSkill, idLevelSkill, idStaff) {
     setLevelSkillChange((d) => [
       ...d,
-      { levelSkill: value, idLevelSkill: idLevelSkill },
+      { levelSkill: levelSkill, idLevelSkill: idLevelSkill, idStaff: idStaff },
     ]);
-  }
-  function getSkill() {
-    return skillArray.map((nameSkill, index) => {
-      return {
-        title: nameSkill,
-        width: 150,
-        dataIndex: "idSkills",
-        render: (idSkills, record) => {
-          let isSkill = idSkills.find((skill) => skill.skillName === nameSkill);
-          if (isSkill) {
-            return (
-              <InputNumber
-                min={0}
-                max={5}
-                defaultValue={isSkill.level}
-                onChange={(value) => {
-                  handleChange(value, isSkill._id);
-                }}
-              />
-            );
-          }
-        },
-      };
-    });
   }
   async function getNameSkillAndStaff() {
     setLoading(true);
@@ -232,17 +376,61 @@ function SkillPage() {
         console.log("error getNameSkillAndStaff", error);
       });
   }
-
-  console.log("skillpage 160", data);
+  function getSkills() {
+    Axios({
+      method: "get",
+      url: "/api/skill",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        console.log("skillPage 388", res.data.skill);
+        setSkills(res.data.skill);
+      })
+      .catch((error) => {
+        console.log("skillPage 392", error);
+      });
+  }
   React.useEffect(() => {
     getNameSkillAndStaff();
+    getSkills();
   }, []);
+
   if (loading) {
     return <Loading />;
   }
   return (
     <>
-      <Title level={3}>Danh sách các kỹ năng của nhân viên</Title>
+      <Row justify="space-between">
+        <Title level={3}>Danh sách các kỹ năng của nhân viên</Title>
+        <Button type="primary" onClick={() => navigate("../create-skill")}>
+          Thêm mới
+        </Button>
+      </Row>
+      <Row>
+        {skills
+          ? skills.map((value, index) => {
+              return (
+                <Popconfirm
+                  key={index}
+                  title="Bạn có chắc muốn xóa kỹ năng này？"
+                  cancelText="Hủy"
+                  okText="Xóa"
+                  okButtonProps={{ type: "danger" }}
+                  onConfirm={() => handleDelete(value._id)}
+                >
+                  <Button
+                    style={{ marginBottom: "5px", marginRight: "5px" }}
+                    type="danger"
+                  >
+                    {value.skillName}
+                  </Button>
+                </Popconfirm>
+              );
+            })
+          : ""}
+      </Row>
       <Table
         dataSource={data}
         pagination={{ pageSize: 4 }}

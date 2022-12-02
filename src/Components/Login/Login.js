@@ -2,20 +2,23 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "./Login.css";
 import Axios from "axios";
+import { Button, Input } from "antd";
+import md5 from "md5";
 
 async function loginUser(credentials) {
-  return Axios("/login", {
+  return await Axios("/login", {
     method: "POST",
     data: credentials,
-  }).then((res) => res.data.token);
+  })
+    .then((res) => res.data.token)
+    .catch((error) => console.log("Login 11", error));
 }
-
-export default function Login({ setToken }) {
+export default function Login({ setToken, setInfoAccount }) {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("login 23");
     const token = await loginUser({
       email,
       password,
@@ -24,11 +27,11 @@ export default function Login({ setToken }) {
   };
   return (
     <div className="login-wrapper">
-      <h1>Please Log In</h1>
+      <h1>Đăng nhập</h1>
       <form onSubmit={handleSubmit}>
         <label>
           <p>Email</p>
-          <input
+          <Input
             type="text"
             onChange={(e) => {
               setEmail(e.target.value);
@@ -36,16 +39,16 @@ export default function Login({ setToken }) {
           />
         </label>
         <label>
-          <p>Password</p>
-          <input
+          <p>Mật khẩu</p>
+          <Input.Password
             type="password"
             onChange={(e) => {
-              setPassword(e.target.value);
+              setPassword(md5(e.target.value));
             }}
           />
         </label>
         <div>
-          <button type="submit">Submit</button>
+          <button type="submit">Đăng nhập</button>
         </div>
       </form>
     </div>

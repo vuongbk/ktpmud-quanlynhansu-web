@@ -18,9 +18,7 @@ function workingDay(date1, date2) {
   let weekendDays = numberWeekends(dt2) - numberWeekends(dt1);
   let mm =
     (Math.floor((dt2 - dt1) / millisecondsPerDay) + 1 - weekendDays) / manmonth; //+1 vì tính luôn cả ngày kết thúc
-  let md =
-    (Math.floor((dt2 - dt1) / millisecondsPerDay) + 1 - weekendDays) % manmonth; //+1 vì tính luôn cả ngày kết thúc
-  return Math.floor(mm) + "mm " + md + "md";
+  return mm;
 }
 
 export default workingDay;

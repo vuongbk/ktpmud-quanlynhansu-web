@@ -1,4 +1,4 @@
-import { Table, Typography } from "antd";
+import { Button, Row, Table, Typography } from "antd";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
@@ -16,7 +16,10 @@ function AssignmentPage() {
       key: "fullName",
       render: (fullName, record) => (
         <>
-          <Link to="/detail-assignment" state={{ data: record }}>
+          <Link
+            to={`/detail-assignment/${record.idStaff}`}
+            state={{ data: record }}
+          >
             {fullName}
           </Link>
         </>
@@ -24,6 +27,7 @@ function AssignmentPage() {
     },
     ...getEffortInMonth(),
   ];
+  // const navigate = useNavigate();
 
   function getEffortInMonth() {
     let curDate = new Date();
@@ -108,7 +112,9 @@ function AssignmentPage() {
           let dateAmount = (nextMonth - currentMonth) / millisecondsPerDay;
           totalE = Math.round(totalE / dateAmount);
           return (
-            <Text style={{ color: totalE < 100 ? "red" : "" }}>{totalE}%</Text>
+            <Text style={{ color: totalE !== 100 ? "red" : "" }}>
+              {totalE}%
+            </Text>
           );
         },
       };
@@ -123,27 +129,7 @@ function AssignmentPage() {
       },
     })
       .then((res) => {
-        let rawData = res.data.map((value) => {
-          return {
-            fullName: value[0].fullName,
-            idStaff: value[0]._id,
-            totalEffort: (function () {
-              let effortArrayByMonth = [];
-              for (let i = 1; i < value.length; i++) {
-                effortArrayByMonth.push({
-                  idProject: value[i].idProject,
-                  dateStart: value[i].dateStart,
-                  dateEnd: value[i].dateEnd,
-                  effort: value[i].effort,
-                  role: value[i].role,
-                  idAssignment: value[i]._id,
-                });
-              }
-              return effortArrayByMonth;
-            })(),
-          };
-        });
-        setData(rawData);
+        setData(res.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -163,11 +149,17 @@ function AssignmentPage() {
   }
   return (
     <>
-      <Title level={3}>Phân công nhân sự</Title>
+      <Row justify="space-between">
+        <Title level={3}>Phân công nhân sự</Title>
+        <Button type="primary">
+          <Link to="/create-assignment">Thêm mới</Link>
+        </Button>
+      </Row>
+
       <Table
         dataSource={data}
         pagination={{ pageSize: 6 }}
-        rowKey={(data) => data.staffName}
+        rowKey="idStaff"
         columns={columnAssignments}
       ></Table>
     </>
