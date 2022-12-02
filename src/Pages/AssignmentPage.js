@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
+import moment from "moment";
 const { Title, Text } = Typography;
 
 function AssignmentPage() {
@@ -30,7 +31,8 @@ function AssignmentPage() {
   // const navigate = useNavigate();
 
   function getEffortInMonth() {
-    let curDate = new Date();
+    let curDate = new Date(moment().startOf("day"));
+    // let curDate = moment().startOf("day");
     let curMonth = curDate.getMonth() + 1;
     let millisecondsPerDay = 24 * 60 * 60 * 1000;
     let monthArray = [];

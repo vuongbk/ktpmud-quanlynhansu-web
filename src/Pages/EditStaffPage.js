@@ -44,6 +44,7 @@ const { Option } = Select;
 function EditPage() {
   const navigate = useNavigate();
   const [dataStaffChange, setDataStaffChange] = useState({});
+  console.log("editStaffPage 47", dataStaffChange);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   // const [fileList, setFileList] = useState([]);
   const [error, setError] = useState();
@@ -224,7 +225,7 @@ function EditPage() {
     //       console.log("edit 240 err", err);
     //     });
     // }
-    navigate(0);
+    navigate(-1);
   };
 
   const handleDelete = async () => {
@@ -452,7 +453,7 @@ function EditPage() {
                 style={{ width: "100%" }}
                 onChange={(e) => {
                   setDataStaffChange((d) => {
-                    return { ...d, birthYear: e.target.value };
+                    return { ...d, birthYear: e };
                   });
                 }}
               />
@@ -587,13 +588,11 @@ function EditPage() {
               </Select>
               <Typography.Title level={5}>Ngày vào làm</Typography.Title>
               <DatePicker
-                defaultValue={
-                  moment(dataStaffChange.startTL) || moment(data?.startTL)
-                }
+                defaultValue={moment(dataStaffChange.startTL || data?.startTL)}
                 style={{ width: "100%" }}
                 onChange={(e) => {
                   setDataStaffChange((d) => {
-                    return { ...d, startTL: e.target.value };
+                    return { ...d, startTL: e };
                   });
                 }}
               />
