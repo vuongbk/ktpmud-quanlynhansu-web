@@ -1,4 +1,6 @@
 function workingDay(date1, date2) {
+  console.log("utls/index 2", date1);
+  console.log("utls/index 2", date2);
   let dt1 = Date.parse(date1);
   let dt2 = Date.parse(date2);
   let t7 = Date.parse("1970-01-03"); //ngay t7 đầu tiên
@@ -17,7 +19,7 @@ function workingDay(date1, date2) {
   }
   let weekendDays = numberWeekends(dt2) - numberWeekends(dt1);
   let mm =
-    (Math.floor((dt2 - dt1) / millisecondsPerDay) + 1 - weekendDays) / manmonth; //+1 vì tính luôn cả ngày kết thúc
+    (Math.floor((dt2 - dt1) / millisecondsPerDay) - weekendDays) / manmonth;
   return mm;
 }
 

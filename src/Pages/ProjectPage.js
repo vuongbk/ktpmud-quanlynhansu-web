@@ -26,23 +26,20 @@ function ProjectPage() {
       ),
     },
     {
-      title: "Thời gian dự kiến",
+      title: "Thời gian dự kiến (mm)",
       dataIndex: "thoigiandukien",
-      render: (text) => text + " mm",
+      render: (text) => text,
     },
     {
-      title: "Đã chạy",
+      title: "Đã chạy (mm)",
       dataIndex: "dachay",
       key: "dachay",
-      render: (text) => text + " mm",
+      render: (text) => text,
     },
     {
-      title: "Còn lại",
+      title: "Còn lại (mm)",
       render: (text, record) => {
-        return (
-          Math.round((record.thoigiandukien - record.dachay) * 100) / 100 +
-          " mm"
-        );
+        return Math.round((record.thoigiandukien - record.dachay) * 100) / 100;
       },
     },
     {
@@ -54,7 +51,7 @@ function ProjectPage() {
       dataIndex: "dateStart",
       render: (dateStart) => {
         let dtStart = new Date(dateStart);
-        return <Text>{moment(dateStart).format("DD-MM-YYYY")}</Text>;
+        return <Text>{moment(dateStart).format("DD/MM/YYYY")}</Text>;
       },
       key: "dateStart",
     },

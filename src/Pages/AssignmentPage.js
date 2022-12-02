@@ -8,7 +8,7 @@ import moment from "moment";
 const { Title, Text } = Typography;
 
 function AssignmentPage() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   const columnAssignments = [
     {

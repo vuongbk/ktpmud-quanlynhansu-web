@@ -246,7 +246,7 @@ function Staffs() {
       dataIndex: "startTL",
       key: "startTL",
       responsive: ["xl"],
-      render: (text) => moment(text).format("DD-MM-YYYY"),
+      render: (text) => moment(text).format("DD/MM/YYYY"),
       sorter: (a, b) => {
         return Date.parse(a.startTL) - Date.parse(b.startTL);
       },

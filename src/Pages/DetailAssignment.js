@@ -20,6 +20,7 @@ function DetailAssignment() {
   );
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
+  const dateFormat = "DD/MM/YYYY";
   const columnAssignments = [
     {
       fixed: "left",
@@ -212,6 +213,7 @@ function DetailAssignment() {
         <RangePicker
           defaultValue={[moment(dateColumnStart), moment(dateColumnEnd)]}
           placement="bottomRight"
+          format={dateFormat}
           onChange={(dates) => {
             setDateColumnStart(dates[0]);
             setDateColumnEnd(dates[1]);

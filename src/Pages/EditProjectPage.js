@@ -41,6 +41,7 @@ function EditProjectPage() {
   const totalTimeWorking = assignments.reduce((total, value) => {
     return (total += workingDay(value.dateStart, currentDay));
   }, 0);
+  const dateFormat = "DD/MM/YYYY";
   function getOptions() {
     return managers.map((value, index) => {
       return {
@@ -239,6 +240,7 @@ function EditProjectPage() {
               />
               <Title level={5}>Ngày bắt đầu</Title>
               <DatePicker
+                format={dateFormat}
                 defaultValue={moment(
                   dataProjectChange.dateStart || data?.dateStart
                 )}
@@ -251,6 +253,7 @@ function EditProjectPage() {
               />
               <Title level={5}>Dự kiến kết thúc</Title>
               <DatePicker
+                format={dateFormat}
                 defaultValue={moment(
                   dataProjectChange.dateEnd || data?.dateEnd
                 )}

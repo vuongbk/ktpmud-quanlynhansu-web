@@ -31,6 +31,7 @@ const EditAssignment = () => {
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const dateFormat = "DD/MM/YYYY";
   const handleOk = () => {
     setIsModalOpen(false);
   };
@@ -149,6 +150,7 @@ const EditAssignment = () => {
               />
               <Title level={5}>Từ ngày</Title>
               <DatePicker
+                format={dateFormat}
                 value={moment(
                   dataChange.dateStart
                     ? dataChange.dateStart
@@ -189,6 +191,7 @@ const EditAssignment = () => {
               />
               <Title level={5}>Đến ngày</Title>
               <DatePicker
+                format={dateFormat}
                 value={moment(
                   dataChange.dateEnd
                     ? dataChange.dateEnd

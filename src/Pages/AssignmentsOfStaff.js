@@ -20,8 +20,8 @@ function AssignmentsOfStaff() {
       render: (text, record) => {
         return (
           <Link to={`/edit-assignment/${text}`}>
-            {moment(record.dateStart).format("DD-MM-YYYY")} /{" "}
-            {moment(record.dateEnd).format("DD-MM-YYYY")}
+            {moment(record.dateStart).format("DD/MM/YYYY")} -{" "}
+            {moment(record.dateEnd).format("DD/MM/YYYY")}
           </Link>
         );
       },

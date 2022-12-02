@@ -67,6 +67,7 @@ function EditPage() {
   const [password, setPassword] = useState({});
   const [newSkill, setNewSkill] = useState({});
   const [skills, setSkills] = useState();
+  const dateFormat = "DD/MM/YYYY";
   let options = skills ? getOptions() : [];
   function getOptions() {
     return skills.map((value, index) => {
@@ -447,6 +448,7 @@ function EditPage() {
               />
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
               <DatePicker
+                format={dateFormat}
                 defaultValue={moment(
                   dataStaffChange.birthYear || data?.birthYear
                 )}
@@ -588,6 +590,7 @@ function EditPage() {
               </Select>
               <Typography.Title level={5}>Ngày vào làm</Typography.Title>
               <DatePicker
+                format={dateFormat}
                 defaultValue={moment(dataStaffChange.startTL || data?.startTL)}
                 style={{ width: "100%" }}
                 onChange={(e) => {

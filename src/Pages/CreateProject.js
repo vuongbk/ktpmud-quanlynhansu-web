@@ -31,7 +31,7 @@ function CreateProject() {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   let options = managers ? getOptions() : [];
-  console.log("createproject 34", options);
+  const dateFormat = "DD/MM/YYYY";
   function getOptions() {
     return managers.map((value, index) => {
       return {
@@ -188,6 +188,7 @@ function CreateProject() {
               <DatePicker
                 defaultValue={moment(dataProjectChange.dateStart)}
                 style={{ width: "100%" }}
+                format={dateFormat}
                 onBlur={(e) => {
                   setDataProjectChange((d) => {
                     return { ...d, dateStart: e.target.value };
@@ -246,6 +247,7 @@ function CreateProject() {
               <DatePicker
                 defaultValue={moment(dataProjectChange.dateEnd)}
                 style={{ width: "100%" }}
+                format={dateFormat}
                 onBlur={(e) => {
                   setDataProjectChange((d) => {
                     return { ...d, dateEnd: e.target.value };
@@ -254,10 +256,13 @@ function CreateProject() {
               />
               <Text>
                 Ước tính:{" "}
-                {workingDay(
-                  dataProjectChange.dateStart || data?.dateStart,
-                  dataProjectChange.dateEnd || data?.dateEnd
-                )}
+                {Math.round(
+                  workingDay(
+                    dataProjectChange.dateStart || moment().startOf("day"),
+                    dataProjectChange.dateEnd || moment().startOf("day")
+                  ) * 100
+                ) / 100}{" "}
+                mm
               </Text>
             </Col>
           </Row>
