@@ -21,7 +21,7 @@ import ProjectPage from "./Pages/ProjectPage";
 import AssignmentPage from "./Pages/AssignmentPage";
 import DetailAssignment from "./Pages/DetailAssignment";
 import EditAssignment from "./Pages/EditAssignment";
-import SkillPage from "./Pages/SkillPage";
+import SkillsOfStaffs from "./Pages/SkillsOfStaffs";
 import Login from "./Components/Login/Login";
 import useToken from "./Components/useToken";
 import Logout from "./Components/Logout";
@@ -33,6 +33,7 @@ import CreateAssignment from "./Pages/CreateAssignment";
 import Account from "./Pages/Account";
 import AssignmentsOfStaff from "./Pages/AssignmentsOfStaff";
 import CreateSkill from "./Pages/CreateSkill";
+import Skills from "./Pages/Skills";
 
 const { Header, Footer, Content } = Layout;
 function App() {
@@ -113,7 +114,7 @@ function App() {
             <Row>
               <Col span={5}>
                 <NavLink to="/">
-                  <img src="/logoThinkLabs.png" alt="logoThinkLabs"></img>
+                  <img src="/logoThinkLabs.png" alt="logo"></img>
                 </NavLink>
               </Col>
               <Col span={16}>
@@ -158,7 +159,7 @@ function App() {
                         color: isActive ? "red" : "",
                       };
                     }}
-                    to="/skill"
+                    to="/skills-of-staffs"
                   >
                     Kỹ năng
                   </NavLink>
@@ -207,8 +208,9 @@ function App() {
             path="/edit-project/:idProject"
             element={<EditProjectPage />}
           />
-          <Route path="/skill" element={<SkillPage />} />
+          <Route path="/skills-of-staffs" element={<SkillsOfStaffs />} />
           <Route path="/create-skill" element={<CreateSkill />} />
+          <Route path="/skills" element={<Skills />} />
           <Route path="/assignment" element={<AssignmentPage />} />
           <Route
             path="/assignments-of-staff"

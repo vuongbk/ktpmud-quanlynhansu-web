@@ -8,6 +8,7 @@ import {
   Typography,
   Popconfirm,
   Modal,
+  notification,
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
@@ -58,7 +59,13 @@ function EditProjectPage() {
   };
   const handleSubmit = async () => {
     if (JSON.stringify(dataProjectChange) === "{}" && leaderChange === "") {
-      window.alert("ko co thay doi");
+      notification.open({
+        message: "Thông báo",
+        description: "Không có thay đổi",
+        duration: 2,
+        placement: "topLeft",
+      });
+      return;
     }
 
     //thay đổi bảng project

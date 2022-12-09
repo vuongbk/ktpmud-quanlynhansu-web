@@ -7,6 +7,7 @@ import {
   Select,
   Typography,
   Modal,
+  notification,
 } from "antd";
 import { useState, useEffect } from "react";
 import moment from "moment";
@@ -48,6 +49,7 @@ function Account({ infoAccount }) {
     }
   }, []);
   async function getInfoAccount() {
+    setLoading(true);
     await Axios({
       method: "get",
       url: "/api/staff?infoAccount=true",
@@ -58,9 +60,11 @@ function Account({ infoAccount }) {
       .then((res) => {
         setData(res.data);
         setImageUrl(res.data.imageUrl);
+        setLoading(false);
       })
       .catch((error) => {
         console.log("App 39 error", error);
+        setLoading(false);
       });
   }
   const [dataStaffChange, setDataStaffChange] = useState({});
@@ -69,15 +73,21 @@ function Account({ infoAccount }) {
   const [loading, setLoading] = useState(false);
   // const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [imageUrl, setImageUrl] = useState();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
   const [password, setPassword] = useState({});
+  const dateFormat = "DD/MM/YYYY";
   const handleOkPasswordModal = async () => {
     if (
       !password.hasOwnProperty("oldPassword") ||
       !password.hasOwnProperty("newPassword")
     ) {
-      window.alert("Nhập thiếu");
+      notification.open({
+        message: "Thông báo",
+        description: "Bạn nhập thiếu",
+        duration: 2,
+        placement: "topLeft",
+      });
       return;
     }
     setLoading(true);
@@ -94,7 +104,7 @@ function Account({ infoAccount }) {
       .catch((error) => {
         setError(error.response.data);
         console.log("editStaff 111", error);
-        setIsModalOpen(true);
+        setIsModalErrorOpen(true);
         setLoading(false);
       });
     setIsModalPasswordOpen(false);
@@ -102,11 +112,11 @@ function Account({ infoAccount }) {
   const handleCancelPasswordModal = () => {
     setIsModalPasswordOpen(false);
   };
-  const handleOk = () => {
-    setIsModalOpen(false);
+  const handleErrorOk = () => {
+    setIsModalErrorOpen(false);
   };
   const handleCancel = () => {
-    setIsModalOpen(false);
+    setIsModalErrorOpen(false);
   };
 
   const handleSubmit = async () => {
@@ -114,7 +124,13 @@ function Account({ infoAccount }) {
       JSON.stringify(dataStaffChange) === "{}" &&
       imageUrl === data.imageUrl
     ) {
-      window.alert("ko co thay doi");
+      notification.open({
+        message: "Thông báo",
+        description: "Không có thay đổi",
+        duration: 2,
+        placement: "topLeft",
+      });
+      return;
     }
 
     //thay đổi bảng staff
@@ -132,7 +148,7 @@ function Account({ infoAccount }) {
         .catch((error) => {
           setError(error.response.data);
           console.log("editStaff 111", error);
-          setIsModalOpen(true);
+          setIsModalErrorOpen(true);
           setLoading(false);
         });
     }
@@ -309,7 +325,7 @@ function Account({ infoAccount }) {
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
               <Text>
                 {moment(dataStaffChange?.birthYear || data?.birthYear).format(
-                  "DD-MM-YYYY"
+                  dateFormat
                 )}
               </Text>
               {/* <DatePicker
@@ -364,7 +380,7 @@ function Account({ infoAccount }) {
               <Typography.Title level={5}>Trạng thái</Typography.Title>
               <Text>{data?.status}</Text>
               <Typography.Title level={5}>Ngày vào làm</Typography.Title>
-              <Text>{moment(data?.startTL).format("DD-MM-YYYY")}</Text>
+              <Text>{moment(data?.startTL).format(dateFormat)}</Text>
             </Col>
           </Row>
           <Row>
@@ -377,8 +393,8 @@ function Account({ infoAccount }) {
                   </Button>
                   <Modal
                     title="Thông báo"
-                    open={isModalOpen}
-                    onOk={handleOk}
+                    open={isModalErrorOpen}
+                    onOk={handleErrorOk}
                     onCancel={handleCancel}
                   >
                     <p>{error?.message}</p>
@@ -389,12 +405,12 @@ function Account({ infoAccount }) {
                         <p>
                           {`dateStart: ${moment(
                             error?.assignment?.dateStart
-                          ).format("DD-MM-YYYY")}`}
+                          ).format(dateFormat)}`}
                         </p>
                         <p>
                           {"dateEnd: " +
                             moment(error?.assignment?.dateEnd).format(
-                              "DD-MM-YYYY"
+                              dateFormat
                             )}
                         </p>
                       </>

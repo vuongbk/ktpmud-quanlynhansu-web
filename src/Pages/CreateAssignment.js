@@ -10,6 +10,7 @@ import {
   Dropdown,
   Menu,
   Modal,
+  notification,
 } from "antd";
 import { useState, useEffect } from "react";
 import {
@@ -40,6 +41,8 @@ const CreateAssignment = () => {
   console.log("createassign 38", projects);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const dateFormat = "DD/MM/YYYY";
+  const iso8601Format = "YYYY-MM-DD";
 
   let optionsStaffs = Array.isArray(data) ? getOptionsStaffs() : [];
   function getOptionsStaffs() {
@@ -67,7 +70,13 @@ const CreateAssignment = () => {
   };
   const handleSubmit = async () => {
     if (JSON.stringify(dataChange) === "{}") {
-      window.alert("ko co thay doi");
+      notification.open({
+        message: "Thông báo",
+        description: "Không có thay đổi",
+        duration: 2,
+        placement: "topLeft",
+      });
+      return;
     } else {
       setLoading(true);
       await Axios.post(`../api/assignment`, dataChange, {
@@ -186,10 +195,14 @@ const CreateAssignment = () => {
 
               <Title level={5}>Từ ngày</Title>
               <DatePicker
+                format={dateFormat}
                 style={{ width: "100%" }}
                 onChange={(date, dateString) => {
                   setDataChange((d) => {
-                    return { ...d, dateStart: dateString };
+                    return {
+                      ...d,
+                      dateStart: moment(date).format(iso8601Format),
+                    };
                   });
                 }}
               />
@@ -221,10 +234,14 @@ const CreateAssignment = () => {
               ></Select>
               <Title level={5}>Đến ngày</Title>
               <DatePicker
+                format={dateFormat}
                 style={{ width: "100%" }}
                 onChange={(date, dateString) => {
                   setDataChange((d) => {
-                    return { ...d, dateEnd: dateString };
+                    return {
+                      ...d,
+                      dateEnd: moment(date).format(iso8601Format),
+                    };
                   });
                 }}
               />

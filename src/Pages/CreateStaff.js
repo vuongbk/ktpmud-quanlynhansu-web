@@ -9,6 +9,7 @@ import {
   Popconfirm,
   message,
   Modal,
+  notification,
 } from "antd";
 import { useState, useEffect, useRef } from "react";
 import md5 from "md5";
@@ -39,6 +40,7 @@ function CreateStaff() {
   //state dùng để thêm department
   const [departments, setDepartments] = useState(["Thanh Hóa", "Hà Nội"]);
   const [nameDepartment, setNameDepartment] = useState("");
+  const dateFormat = "DD/MM/YYYY";
   const inputRef = useRef(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -66,7 +68,13 @@ function CreateStaff() {
       JSON.stringify(dataStaffChange) === "{}" &&
       JSON.stringify(levelSkillChange) === "[]"
     ) {
-      window.alert("ko co thay doi");
+      notification.open({
+        message: "Thông báo",
+        description: "Không có thay đổi",
+        duration: 2,
+        placement: "topLeft",
+      });
+      return;
     }
 
     //create staff
@@ -132,11 +140,12 @@ function CreateStaff() {
               />
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
               <DatePicker
+                format={dateFormat}
                 defaultValue={moment(dataStaffChange.birthYear)}
                 style={{ width: "100%" }}
-                onBlur={(e) => {
+                onChange={(e) => {
                   setDataStaffChange((d) => {
-                    return { ...d, birthYear: e.target.value };
+                    return { ...d, birthYear: e };
                   });
                 }}
               />
@@ -280,11 +289,12 @@ function CreateStaff() {
               </Select>
               <Typography.Title level={5}>Ngày vào làm</Typography.Title>
               <DatePicker
+                format={dateFormat}
                 defaultValue={moment(dataStaffChange.startTL)}
                 style={{ width: "100%" }}
-                onBlur={(e) => {
+                onChange={(e) => {
                   setDataStaffChange((d) => {
-                    return { ...d, startTL: e.target.value };
+                    return { ...d, startTL: e };
                   });
                 }}
               />

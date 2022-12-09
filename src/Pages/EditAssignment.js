@@ -10,10 +10,11 @@ import {
   Dropdown,
   Menu,
   Modal,
+  notification,
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
-import moment from "moment";
+import moment, { ISO_8601 } from "moment";
 import Axios from "axios";
 import workingDay from "../utils";
 import Loading from "../Components/Modal/Loading";
@@ -28,10 +29,12 @@ const EditAssignment = () => {
   const [error, setError] = useState();
   const [indexAssign, setIndexAssign] = useState(0);
   const [dataChange, setDataChange] = useState({});
+  console.log("32", dataChange);
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dateFormat = "DD/MM/YYYY";
+  const iso8601Format = "YYYY-MM-DD";
   const handleOk = () => {
     setIsModalOpen(false);
   };
@@ -40,7 +43,13 @@ const EditAssignment = () => {
   };
   const handleSubmit = async () => {
     if (JSON.stringify(dataChange) === "{}") {
-      window.alert("ko co thay doi");
+      notification.open({
+        message: "Thông báo",
+        description: "Không có thay đổi",
+        duration: 2,
+        placement: "topLeft",
+      });
+      return;
     }
 
     if (JSON.stringify(dataChange) !== "{}") {
@@ -151,15 +160,18 @@ const EditAssignment = () => {
               <Title level={5}>Từ ngày</Title>
               <DatePicker
                 format={dateFormat}
-                value={moment(
+                value={
                   dataChange.dateStart
-                    ? dataChange.dateStart
-                    : data?.asignment.dateStart
-                )}
+                    ? moment(dataChange.dateStart, [dateFormat, iso8601Format])
+                    : moment(data?.asignment.dateStart)
+                }
                 style={{ width: "100%" }}
                 onChange={(date, dateString) => {
                   setDataChange((d) => {
-                    return { ...d, dateStart: dateString };
+                    return {
+                      ...d,
+                      dateStart: moment(date).format(iso8601Format),
+                    };
                   });
                 }}
               />
@@ -194,13 +206,16 @@ const EditAssignment = () => {
                 format={dateFormat}
                 value={moment(
                   dataChange.dateEnd
-                    ? dataChange.dateEnd
-                    : data?.asignment.dateEnd
+                    ? moment(dataChange.dateEnd, [dateFormat, iso8601Format])
+                    : moment(data?.asignment.dateEnd)
                 )}
                 style={{ width: "100%" }}
                 onChange={(date, dateString) => {
                   setDataChange((d) => {
-                    return { ...d, dateEnd: dateString };
+                    return {
+                      ...d,
+                      dateEnd: moment(date).format(iso8601Format),
+                    };
                   });
                 }}
               />

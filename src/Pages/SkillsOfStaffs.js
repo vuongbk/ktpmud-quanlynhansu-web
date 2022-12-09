@@ -10,6 +10,7 @@ import {
   Modal,
   Select,
   Popconfirm,
+  notification,
 } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -21,7 +22,7 @@ import { getToken } from "../Components/useToken";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
-function SkillPage() {
+function SkillsOfStaffs() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const searchInput = useRef(null);
@@ -237,23 +238,26 @@ function SkillPage() {
     {
       title: "Thao tác",
       fixed: "right",
-      width: 125,
+      width: 230,
       render: (record) => {
         return (
           <Row>
-            <Col span={12}>
-              <Row style={{ marginBottom: "5px" }}>
+            <Col span={18} offset={3}>
+              <Space wrap>
                 <Button
+                  style={{ width: "100%" }}
                   ghost
+                  size="small"
                   type="primary"
                   onClick={() => handleSubmit(record._id)}
                 >
                   Cập nhật
                 </Button>
-              </Row>
-              <Row>
+
                 <Button
+                  style={{ width: "100%", padding: "1px" }}
                   ghost
+                  size="small"
                   type="primary"
                   onClick={() => {
                     setIsModalSkillOpen(true);
@@ -264,57 +268,69 @@ function SkillPage() {
                 >
                   Thêm skill
                 </Button>
-              </Row>
-            </Col>
-            <Modal
-              // maskStyle={{ opacity: 0.5 }}
-              open={isModalSkillOpen}
-              title="Thêm skill mới"
-              onOk={() => handleOkSkillModal()}
-              onCancel={handleCancelSkillModal}
-              footer={[
-                <Button key="back" onClick={handleCancelSkillModal}>
-                  Hủy
-                </Button>,
-                <Button
-                  key="submit"
-                  type="primary"
-                  onClick={() => handleOkSkillModal()}
-                >
-                  Thêm skill
-                </Button>,
-              ]}
-            >
-              {/* <Text>Thêm levelSkill mới</Text> */}
-              <Select
-                labelInValue
-                defaultValue={data?.nameLeader}
-                onChange={(e) => {
-                  console.log("createProject 230", e);
-                  setNewSkill((d) => {
-                    return { ...d, idSkill: e.value };
-                  });
-                }}
-                style={{
-                  width: "100%",
-                }}
-                options={options}
-              ></Select>
-              <Select
-                onSelect={(e) => {
-                  setNewSkill((d) => {
-                    return { ...d, level: e };
-                  });
-                }}
+              </Space>
+              <Modal
+                // maskStyle={{ opacity: 0.5 }}
+                open={isModalSkillOpen}
+                title="Thêm skill mới"
+                onOk={() => handleOkSkillModal()}
+                onCancel={handleCancelSkillModal}
+                footer={[
+                  <Button key="back" onClick={handleCancelSkillModal}>
+                    Hủy
+                  </Button>,
+                  <Button
+                    key="submit"
+                    type="primary"
+                    onClick={() => handleOkSkillModal()}
+                  >
+                    Thêm skill
+                  </Button>,
+                ]}
               >
-                <Option value={0}>0</Option>
-                <Option value={1}>1</Option>
-                <Option value={2}>2</Option>
-                <Option value={3}>3</Option>
-                <Option value={4}>4</Option>
-                <Option value={5}>5</Option>
-              </Select>
-            </Modal>
+                {/* <Text>Thêm levelSkill mới</Text> */}
+                <Row>
+                  <Col span={12}>
+                    <Text>Tên skill</Text>
+                    <Select
+                      labelInValue
+                      onChange={(e) => {
+                        console.log("createProject 230", e);
+                        setNewSkill((d) => {
+                          return { ...d, idSkill: e.value };
+                        });
+                      }}
+                      style={{
+                        width: "100%",
+                      }}
+                      options={options}
+                    ></Select>
+                  </Col>
+                  <Col span={6} offset={6}>
+                    <Row>
+                      <Text>Cấp độ</Text>
+                    </Row>
+                    <Select
+                      Chọn
+                      cấp
+                      độ
+                      onSelect={(e) => {
+                        setNewSkill((d) => {
+                          return { ...d, level: e };
+                        });
+                      }}
+                    >
+                      <Option value={0}>0</Option>
+                      <Option value={1}>1</Option>
+                      <Option value={2}>2</Option>
+                      <Option value={3}>3</Option>
+                      <Option value={4}>4</Option>
+                      <Option value={5}>5</Option>
+                    </Select>
+                  </Col>
+                </Row>
+              </Modal>
+            </Col>
           </Row>
         );
       },
@@ -327,7 +343,13 @@ function SkillPage() {
       });
       console.log("skillpage 308", levelSkillOfStaff);
       if (JSON.stringify(levelSkillOfStaff) === "[]") {
-        return window.alert("không có thay đổi");
+        notification.open({
+          message: "Thông báo",
+          description: "Không có thay đổi",
+          duration: 2,
+          placement: "topLeft",
+        });
+        return;
       }
       setLoading(true);
       await levelSkillOfStaff.forEach(async (value, index) => {
@@ -351,7 +373,13 @@ function SkillPage() {
           });
       });
     } else {
-      window.alert("không có thay đổi");
+      notification.open({
+        message: "Thông báo",
+        description: "Không có thay đổi",
+        duration: 2,
+        placement: "topLeft",
+      });
+      return;
     }
   }
   function handleChange(levelSkill, idLevelSkill, idStaff) {
@@ -404,32 +432,29 @@ function SkillPage() {
     <>
       <Row justify="space-between">
         <Title level={3}>Danh sách các kỹ năng của nhân viên</Title>
-        <Button type="primary" onClick={() => navigate("../create-skill")}>
-          Thêm mới
-        </Button>
       </Row>
       <Row>
-        {skills
-          ? skills.map((value, index) => {
-              return (
-                <Popconfirm
-                  key={index}
-                  title="Bạn có chắc muốn xóa kỹ năng này？"
-                  cancelText="Hủy"
-                  okText="Xóa"
-                  okButtonProps={{ type: "danger" }}
-                  onConfirm={() => handleDelete(value._id)}
-                >
-                  <Button
-                    style={{ marginBottom: "5px", marginRight: "5px" }}
-                    type="danger"
+        <Space wrap style={{ marginBottom: "5px" }}>
+          {skills
+            ? skills.map((value, index) => {
+                return (
+                  <Popconfirm
+                    key={index}
+                    title="Bạn có chắc muốn xóa kỹ năng này？"
+                    cancelText="Hủy"
+                    okText="Xóa"
+                    okButtonProps={{ type: "danger" }}
+                    onConfirm={() => handleDelete(value._id)}
                   >
-                    {value.skillName}
-                  </Button>
-                </Popconfirm>
-              );
-            })
-          : ""}
+                    <Button type="danger">{value.skillName}</Button>
+                  </Popconfirm>
+                );
+              })
+            : ""}
+          <Button type="primary" onClick={() => navigate("../skills")}>
+            Chỉnh sửa danh sách kỹ năng
+          </Button>
+        </Space>
       </Row>
       <Table
         dataSource={data}
@@ -444,4 +469,4 @@ function SkillPage() {
   );
 }
 
-export default SkillPage;
+export default SkillsOfStaffs;

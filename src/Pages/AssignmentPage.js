@@ -31,8 +31,9 @@ function AssignmentPage() {
   // const navigate = useNavigate();
 
   function getEffortInMonth() {
+    //Thêm vào brach 'sua-loi-hien-thi-effort-theo-thang'
     let curDate = new Date(moment().startOf("day"));
-    // let curDate = moment().startOf("day");
+    //Tháng thực tế
     let curMonth = curDate.getMonth() + 1;
     let millisecondsPerDay = 24 * 60 * 60 * 1000;
     let monthArray = [];
@@ -47,11 +48,13 @@ function AssignmentPage() {
 
     //trả về một mảng các column
     return monthArray.map((month, index) => {
+      //Tháng ở cột đang xét, đơn vị millisecond
       let currentMonth = Date.parse(
         `${month > 12 ? curDate.getFullYear() + 1 : curDate.getFullYear()}-${
           month <= 9 ? "0" + month : month > 12 ? "0" + (month - 12) : month
         }`
       );
+      //Tháng ở cột sau
       let nextMonth = Date.parse(
         `${
           month + 1 > 12 ? curDate.getFullYear() + 1 : curDate.getFullYear()

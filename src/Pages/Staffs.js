@@ -144,16 +144,36 @@ function Staffs() {
       dataIndex: "role",
       filters: [
         {
-          text: "manager",
-          value: "manager",
+          text: "Lập trình viên",
+          value: "Lập trình viên",
         },
         {
-          text: "boss",
-          value: "boss",
+          text: "Leader",
+          value: "Leader",
         },
         {
-          text: "developer",
-          value: "developer",
+          text: "Tester",
+          value: "Tester",
+        },
+        {
+          text: "Cộng tác viên",
+          value: "Cộng tác viên",
+        },
+        {
+          text: "BA",
+          value: "BA",
+        },
+        {
+          text: "Kế toán",
+          value: "Kế toán",
+        },
+        {
+          text: "Thực tập sinh",
+          value: "Thực tập sinh",
+        },
+        {
+          text: "CEO",
+          value: "CEO",
         },
       ],
       onFilter: (value, record) => {

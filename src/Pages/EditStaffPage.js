@@ -8,6 +8,7 @@ import {
   Typography,
   Popconfirm,
   Modal,
+  notification,
 } from "antd";
 import { useState, useEffect, useRef } from "react";
 import { PlusOutlined } from "@ant-design/icons";
@@ -103,7 +104,12 @@ function EditPage() {
   };
   const handleOkPasswordModal = async () => {
     if (!password.hasOwnProperty("newPassword")) {
-      window.alert("Nhập thiếu");
+      notification.open({
+        message: "Thông báo",
+        description: "Nhập thiếu",
+        duration: 2,
+        placement: "topLeft",
+      });
       return;
     }
     setLoading(true);
@@ -157,7 +163,13 @@ function EditPage() {
       JSON.stringify(levelSkillChange) === "[]" &&
       imageUrl === data.imageUrl
     ) {
-      window.alert("ko co thay doi");
+      notification.open({
+        message: "Thông báo",
+        description: "Không có thay đổi",
+        duration: 2,
+        placement: "topLeft",
+      });
+      return;
     }
     console.log("editStaff 97", imageUrl === data.imageUrl);
     console.log("editStaff 97", JSON.stringify(dataStaffChange) === "{}");
@@ -352,11 +364,13 @@ function EditPage() {
       <Row>
         <Col span={24}>
           <Row>
-            <Col span={20} offset={5}>
+            <Col span={15} offset={5}>
               <Typography.Title level={3}>
                 {dataStaffChange.fullName || data?.fullName}
               </Typography.Title>
-              <Typography.Title level={4}>Thông tin cơ bản</Typography.Title>
+              <Divider orientation="left">
+                <Typography.Title level={4}>Thông tin cơ bản</Typography.Title>
+              </Divider>
               {/* upload đang lỗi, tạm thời comment để deploy */}
               {/* <Upload
                 name="avatar"
@@ -602,8 +616,15 @@ function EditPage() {
             </Col>
           </Row>
           <Row>
-            <Col span={16} offset={5}>
-              <Typography.Title level={4}>Kinh nghiệm</Typography.Title>
+            <Col span={15} offset={5}>
+              <Divider orientation="left">
+                <Typography.Title
+                  level={4}
+                  style={{ marginTop: "35px", marginBottom: "35px" }}
+                >
+                  Kinh nghiệm
+                </Typography.Title>
+              </Divider>
               <Button type="primary" onClick={() => setIsModalSkillOpen(true)}>
                 Thêm skill
               </Button>
@@ -736,7 +757,7 @@ function EditPage() {
                 </Col>
               </Row>
               <Row>
-                <Col span={6} offset={14}>
+                <Col span={6} offset={18}>
                   <Popconfirm
                     title="Bạn có chắc muốn xóa nhân viên？"
                     cancelText="Hủy"

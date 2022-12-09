@@ -61,7 +61,7 @@ function DetailAssignment() {
     ) {
       dateColumnList.push({
         width: "70px",
-        title: i.format("DD-MM"),
+        title: i.format("DD/MM"),
         dataIndex: "totalEffort",
         render: (totalEffort, record) => {
           //kiểm tra xem ngày cột đang xét (= i) nằm ở assignment nào
