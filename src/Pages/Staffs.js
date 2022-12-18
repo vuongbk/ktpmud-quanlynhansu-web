@@ -10,6 +10,8 @@ import moment from "moment";
 const { Title, Text } = Typography;
 
 function Staffs() {
+  console.log("hello");
+  const [infoAccount, setInfoAccount] = useState();
   const navigate = useNavigate();
   const emailRef = React.useRef(null);
   const [data, setData] = useState(null);
@@ -26,6 +28,24 @@ function Staffs() {
     clearFilters();
     setSearchText("");
   };
+  if (!infoAccount) {
+    getInfoAccount();
+  }
+  async function getInfoAccount() {
+    await Axios({
+      method: "get",
+      url: "../api/staff?infoAccount=true",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setInfoAccount(res.data);
+      })
+      .catch((error) => {
+        console.log("App 39 error", error);
+      });
+  }
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -107,7 +127,12 @@ function Staffs() {
     render: (text, record) => {
       if (dataIndex === "fullName") {
         return (
-          <Link to={`/edit-staff/${record._id}`} state={{ data: record }}>
+          <Link
+            to={
+              infoAccount?.role === "boss" ? `/edit-staff/${record._id}` : "#"
+            }
+            state={{ data: record }}
+          >
             {searchedColumn === dataIndex ? (
               <Highlighter
                 highlightStyle={{
@@ -177,7 +202,7 @@ function Staffs() {
         },
       ],
       onFilter: (value, record) => {
-        return record.role === value;
+        return record?.role === value;
       },
       key: "role",
       responsive: ["sm"],
@@ -319,9 +344,11 @@ function Staffs() {
     <>
       <Row justify="space-between">
         <Title level={3}>Danh sách nhân viên</Title>
-        <Button type="primary" onClick={() => navigate("../../create-staff")}>
-          Thêm mới
-        </Button>
+        {infoAccount?.role === "boss" && (
+          <Button type="primary" onClick={() => navigate("../../create-staff")}>
+            Thêm mới
+          </Button>
+        )}
       </Row>
       <Table
         dataSource={data}

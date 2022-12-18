@@ -110,14 +110,14 @@ function App() {
         }}
       >
         <Row>
-          <Col span={21}>
+          <Col span={18}>
             <Row>
-              <Col span={5}>
+              <Col span={7}>
                 <NavLink to="/">
                   <img src="/logoThinkLabs.png" alt="logo"></img>
                 </NavLink>
               </Col>
-              <Col span={16}>
+              <Col span={17}>
                 <Space size={20}>
                   <NavLink
                     style={({ isActive }) => {
@@ -167,7 +167,7 @@ function App() {
               </Col>
             </Row>
           </Col>
-          <Col span={3}>
+          <Col span={6}>
             <Row justify="end">
               <Dropdown
                 menu={{
@@ -225,10 +225,7 @@ function App() {
             path="/edit-assignment/:idAssignment"
             element={<EditAssignment />}
           />
-          <Route
-            path="/account"
-            element={<Account infoAccount={infoAccount} />}
-          />
+          <Route path="/account" element={<Account />} />
 
           <Route path="*" element={<p>There's nothing here!</p>} />
         </Routes>

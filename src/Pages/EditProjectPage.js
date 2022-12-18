@@ -43,6 +43,7 @@ function EditProjectPage() {
     return (total += workingDay(value.dateStart, currentDay));
   }, 0);
   const dateFormat = "DD/MM/YYYY";
+  const iso8601Format = "YYYY-MM-DD";
   function getOptions() {
     return managers.map((value, index) => {
       return {
@@ -60,10 +61,10 @@ function EditProjectPage() {
   const handleSubmit = async () => {
     if (JSON.stringify(dataProjectChange) === "{}" && leaderChange === "") {
       notification.open({
-        message: "Thông báo",
+        message: <Title level={4}>Thông báo</Title>,
         description: "Không có thay đổi",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     }
@@ -215,191 +216,180 @@ function EditProjectPage() {
   }
 
   return (
-    <>
-      <Row>
-        <Col span={24}>
-          <Row>
-            <Col span={19} offset={5}>
-              <Title level={3}>
-                {dataProjectChange.projectName || data?.projectName}
-              </Title>
-            </Col>
-          </Row>
-          <Row>
-            {/* cột 1 */}
-            <Col
-              xs={24}
-              md={{
-                span: 6,
-                offset: 5,
+    <Row>
+      <Col span={14} offset={5}>
+        <Row>
+          <Title level={3}>
+            {dataProjectChange.projectName || data?.projectName}
+          </Title>
+        </Row>
+        <Row>
+          {/* cột 1 */}
+          <Col
+            xs={24}
+            md={{
+              span: 10,
+            }}
+          >
+            <Title level={5}>Tên dự án</Title>
+            <Input
+              defaultValue={dataProjectChange.projectName || data?.projectName}
+              onChange={(e) => {
+                setDataProjectChange((d) => {
+                  return { ...d, projectName: e.target.value };
+                });
               }}
-            >
-              <Title level={5}>Tên dự án</Title>
-              <Input
-                defaultValue={
-                  dataProjectChange.projectName || data?.projectName
-                }
-                onChange={(e) => {
-                  setDataProjectChange((d) => {
-                    return { ...d, projectName: e.target.value };
-                  });
-                }}
-              />
-              <Title level={5}>Ngày bắt đầu</Title>
-              <DatePicker
-                format={dateFormat}
-                defaultValue={moment(
-                  dataProjectChange.dateStart || data?.dateStart
-                )}
+            />
+            <Title level={5}>Ngày bắt đầu</Title>
+            <DatePicker
+              format={dateFormat}
+              defaultValue={moment(
+                dataProjectChange.dateStart || data?.dateStart
+              )}
+              style={{ width: "100%" }}
+              onChange={(date) => {
+                setDataProjectChange((d) => {
+                  return {
+                    ...d,
+                    dateStart: moment(date).format(iso8601Format),
+                  };
+                });
+              }}
+            />
+            <Title level={5}>Dự kiến kết thúc</Title>
+            <DatePicker
+              format={dateFormat}
+              defaultValue={moment(dataProjectChange.dateEnd || data?.dateEnd)}
+              style={{ width: "100%" }}
+              onChange={(date) => {
+                setDataProjectChange((d) => {
+                  return { ...d, dateEnd: moment(date).format(iso8601Format) };
+                });
+              }}
+            />
+            <Text>
+              Ước tính: {Math.round(timeWorkingEstimation * 100) / 100} mm
+            </Text>
+          </Col>
+          {/* cột 2 */}
+          <Col xs={24} md={{ span: 10, offset: 4 }}>
+            <Title level={5}>PM/Leader</Title>
+            <Select
+              labelInValue
+              defaultValue={data?.nameLeader}
+              onChange={(e) => {
+                console.log("createProject 230", e);
+                setDataProjectChange((d) => {
+                  return { ...d, idLeader: e.value, nameLeader: e.label };
+                });
+              }}
+              style={{
+                width: "100%",
+              }}
+              options={options}
+            ></Select>
+            <Title level={5}>Trạng thái</Title>
+            <Select
+              defaultValue={data?.status}
+              onChange={(e) => {
+                console.log("createProject 230", e);
+                setDataProjectChange((d) => {
+                  return { ...d, status: e };
+                });
+              }}
+              style={{
+                width: "100%",
+              }}
+              options={[
+                {
+                  value: "Đang thực hiện",
+                  label: "Đang thực hiện",
+                },
+                {
+                  value: "Kết thúc",
+                  label: "Kết thúc",
+                },
+                {
+                  value: "Tạm dừng",
+                  label: "Tạm dừng",
+                },
+                {
+                  value: "Chưa thực hiện",
+                  label: "Chưa thực hiện",
+                },
+              ]}
+            ></Select>
+            <Title level={5}>Đã chạy</Title>
+            <Input
+              defaultValue={() => {
+                return Math.round(totalTimeWorking * 100) / 100 + " mm";
+              }}
+              disabled
+            />
+            <Text>
+              Còn lại:{" "}
+              {Math.round((timeWorkingEstimation - totalTimeWorking) * 100) /
+                100}{" "}
+              {" mm"}
+            </Text>
+          </Col>
+        </Row>
+        <Row style={{ marginTop: "50px" }}>
+          <Col span={5}>
+            <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+              Quay lại
+            </Button>
+          </Col>
+          <Col span={5} offset={14}>
+            <Row>
+              <Button
+                type="primary"
                 style={{ width: "100%" }}
-                onBlur={(e) => {
-                  setDataProjectChange((d) => {
-                    return { ...d, dateStart: e.target.value };
-                  });
-                }}
-              />
-              <Title level={5}>Dự kiến kết thúc</Title>
-              <DatePicker
-                format={dateFormat}
-                defaultValue={moment(
-                  dataProjectChange.dateEnd || data?.dateEnd
+                onClick={handleSubmit}
+              >
+                Cập nhật
+              </Button>
+              <Modal
+                title="Thông báo"
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+              >
+                <p>{error?.message}</p>
+                {error?.assignment && (
+                  <>
+                    <hr></hr>
+                    <p>effort: {error?.assignment?.effort}</p>
+                    <p>
+                      {`dateStart: ${moment(
+                        error?.assignment?.dateStart
+                      ).format("DD-MM-YYYY")}`}
+                    </p>
+                    <p>
+                      {"dateEnd: " +
+                        moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
+                    </p>
+                  </>
                 )}
-                style={{ width: "100%" }}
-                onBlur={(e) => {
-                  setDataProjectChange((d) => {
-                    return { ...d, dateEnd: e.target.value };
-                  });
-                }}
-              />
-              <Text>
-                Ước tính: {Math.round(timeWorkingEstimation * 100) / 100} mm
-              </Text>
-            </Col>
-            {/* cột 2 */}
-            <Col xs={24} md={{ span: 6, offset: 2 }}>
-              <Title level={5}>PM/Leader</Title>
-              <Select
-                labelInValue
-                defaultValue={data?.nameLeader}
-                onChange={(e) => {
-                  console.log("createProject 230", e);
-                  setDataProjectChange((d) => {
-                    return { ...d, idLeader: e.value, nameLeader: e.label };
-                  });
-                }}
-                style={{
-                  width: "100%",
-                }}
-                options={options}
-              ></Select>
-              <Title level={5}>Trạng thái</Title>
-              <Select
-                defaultValue={data?.status}
-                onChange={(e) => {
-                  console.log("createProject 230", e);
-                  setDataProjectChange((d) => {
-                    return { ...d, status: e };
-                  });
-                }}
-                style={{
-                  width: "100%",
-                }}
-                options={[
-                  {
-                    value: "Đang thực hiện",
-                    label: "Đang thực hiện",
-                  },
-                  {
-                    value: "Kết thúc",
-                    label: "Kết thúc",
-                  },
-                  {
-                    value: "Tạm dừng",
-                    label: "Tạm dừng",
-                  },
-                  {
-                    value: "Chưa thực hiện",
-                    label: "Chưa thực hiện",
-                  },
-                ]}
-              ></Select>
-              <Title level={5}>Đã chạy</Title>
-              <Input
-                defaultValue={() => {
-                  return Math.round(totalTimeWorking * 100) / 100 + " mm";
-                }}
-                disabled
-              />
-              <Text>
-                Còn lại:{" "}
-                {Math.round((timeWorkingEstimation - totalTimeWorking) * 100) /
-                  100}{" "}
-                {" mm"}
-              </Text>
-            </Col>
-          </Row>
-          <Row justify="space-between">
-            <Col span={16} offset={5}>
-              <Row style={{ marginTop: "50px" }}>
-                <Col span={6}>
-                  <Button
-                    style={{ width: "100%" }}
-                    onClick={() => navigate(-1)}
-                  >
-                    Quay lại
-                  </Button>
-                </Col>
-                <Col span={6} offset={5}>
-                  <Button style={{ width: "100%" }} onClick={handleSubmit}>
-                    Cập nhật
-                  </Button>
-                  <Modal
-                    title="Thông báo"
-                    open={isModalOpen}
-                    onOk={handleOk}
-                    onCancel={handleCancel}
-                  >
-                    <p>{error?.message}</p>
-                    {error?.assignment && (
-                      <>
-                        <hr></hr>
-                        <p>effort: {error?.assignment?.effort}</p>
-                        <p>
-                          {`dateStart: ${moment(
-                            error?.assignment?.dateStart
-                          ).format("DD-MM-YYYY")}`}
-                        </p>
-                        <p>
-                          {"dateEnd: " +
-                            moment(error?.assignment?.dateEnd).format(
-                              "DD-MM-YYYY"
-                            )}
-                        </p>
-                      </>
-                    )}
-                  </Modal>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6} offset={14}>
-                  <Popconfirm
-                    title="Bạn có chắc muốn xóa dự án？"
-                    cancelText="Hủy"
-                    okText="Xóa"
-                    okButtonProps={{ type: "danger" }}
-                    onConfirm={handleDelete}
-                  >
-                    <Button type="link" danger>
-                      Xóa dự án
-                    </Button>
-                  </Popconfirm>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </>
+              </Modal>
+            </Row>
+            <Row>
+              <Popconfirm
+                title="Bạn có chắc muốn xóa dự án？"
+                cancelText="Hủy"
+                okText="Xóa"
+                okButtonProps={{ type: "danger" }}
+                onConfirm={handleDelete}
+              >
+                <Button style={{ width: "100%" }} type="link" danger>
+                  Xóa dự án
+                </Button>
+              </Popconfirm>
+            </Row>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
   );
 }
 

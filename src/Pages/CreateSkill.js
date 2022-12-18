@@ -8,6 +8,7 @@ import {
   Typography,
   Popconfirm,
   Modal,
+  notification,
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
@@ -32,6 +33,15 @@ function CreateSkill() {
     setIsModalOpen(false);
   };
   const handleSubmit = async () => {
+    if (nameSkill === "") {
+      notification.open({
+        message: <Title level={4}>Thông báo</Title>,
+        description: "Nhập thiếu",
+        duration: 2,
+        placement: "top",
+      });
+      return;
+    }
     await Axios({
       method: "post",
       url: "/api/skill",

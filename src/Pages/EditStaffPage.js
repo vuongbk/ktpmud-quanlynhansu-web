@@ -13,7 +13,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Divider, Space } from "antd";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate, json } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading.js";
@@ -21,7 +21,7 @@ import Loading from "../Components/Modal/Loading.js";
 import { getToken } from "../Components/useToken.js";
 import md5 from "md5";
 const { Option } = Select;
-// const { Text, Title } = Typography;
+const { Text, Title } = Typography;
 
 // const getBase64 = (img, callback) => {
 //   console.log("editstaff 23 img", img);
@@ -79,6 +79,18 @@ function EditPage() {
     });
   }
   const handleOkSkillModal = async () => {
+    if (
+      Object.keys(newSkill).length === 1 ||
+      Object.keys(newSkill).length === 0
+    ) {
+      notification.open({
+        message: <Title level={4}>Thông báo</Title>,
+        description: "Chọn thiếu",
+        duration: 2,
+        placement: "top",
+      });
+      return;
+    }
     setLoading(true);
     await Axios({
       method: "post",
@@ -105,10 +117,10 @@ function EditPage() {
   const handleOkPasswordModal = async () => {
     if (!password.hasOwnProperty("newPassword")) {
       notification.open({
-        message: "Thông báo",
+        message: <Title level={4}>Thông báo</Title>,
         description: "Nhập thiếu",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     }
@@ -164,10 +176,10 @@ function EditPage() {
       imageUrl === data.imageUrl
     ) {
       notification.open({
-        message: "Thông báo",
+        message: <Title level={4}>Thông báo</Title>,
         description: "Không có thay đổi",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     }
@@ -362,14 +374,16 @@ function EditPage() {
   return (
     <>
       <Row>
-        <Col span={24}>
+        <Col span={14} offset={5}>
           <Row>
-            <Col span={15} offset={5}>
-              <Typography.Title level={3}>
-                {dataStaffChange.fullName || data?.fullName}
-              </Typography.Title>
-              <Divider orientation="left">
-                <Typography.Title level={4}>Thông tin cơ bản</Typography.Title>
+            <Col span={24}>
+              <Row>
+                <Title level={3}>
+                  {dataStaffChange.fullName || data?.fullName}
+                </Title>
+              </Row>
+              <Divider orientation="left" orientationMargin={0}>
+                <Title level={4}>Thông tin cơ bản</Title>
               </Divider>
               {/* upload đang lỗi, tạm thời comment để deploy */}
               {/* <Upload
@@ -392,45 +406,47 @@ function EditPage() {
                   uploadButton
                 )}
               </Upload> */}
-              <Button
-                type="primary"
-                onClick={() => setIsModalPasswordOpen(true)}
-              >
-                Đặt lại mật khẩu
-              </Button>
-              <Modal
-                open={isModalPasswordOpen}
-                title="Đặt lại mật khẩu"
-                onOk={handleOkPasswordModal}
-                onCancel={handleCancelPasswordModal}
-                footer={[
-                  <Button key="back" onClick={handleCancelPasswordModal}>
-                    Hủy
-                  </Button>,
-                  <Button
-                    key="submit"
-                    type="primary"
-                    loading={loading}
-                    onClick={handleOkPasswordModal}
-                  >
-                    Đặt lại
-                  </Button>,
-                ]}
-              >
-                {/* <Text>Mật khẩu mới</Text> */}
-                <Input.Password
-                  style={{ marginTop: "20px" }}
-                  placeholder="Mật khẩu mới"
-                  onChange={(e) =>
-                    setPassword((p) => {
-                      return {
-                        ...p,
-                        newPassword: md5(e.target.value),
-                      };
-                    })
-                  }
-                />
-              </Modal>
+              <Row>
+                <Button
+                  type="primary"
+                  onClick={() => setIsModalPasswordOpen(true)}
+                >
+                  Đặt lại mật khẩu
+                </Button>
+                <Modal
+                  open={isModalPasswordOpen}
+                  title="Đặt lại mật khẩu"
+                  onOk={handleOkPasswordModal}
+                  onCancel={handleCancelPasswordModal}
+                  footer={[
+                    <Button key="back" onClick={handleCancelPasswordModal}>
+                      Hủy
+                    </Button>,
+                    <Button
+                      key="submit"
+                      type="primary"
+                      loading={loading}
+                      onClick={handleOkPasswordModal}
+                    >
+                      Đặt lại
+                    </Button>,
+                  ]}
+                >
+                  {/* <Text>Mật khẩu mới</Text> */}
+                  <Input.Password
+                    style={{ marginTop: "20px" }}
+                    placeholder="Mật khẩu mới"
+                    onChange={(e) =>
+                      setPassword((p) => {
+                        return {
+                          ...p,
+                          newPassword: md5(e.target.value),
+                        };
+                      })
+                    }
+                  />
+                </Modal>
+              </Row>
             </Col>
           </Row>
           <Row>
@@ -438,11 +454,10 @@ function EditPage() {
             <Col
               xs={24}
               md={{
-                span: 6,
-                offset: 5,
+                span: 10,
               }}
             >
-              <Typography.Title level={5}>Họ và tên</Typography.Title>
+              <Title level={5}>Họ và tên</Title>
               <Input
                 defaultValue={dataStaffChange.fullName || data?.fullName}
                 onChange={(e) => {
@@ -451,7 +466,7 @@ function EditPage() {
                   });
                 }}
               />
-              <Typography.Title level={5}>Điện thoại</Typography.Title>
+              <Title level={5}>Điện thoại</Title>
               <Input
                 defaultValue={dataStaffChange.phoneNumber || data?.phoneNumber}
                 onChange={(e) => {
@@ -460,7 +475,7 @@ function EditPage() {
                   });
                 }}
               />
-              <Typography.Title level={5}>Ngày sinh</Typography.Title>
+              <Title level={5}>Ngày sinh</Title>
               <DatePicker
                 format={dateFormat}
                 defaultValue={moment(
@@ -473,7 +488,7 @@ function EditPage() {
                   });
                 }}
               />
-              <Typography.Title level={5}>Phòng ban</Typography.Title>
+              <Title level={5}>Phòng ban</Title>
               <Select
                 defaultValue={dataStaffChange.department || data?.department}
                 style={{
@@ -518,7 +533,7 @@ function EditPage() {
                   <Option key={item}>{item}</Option>
                 ))}
               </Select>
-              <Typography.Title level={5}>Cấp bậc</Typography.Title>
+              <Title level={5}>Cấp bậc</Title>
               <Select
                 defaultValue={dataStaffChange.level || data?.level}
                 onSelect={(e) => {
@@ -536,8 +551,8 @@ function EditPage() {
               </Select>
             </Col>
             {/* cột 2 */}
-            <Col xs={24} md={{ span: 6, offset: 2 }}>
-              <Typography.Title level={5}>Email</Typography.Title>
+            <Col xs={24} md={{ span: 10, offset: 4 }}>
+              <Title level={5}>Email</Title>
               <Input
                 defaultValue={dataStaffChange.email || data?.email}
                 onChange={(e) => {
@@ -546,7 +561,7 @@ function EditPage() {
                   });
                 }}
               />
-              <Typography.Title level={5}>Giới tính</Typography.Title>
+              <Title level={5}>Giới tính</Title>
               <Select
                 defaultValue={dataStaffChange.sex || data?.sex}
                 onSelect={(e) => {
@@ -562,7 +577,7 @@ function EditPage() {
                 <Option value="Nữ">Nữ</Option>
                 <Option value="Khác">Khác</Option>
               </Select>
-              <Typography.Title level={5}>Vị trí</Typography.Title>
+              <Title level={5}>Vị trí</Title>
               <Select
                 defaultValue={dataStaffChange.role || data?.role}
                 onSelect={(e) => {
@@ -583,7 +598,7 @@ function EditPage() {
                 <Option value="Thực tập sinh">Thực tập sinh</Option>
                 <Option value="CEO">CEO</Option>
               </Select>
-              <Typography.Title level={5}>Trạng thái</Typography.Title>
+              <Title level={5}>Trạng thái</Title>
               <Select
                 defaultValue={dataStaffChange.status || data?.status}
                 onSelect={(e) => {
@@ -602,7 +617,7 @@ function EditPage() {
                 <Option value="Tạm nghỉ">Tạm nghỉ</Option>
                 <Option value="Đã nghỉ">Đã nghỉ</Option>
               </Select>
-              <Typography.Title level={5}>Ngày vào làm</Typography.Title>
+              <Title level={5}>Ngày vào làm</Title>
               <DatePicker
                 format={dateFormat}
                 defaultValue={moment(dataStaffChange.startTL || data?.startTL)}
@@ -616,76 +631,92 @@ function EditPage() {
             </Col>
           </Row>
           <Row>
-            <Col span={15} offset={5}>
-              <Divider orientation="left">
-                <Typography.Title
+            <Col span={24}>
+              <Divider orientation="left" orientationMargin={0}>
+                <Title
                   level={4}
                   style={{ marginTop: "35px", marginBottom: "35px" }}
                 >
                   Kinh nghiệm
-                </Typography.Title>
+                </Title>
               </Divider>
-              <Button type="primary" onClick={() => setIsModalSkillOpen(true)}>
-                Thêm skill
-              </Button>
-              <Modal
-                open={isModalSkillOpen}
-                title="Thêm skill mới"
-                onOk={handleOkSkillModal}
-                onCancel={handleCancelSkillModal}
-                footer={[
-                  <Button key="back" onClick={handleCancelSkillModal}>
-                    Hủy
-                  </Button>,
-                  <Button
-                    key="submit"
-                    type="primary"
-                    loading={loading}
-                    onClick={handleOkSkillModal}
-                  >
-                    Thêm skill
-                  </Button>,
-                ]}
-              >
-                {/* <Text>Thêm levelSkill mới</Text> */}
-                <Select
-                  labelInValue
-                  defaultValue={data?.nameLeader}
-                  onChange={(e) => {
-                    console.log("createProject 230", e);
-                    setNewSkill((d) => {
-                      return { ...d, idSkill: e.value };
-                    });
-                  }}
-                  style={{
-                    width: "100%",
-                  }}
-                  options={options}
-                ></Select>
-                <Select
-                  onSelect={(e) => {
-                    setNewSkill((d) => {
-                      return { ...d, level: e };
-                    });
-                  }}
+              <Row>
+                <Button
+                  type="primary"
+                  onClick={() => setIsModalSkillOpen(true)}
                 >
-                  <Option value={0}>0</Option>
-                  <Option value={1}>1</Option>
-                  <Option value={2}>2</Option>
-                  <Option value={3}>3</Option>
-                  <Option value={4}>4</Option>
-                  <Option value={5}>5</Option>
-                </Select>
-              </Modal>
+                  Thêm skill
+                </Button>
+                <Modal
+                  open={isModalSkillOpen}
+                  title={<Title level={4}>Thêm skill mới</Title>}
+                  // onOk={handleOkSkillModal}
+                  onCancel={handleCancelSkillModal}
+                  footer={[
+                    <Button key="back" onClick={handleCancelSkillModal}>
+                      Hủy
+                    </Button>,
+                    <Button
+                      key="submit"
+                      type="primary"
+                      loading={loading}
+                      onClick={handleOkSkillModal}
+                    >
+                      Thêm skill
+                    </Button>,
+                  ]}
+                >
+                  {/* <Text>Thêm levelSkill mới</Text> */}
+                  <Row justify="space-between">
+                    <Col span={12}>
+                      <Title level={5} style={{ marginTop: "0" }}>
+                        Tên skill
+                      </Title>
+                      <Select
+                        labelInValue
+                        defaultValue={data?.nameLeader}
+                        onChange={(e) => {
+                          console.log("createProject 230", e);
+                          setNewSkill((d) => {
+                            return { ...d, idSkill: e.value };
+                          });
+                        }}
+                        style={{
+                          width: "100%",
+                        }}
+                        options={options}
+                      ></Select>
+                    </Col>
+                    <Col span={6} offset={6}>
+                      <Title level={5} style={{ marginTop: "0" }}>
+                        Cấp
+                      </Title>
+                      <Select
+                        onSelect={(e) => {
+                          setNewSkill((d) => {
+                            return { ...d, level: e };
+                          });
+                        }}
+                      >
+                        <Option value={0}>0</Option>
+                        <Option value={1}>1</Option>
+                        <Option value={2}>2</Option>
+                        <Option value={3}>3</Option>
+                        <Option value={4}>4</Option>
+                        <Option value={5}>5</Option>
+                      </Select>
+                    </Col>
+                  </Row>
+                </Modal>
+              </Row>
+
               <Row>
                 {skillsOfStaff &&
                   typeof skillsOfStaff[0] === "object" &&
                   skillsOfStaff.map((value, index) => {
                     return (
                       <Col xs={24} sm={12} lg={6} key={index}>
-                        <Typography.Title level={5}>
-                          {value.nameSkill}
-                        </Typography.Title>
+                        <Title level={5}>{value.nameSkill}</Title>
                         <Select
                           defaultValue={
                             getDefaultLevelSkillValue(value.nameSkill)
@@ -715,7 +746,7 @@ function EditPage() {
                   })}
               </Row>
               <Row style={{ marginTop: "50px" }} justify="space-between">
-                <Col span={6}>
+                <Col span={5}>
                   <Button
                     style={{ width: "100%" }}
                     onClick={() => {
@@ -725,50 +756,54 @@ function EditPage() {
                     Quay lại
                   </Button>
                 </Col>
-                <Col span={6} offset={5}>
-                  <Button style={{ width: "100%" }} onClick={handleSubmit}>
-                    Cập nhật
-                  </Button>
-                  <Modal
-                    title="Thông báo"
-                    open={isModalOpen}
-                    onOk={handleOk}
-                    onCancel={handleCancel}
-                  >
-                    <p>{error?.message}</p>
-                    {error?.assignment && (
-                      <>
-                        <hr></hr>
-                        <p>effort: {error?.assignment?.effort}</p>
-                        <p>
-                          {`dateStart: ${moment(
-                            error?.assignment?.dateStart
-                          ).format("DD-MM-YYYY")}`}
-                        </p>
-                        <p>
-                          {"dateEnd: " +
-                            moment(error?.assignment?.dateEnd).format(
-                              "DD-MM-YYYY"
-                            )}
-                        </p>
-                      </>
-                    )}
-                  </Modal>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={6} offset={18}>
-                  <Popconfirm
-                    title="Bạn có chắc muốn xóa nhân viên？"
-                    cancelText="Hủy"
-                    okText="Xóa"
-                    okButtonProps={{ type: "danger" }}
-                    onConfirm={handleDelete}
-                  >
-                    <Button type="link" danger>
-                      Xóa nhân viên
+                <Col span={5} offset={14}>
+                  <Row>
+                    <Button
+                      type="primary"
+                      style={{ width: "100%" }}
+                      onClick={handleSubmit}
+                    >
+                      Cập nhật
                     </Button>
-                  </Popconfirm>
+                    <Modal
+                      title="Thông báo"
+                      open={isModalOpen}
+                      onOk={handleOk}
+                      onCancel={handleCancel}
+                    >
+                      <p>{error?.message}</p>
+                      {error?.assignment && (
+                        <>
+                          <hr></hr>
+                          <p>effort: {error?.assignment?.effort}</p>
+                          <p>
+                            {`dateStart: ${moment(
+                              error?.assignment?.dateStart
+                            ).format("DD-MM-YYYY")}`}
+                          </p>
+                          <p>
+                            {"dateEnd: " +
+                              moment(error?.assignment?.dateEnd).format(
+                                "DD-MM-YYYY"
+                              )}
+                          </p>
+                        </>
+                      )}
+                    </Modal>
+                  </Row>
+                  <Row>
+                    <Popconfirm
+                      title="Bạn có chắc muốn xóa nhân viên？"
+                      cancelText="Hủy"
+                      okText="Xóa"
+                      okButtonProps={{ type: "danger" }}
+                      onConfirm={handleDelete}
+                    >
+                      <Button style={{ width: "100%" }} type="link" danger>
+                        Xóa nhân viên
+                      </Button>
+                    </Popconfirm>
+                  </Row>
                 </Col>
               </Row>
             </Col>

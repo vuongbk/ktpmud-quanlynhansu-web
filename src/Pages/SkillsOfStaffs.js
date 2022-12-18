@@ -23,6 +23,7 @@ const { Option } = Select;
 const { Title, Text } = Typography;
 
 function SkillsOfStaffs() {
+  const [infoAccount, setInfoAccount] = useState();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const searchInput = useRef(null);
@@ -42,26 +43,37 @@ function SkillsOfStaffs() {
       };
     });
   }
-  const handleDelete = async (idSkill) => {
-    setLoading(true);
+  if (!infoAccount) {
+    getInfoAccount();
+  }
+  async function getInfoAccount() {
     await Axios({
-      method: "delete",
-      url: `api/skill/${idSkill}`,
+      method: "get",
+      url: "../api/staff?infoAccount=true",
       headers: {
         Authorization: "Bearer " + getToken(),
       },
     })
       .then((res) => {
-        console.log("skillPage 53", res);
-        setLoading(false);
-        navigate(0);
+        setInfoAccount(res.data);
       })
       .catch((error) => {
-        console.log("skillPage 57", error);
-        setLoading(false);
+        console.log("App 39 error", error);
       });
-  };
+  }
   const handleOkSkillModal = async () => {
+    if (
+      Object.keys(newSkill).length === 1 ||
+      Object.keys(newSkill).length === 2
+    ) {
+      notification.open({
+        message: <Title level={4}>Thông báo</Title>,
+        description: "Chọn thiếu",
+        duration: 2,
+        placement: "top",
+      });
+      return;
+    }
     setLoading(true);
     await Axios({
       method: "post",
@@ -72,13 +84,13 @@ function SkillsOfStaffs() {
       },
     })
       .then((res) => {
-        console.log("skillpage 55", res);
+        console.log("SkillsOfStaffs 69", res);
         setLoading(false);
         setIsModalSkillOpen(false);
         navigate(0);
       })
       .catch((error) => {
-        console.log("skillpage 59", error);
+        console.log("SkillsOfStaffs 75", error);
         setLoading(false);
       });
   };
@@ -109,7 +121,7 @@ function SkillsOfStaffs() {
         >
           <Input
             ref={searchInput}
-            placeholder={`Search ${dataIndex}`}
+            placeholder={`Tên tìm kiếm`}
             value={selectedKeys[0]}
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -130,7 +142,7 @@ function SkillsOfStaffs() {
                 width: 90,
               }}
             >
-              Search
+              Tìm
             </Button>
             <Button
               onClick={() => clearFilters && handleReset(clearFilters)}
@@ -139,7 +151,7 @@ function SkillsOfStaffs() {
                 width: 90,
               }}
             >
-              Reset
+              Đặt lại
             </Button>
             <Button
               type="link"
@@ -152,7 +164,7 @@ function SkillsOfStaffs() {
                 setSearchedColumn(dataIndex);
               }}
             >
-              Filter
+              Lọc
             </Button>
           </Space>
         </div>
@@ -235,104 +247,107 @@ function SkillsOfStaffs() {
       },
     },
     // ...getSkill(),
+    //Giám đốc thì mới hiển thị cột thao tác
     {
       title: "Thao tác",
       fixed: "right",
-      width: 230,
+      width: 190,
       render: (record) => {
-        return (
-          <Row>
-            <Col span={18} offset={3}>
-              <Space wrap>
-                <Button
-                  style={{ width: "100%" }}
-                  ghost
-                  size="small"
-                  type="primary"
-                  onClick={() => handleSubmit(record._id)}
-                >
-                  Cập nhật
-                </Button>
-
-                <Button
-                  style={{ width: "100%", padding: "1px" }}
-                  ghost
-                  size="small"
-                  type="primary"
-                  onClick={() => {
-                    setIsModalSkillOpen(true);
-                    setNewSkill((d) => {
-                      return { ...d, idStaff: record._id };
-                    });
-                  }}
-                >
-                  Thêm skill
-                </Button>
-              </Space>
-              <Modal
-                // maskStyle={{ opacity: 0.5 }}
-                open={isModalSkillOpen}
-                title="Thêm skill mới"
-                onOk={() => handleOkSkillModal()}
-                onCancel={handleCancelSkillModal}
-                footer={[
-                  <Button key="back" onClick={handleCancelSkillModal}>
-                    Hủy
-                  </Button>,
+        if (infoAccount?.role === "boss") {
+          return (
+            <Row>
+              <Col span={24}>
+                <Space wrap>
                   <Button
-                    key="submit"
+                    style={{ fontSize: "10px" }}
+                    size="small"
                     type="primary"
-                    onClick={() => handleOkSkillModal()}
+                    onClick={() => handleSubmit(record._id)}
+                  >
+                    Cập nhật
+                  </Button>
+
+                  <Button
+                    style={{ fontSize: "10px" }}
+                    size="small"
+                    type="primary"
+                    onClick={() => {
+                      setIsModalSkillOpen(true);
+                      setNewSkill((d) => {
+                        return { ...d, idStaff: record._id };
+                      });
+                    }}
                   >
                     Thêm skill
-                  </Button>,
-                ]}
-              >
-                {/* <Text>Thêm levelSkill mới</Text> */}
-                <Row>
-                  <Col span={12}>
-                    <Text>Tên skill</Text>
-                    <Select
-                      labelInValue
-                      onChange={(e) => {
-                        console.log("createProject 230", e);
-                        setNewSkill((d) => {
-                          return { ...d, idSkill: e.value };
-                        });
-                      }}
-                      style={{
-                        width: "100%",
-                      }}
-                      options={options}
-                    ></Select>
-                  </Col>
-                  <Col span={6} offset={6}>
-                    <Row>
-                      <Text>Cấp độ</Text>
-                    </Row>
-                    <Select
-                      Chọn
-                      cấp
-                      độ
-                      onSelect={(e) => {
-                        setNewSkill((d) => {
-                          return { ...d, level: e };
-                        });
-                      }}
+                  </Button>
+                </Space>
+                <Modal
+                  // maskStyle={{ opacity: 0.5 }}
+                  open={isModalSkillOpen}
+                  title="Thêm skill mới"
+                  onOk={() => handleOkSkillModal()}
+                  onCancel={handleCancelSkillModal}
+                  footer={[
+                    <Button key="back" onClick={handleCancelSkillModal}>
+                      Hủy
+                    </Button>,
+                    <Button
+                      key="submit"
+                      type="primary"
+                      onClick={() => handleOkSkillModal()}
                     >
-                      <Option value={0}>0</Option>
-                      <Option value={1}>1</Option>
-                      <Option value={2}>2</Option>
-                      <Option value={3}>3</Option>
-                      <Option value={4}>4</Option>
-                      <Option value={5}>5</Option>
-                    </Select>
-                  </Col>
-                </Row>
-              </Modal>
-            </Col>
-          </Row>
-        );
+                      Thêm skill
+                    </Button>,
+                  ]}
+                >
+                  {/* <Text>Thêm levelSkill mới</Text> */}
+                  <Row>
+                    <Col span={12}>
+                      <Text>Tên skill</Text>
+                      <Select
+                        labelInValue
+                        onChange={(e) => {
+                          console.log("createProject 230", e);
+                          setNewSkill((d) => {
+                            return { ...d, idSkill: e.value };
+                          });
+                        }}
+                        style={{
+                          width: "100%",
+                        }}
+                        options={options}
+                      ></Select>
+                    </Col>
+                    <Col span={6} offset={6}>
+                      <Row>
+                        <Text>Cấp độ</Text>
+                      </Row>
+                      <Select
+                        Chọn
+                        cấp
+                        độ
+                        onSelect={(e) => {
+                          setNewSkill((d) => {
+                            return { ...d, level: e };
+                          });
+                        }}
+                      >
+                        <Option value={0}>0</Option>
+                        <Option value={1}>1</Option>
+                        <Option value={2}>2</Option>
+                        <Option value={3}>3</Option>
+                        <Option value={4}>4</Option>
+                        <Option value={5}>5</Option>
+                      </Select>
+                    </Col>
+                  </Row>
+                </Modal>
+              </Col>
+            </Row>
+          );
+        } else {
+          return "";
+        }
       },
     },
   ];
@@ -344,10 +359,10 @@ function SkillsOfStaffs() {
       console.log("skillpage 308", levelSkillOfStaff);
       if (JSON.stringify(levelSkillOfStaff) === "[]") {
         notification.open({
-          message: "Thông báo",
+          message: <Title level={4}>Thông báo</Title>,
           description: "Không có thay đổi",
           duration: 2,
-          placement: "topLeft",
+          placement: "top",
         });
         return;
       }
@@ -374,10 +389,10 @@ function SkillsOfStaffs() {
       });
     } else {
       notification.open({
-        message: "Thông báo",
+        message: <Title level={4}>Thông báo</Title>,
         description: "Không có thay đổi",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     }
@@ -437,23 +452,14 @@ function SkillsOfStaffs() {
         <Space wrap style={{ marginBottom: "5px" }}>
           {skills
             ? skills.map((value, index) => {
-                return (
-                  <Popconfirm
-                    key={index}
-                    title="Bạn có chắc muốn xóa kỹ năng này？"
-                    cancelText="Hủy"
-                    okText="Xóa"
-                    okButtonProps={{ type: "danger" }}
-                    onConfirm={() => handleDelete(value._id)}
-                  >
-                    <Button type="danger">{value.skillName}</Button>
-                  </Popconfirm>
-                );
+                return <Button type="danger">{value.skillName}</Button>;
               })
             : ""}
-          <Button type="primary" onClick={() => navigate("../skills")}>
-            Chỉnh sửa danh sách kỹ năng
-          </Button>
+          {infoAccount?.role === "boss" && (
+            <Button type="primary" onClick={() => navigate("../skills")}>
+              Chỉnh sửa danh sách kỹ năng
+            </Button>
+          )}
         </Space>
       </Row>
       <Table

@@ -9,28 +9,31 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 function DetailAssignment() {
-  let curDate = moment().startOf("day");
+  const [infoAccount, setInfoAccount] = useState();
   const [data, setData] = useState(null);
   const { idStaff } = useParams();
   const [dateColumnStart, setDateColumnStart] = useState(
-    moment(curDate).subtract(25, "days")
+    moment().subtract(25, "days")
   );
-  const [dateColumnEnd, setDateColumnEnd] = useState(
-    moment(curDate).add(35, "days")
-  );
+  const [dateColumnEnd, setDateColumnEnd] = useState(moment().add(35, "days"));
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const dateFormat = "DD/MM/YYYY";
+
   const columnAssignments = [
     {
+      dataIndex: "projectName",
       fixed: "left",
       width: "200px",
       title: "Dự án",
-      dataIndex: "projectName",
       render: (projectName, record) => {
         return (
           <Link
-            to={`/assignments-of-staff?idStaff=${idStaff}&idProject=${record._id}`}
+            to={
+              infoAccount?.role === "boss"
+                ? `/assignments-of-staff?idStaff=${idStaff}&idProject=${record._id}`
+                : "#"
+            }
           >
             {projectName}
           </Link>
@@ -40,6 +43,24 @@ function DetailAssignment() {
     ...getEffortInDay(),
   ];
   const navigate = useNavigate();
+  if (!infoAccount) {
+    getInfoAccount();
+  }
+  async function getInfoAccount() {
+    await Axios({
+      method: "get",
+      url: "../api/staff?infoAccount=true",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setInfoAccount(res.data);
+      })
+      .catch((error) => {
+        console.log("App 39 error", error);
+      });
+  }
   function removeDuplicateIds(listId) {
     let obj = {};
     let out = [];
@@ -55,15 +76,23 @@ function DetailAssignment() {
   function getEffortInDay() {
     let dateColumnList = [];
     for (
-      let i = dateColumnStart;
+      let i = dateColumnStart.clone();
       i.isSameOrBefore(dateColumnEnd);
       i = moment(i).add(1, "days")
     ) {
       dateColumnList.push({
-        width: "70px",
         title: i.format("DD/MM"),
+        width: "70px",
         dataIndex: "totalEffort",
         render: (totalEffort, record) => {
+          //check xem có phải t7, cn không
+          if (i.day() === 0) {
+            return <Text>CN</Text>;
+          }
+          if (i.day() === 6) {
+            return <Text>T7</Text>;
+          }
+
           //kiểm tra xem ngày cột đang xét (= i) nằm ở assignment nào
           function checkAssign(iTest) {
             //duyệt các assign của dự án dòng này
@@ -104,11 +133,15 @@ function DetailAssignment() {
           }
           let indexOfAssignment = checkAssign(i);
           let sumEffort = checkTotalEffortInDay(i);
-          //làm tiếp ở đoạn này, lấy tổng effort theo từng khoảng
+
           if (indexOfAssignment !== -1) {
             return (
               <Link
-                to={`/edit-assignment/${totalEffort[indexOfAssignment]?._id}`}
+                to={
+                  infoAccount?.role === "boss"
+                    ? `/edit-assignment/${totalEffort[indexOfAssignment]?._id}`
+                    : "#"
+                }
                 state={{
                   data: {
                     projectName: record.projectName,
@@ -215,15 +248,18 @@ function DetailAssignment() {
           placement="bottomRight"
           format={dateFormat}
           onChange={(dates) => {
+            console.log(dates);
             setDateColumnStart(dates[0]);
             setDateColumnEnd(dates[1]);
           }}
         />
-        <Button type="primary">
-          <Link to={`/create-assignment?idStaff=${idStaff}`} state={{ data }}>
-            Thêm mới
-          </Link>
-        </Button>
+        {infoAccount?.role === "boss" && (
+          <Button type="primary">
+            <Link to={`/create-assignment?idStaff=${idStaff}`} state={{ data }}>
+              Thêm mới
+            </Link>
+          </Button>
+        )}
       </Row>
 
       <Table

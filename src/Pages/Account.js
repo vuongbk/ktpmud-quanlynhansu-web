@@ -41,32 +41,8 @@ const { Text } = Typography;
 
 // Không hiểu tại sao cái trang infoAccount lại lỗi phần lấy data từ api, lấy đc data rồi, nhưng sao nó ko hiển thị
 // thông tin cho vào Text thì được, Vào Input thì ko?
-function Account({ infoAccount }) {
-  const [data, setData] = useState(infoAccount);
-  useEffect(() => {
-    if (!infoAccount) {
-      getInfoAccount();
-    }
-  }, []);
-  async function getInfoAccount() {
-    setLoading(true);
-    await Axios({
-      method: "get",
-      url: "/api/staff?infoAccount=true",
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        setData(res.data);
-        setImageUrl(res.data.imageUrl);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log("App 39 error", error);
-        setLoading(false);
-      });
-  }
+function Account({}) {
+  const [infoAccount, setInfoAccount] = useState();
   const [dataStaffChange, setDataStaffChange] = useState({});
   // const [fileList, setFileList] = useState([]);
   const [error, setError] = useState();
@@ -77,6 +53,23 @@ function Account({ infoAccount }) {
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
   const [password, setPassword] = useState({});
   const dateFormat = "DD/MM/YYYY";
+  console.log("56", infoAccount);
+
+  async function getInfoAccount() {
+    await Axios({
+      method: "get",
+      url: "../api/staff?infoAccount=true",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setInfoAccount(res.data);
+      })
+      .catch((error) => {
+        console.log("App 39 error", error);
+      });
+  }
   const handleOkPasswordModal = async () => {
     if (
       !password.hasOwnProperty("oldPassword") ||
@@ -91,7 +84,7 @@ function Account({ infoAccount }) {
       return;
     }
     setLoading(true);
-    await Axios.put(`/api/staff/${data._id}`, password, {
+    await Axios.put(`/api/staff/${infoAccount?._id}`, password, {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -122,7 +115,7 @@ function Account({ infoAccount }) {
   const handleSubmit = async () => {
     if (
       JSON.stringify(dataStaffChange) === "{}" &&
-      imageUrl === data.imageUrl
+      imageUrl === infoAccount?.imageUrl
     ) {
       notification.open({
         message: "Thông báo",
@@ -136,7 +129,7 @@ function Account({ infoAccount }) {
     //thay đổi bảng staff
     if (JSON.stringify(dataStaffChange) !== "{}") {
       setLoading(true);
-      await Axios.put(`/api/staff/${data._id}`, dataStaffChange, {
+      await Axios.put(`/api/staff/${infoAccount?._id}`, dataStaffChange, {
         headers: {
           Authorization: "Bearer " + getToken(),
         },
@@ -154,10 +147,10 @@ function Account({ infoAccount }) {
     }
 
     //upload image
-    // if (imageUrl !== data.imageUrl) {
+    // if (imageUrl !== infoAccount?.imageUrl) {
     //   let formData = new FormData();
     //   formData.append("file", fileList.pop().originFileObj);
-    //   formData.append("idStaff", data._id);
+    //   formData.append("idStaff", infoAccount?._id);
 
     //   await Axios.post("api/image", formData, {
     //     headers: {
@@ -205,6 +198,9 @@ function Account({ infoAccount }) {
   //     console.log("Account 214 loi");
   //   }
   // };
+  useEffect(() => {
+    getInfoAccount();
+  }, []);
   if (loading) {
     return <Loading />;
   }
@@ -216,7 +212,7 @@ function Account({ infoAccount }) {
           <Row>
             <Col span={20} offset={5}>
               <Typography.Title level={3}>
-                {dataStaffChange?.fullName || data?.fullName}
+                {dataStaffChange?.fullName || infoAccount?.fullName}
               </Typography.Title>
               <Typography.Title level={4}>Thông tin cơ bản</Typography.Title>
               {/* phần upload ảnh đang lỗi, tạm thời comment để deploy */}
@@ -303,9 +299,9 @@ function Account({ infoAccount }) {
               }}
             >
               <Typography.Title level={5}>Họ và tên</Typography.Title>
-              <Text>{dataStaffChange?.fullName || data?.fullName}</Text>
+              <Text>{dataStaffChange?.fullName || infoAccount?.fullName}</Text>
               {/* <Input
-                defaultValue={dataStaffChange?.fullName || data?.fullName}
+                defaultValue={dataStaffChange?.fullName || infoAccount?.fullName}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, fullName: e.target.value };
@@ -313,9 +309,11 @@ function Account({ infoAccount }) {
                 }}
               /> */}
               <Typography.Title level={5}>Điện thoại</Typography.Title>
-              <Text>{dataStaffChange?.phoneNumber || data?.phoneNumber}</Text>
+              <Text>
+                {dataStaffChange?.phoneNumber || infoAccount?.phoneNumber}
+              </Text>
               {/* <Input
-                defaultValue={dataStaffChange?.phoneNumber || data?.phoneNumber}
+                defaultValue={dataStaffChange?.phoneNumber || infoAccount?.phoneNumber}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, phoneNumber: e.target.value };
@@ -324,13 +322,13 @@ function Account({ infoAccount }) {
               /> */}
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
               <Text>
-                {moment(dataStaffChange?.birthYear || data?.birthYear).format(
-                  dateFormat
-                )}
+                {moment(
+                  dataStaffChange?.birthYear || infoAccount?.birthYear
+                ).format(dateFormat)}
               </Text>
               {/* <DatePicker
                 defaultValue={moment(
-                  dataStaffChange?.birthYear || data?.birthYear
+                  dataStaffChange?.birthYear || infoAccount?.birthYear
                 )}
                 style={{ width: "100%" }}
                 onBlur={(e) => {
@@ -341,17 +339,17 @@ function Account({ infoAccount }) {
               /> */}
               <Typography.Title level={5}>Phòng ban</Typography.Title>
 
-              <Text>{data?.department}</Text>
+              <Text>{infoAccount?.department}</Text>
               <Typography.Title level={5}>Cấp bậc</Typography.Title>
 
-              <Text>{data?.role}</Text>
+              <Text>{infoAccount?.role}</Text>
             </Col>
             {/* cột 2 */}
             <Col xs={24} md={{ span: 6, offset: 2 }}>
               <Typography.Title level={5}>Email</Typography.Title>
-              <Text>{dataStaffChange?.email || data?.email}</Text>
+              <Text>{dataStaffChange?.email || infoAccount?.email}</Text>
               {/* <Input
-                defaultValue={dataStaffChange?.email || data?.email}
+                defaultValue={dataStaffChange?.email || infoAccount?.email}
                 onBlur={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, email: e.target.value };
@@ -360,7 +358,7 @@ function Account({ infoAccount }) {
               /> */}
               <Typography.Title level={5}>Giới tính</Typography.Title>
               {/* <Select
-                defaultValue={dataStaffChange?.sex || data?.sex}
+                defaultValue={dataStaffChange?.sex || infoAccount?.sex}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, sex: e };
@@ -374,13 +372,13 @@ function Account({ infoAccount }) {
                 <Option value="Nữ">Nữ</Option>
                 <Option value="Khác">Khác</Option>
               </Select> */}
-              <Text>{dataStaffChange?.sex || data?.sex}</Text>
+              <Text>{dataStaffChange?.sex || infoAccount?.sex}</Text>
               <Typography.Title level={5}>Vị trí</Typography.Title>
-              <Text>{data?.level}</Text>
+              <Text>{infoAccount?.level}</Text>
               <Typography.Title level={5}>Trạng thái</Typography.Title>
-              <Text>{data?.status}</Text>
+              <Text>{infoAccount?.status}</Text>
               <Typography.Title level={5}>Ngày vào làm</Typography.Title>
-              <Text>{moment(data?.startTL).format(dateFormat)}</Text>
+              <Text>{moment(infoAccount?.startTL).format(dateFormat)}</Text>
             </Col>
           </Row>
           <Row>

@@ -1,4 +1,4 @@
-import { Button, Row, Table, Typography } from "antd";
+import { Button, Row, Table, Typography, DatePicker } from "antd";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
@@ -6,14 +6,40 @@ import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 import moment from "moment";
 const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 function AssignmentPage() {
+  const [infoAccount, setInfoAccount] = useState();
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
+  const [monthColumnStart, setMonthColumnStart] = useState(
+    moment().startOf("month").subtract(3, "months")
+  );
+  const [monthColumnEnd, setMonthColumnEnd] = useState(
+    moment().startOf("month").add(5, "months")
+  );
+  const monthFormat = "MM-YYYY";
+
+  async function getInfoAccount() {
+    await Axios({
+      method: "get",
+      url: "../api/staff?infoAccount=true",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setInfoAccount(res.data);
+      })
+      .catch((error) => {
+        console.log("App 39 error", error);
+      });
+  }
   const columnAssignments = [
     {
       title: "Nhân viên",
       dataIndex: "fullName",
+      width: "200px",
       key: "fullName",
       render: (fullName, record) => (
         <>
@@ -28,53 +54,29 @@ function AssignmentPage() {
     },
     ...getEffortInMonth(),
   ];
-  // const navigate = useNavigate();
-
   function getEffortInMonth() {
-    //Thêm vào brach 'sua-loi-hien-thi-effort-theo-thang'
-    let curDate = new Date(moment().startOf("day"));
-    //Tháng thực tế
-    let curMonth = curDate.getMonth() + 1;
     let millisecondsPerDay = 24 * 60 * 60 * 1000;
     let monthArray = [];
     //lấy tổng effort làm trong 1 khoảng ngày
     function getTotalEffort(dateStart, dateEnd, effort) {
-      let days = Math.floor((dateEnd - dateStart) / millisecondsPerDay);
+      let days = (dateEnd - dateStart) / millisecondsPerDay;
       return effort * days;
     }
-    for (let j = curMonth - 3; j < curMonth + 6; j++) {
-      monthArray.push(j);
-    }
-
-    //trả về một mảng các column
-    return monthArray.map((month, index) => {
-      //Tháng ở cột đang xét, đơn vị millisecond
-      let currentMonth = Date.parse(
-        `${month > 12 ? curDate.getFullYear() + 1 : curDate.getFullYear()}-${
-          month <= 9 ? "0" + month : month > 12 ? "0" + (month - 12) : month
-        }`
-      );
-      //Tháng ở cột sau
-      let nextMonth = Date.parse(
-        `${
-          month + 1 > 12 ? curDate.getFullYear() + 1 : curDate.getFullYear()
-        }-${
-          month + 1 <= 9
-            ? "0" + (month + 1)
-            : month + 1 > 12
-            ? "0" + (month + 1 - 12)
-            : month + 1
-        }`
-      );
+    for (
+      let j = monthColumnStart.clone();
+      j.isSameOrBefore(monthColumnEnd);
+      j = j.add(1, "months")
+    ) {
+      const currentMonth = j.valueOf();
+      const nextMonth = j.clone().add(1, "months").valueOf();
       function getTitle() {
-        let date = new Date(currentMonth);
+        let date = new Date(j);
         let title = date.getMonth() + 1 + "/" + date.getFullYear();
         return title;
       }
-
-      //mỗi column có title, effort
-      return {
-        title: getTitle,
+      monthArray.push({
+        title: j.format(monthFormat),
+        width: "100px",
         dataIndex: "totalEffort",
         render: (totalEffort) => {
           let totalE = totalEffort.reduce((total, value, index) => {
@@ -122,8 +124,9 @@ function AssignmentPage() {
             </Text>
           );
         },
-      };
-    });
+      });
+    }
+    return monthArray;
   }
 
   async function getAssignmentAndStaff() {
@@ -147,6 +150,9 @@ function AssignmentPage() {
     if (!data) {
       getAssignmentAndStaff();
     }
+    if (!infoAccount) {
+      getInfoAccount();
+    }
   }, [data]);
 
   if (loading) {
@@ -154,11 +160,26 @@ function AssignmentPage() {
   }
   return (
     <>
-      <Row justify="space-between">
+      <Row style={{ marginBottom: "20px" }}>
         <Title level={3}>Phân công nhân sự</Title>
-        <Button type="primary">
-          <Link to="/create-assignment">Thêm mới</Link>
-        </Button>
+      </Row>
+      <Row justify="space-between" style={{ marginBottom: "10px" }}>
+        <RangePicker
+          picker="month"
+          defaultValue={[monthColumnStart, monthColumnEnd]}
+          placement="bottomRight"
+          format={monthFormat}
+          onChange={(dates) => {
+            console.log("258", dates);
+            setMonthColumnStart(dates[0]);
+            setMonthColumnEnd(dates[1]);
+          }}
+        />
+        {infoAccount?.role === "boss" && (
+          <Button type="primary">
+            <Link to="/create-assignment">Thêm mới</Link>
+          </Button>
+        )}
       </Row>
 
       <Table

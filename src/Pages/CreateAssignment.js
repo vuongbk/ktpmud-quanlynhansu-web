@@ -69,12 +69,19 @@ const CreateAssignment = () => {
     setIsModalOpen(false);
   };
   const handleSubmit = async () => {
-    if (JSON.stringify(dataChange) === "{}") {
+    if (
+      Object.keys(dataChange).length === 1 ||
+      !dataChange.hasOwnProperty("role") ||
+      !dataChange.hasOwnProperty("effort") ||
+      !dataChange.hasOwnProperty("dateEnd") ||
+      !dataChange.hasOwnProperty("dateStart") ||
+      !dataChange.hasOwnProperty("idProject")
+    ) {
       notification.open({
-        message: "Thông báo",
-        description: "Không có thay đổi",
+        message: <Title level={4}>Thông báo</Title>,
+        description: "Nhập thiếu",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     } else {
@@ -151,166 +158,147 @@ const CreateAssignment = () => {
   }
 
   return (
-    <>
-      <Row>
-        {/* {console.log("editassign 126 ", moment(error?.dateStart))} */}
-        <Col span={24}>
-          <Row>
-            <Col span={19} offset={5}>
-              <Title level={3}>Thêm phân công</Title>
-            </Col>
-            <Col>
-              {/* <Dropdown overlay={menu}>
-                <p>Chọn khoảng ngày</p>
-              </Dropdown> */}
-            </Col>
-          </Row>
-          <Row>
-            {/* cột 1 */}
-            <Col
-              xs={24}
-              md={{
-                span: 6,
-                offset: 5,
-              }}
-            >
-              <Title level={5}>Nhân viên</Title>
-              {searchParams.get("idStaff") ? (
-                <Input defaultValue={data?.fullName} disabled />
-              ) : (
-                <Select
-                  labelInValue
-                  onChange={(e) => {
-                    console.log("createProject 230", e);
-                    setDataChange((d) => {
-                      return { ...d, idStaff: e.value };
-                    });
-                  }}
-                  style={{
-                    width: "100%",
-                  }}
-                  options={optionsStaffs}
-                ></Select>
-              )}
-
-              <Title level={5}>Từ ngày</Title>
-              <DatePicker
-                format={dateFormat}
-                style={{ width: "100%" }}
-                onChange={(date, dateString) => {
-                  setDataChange((d) => {
-                    return {
-                      ...d,
-                      dateStart: moment(date).format(iso8601Format),
-                    };
-                  });
-                }}
-              />
-              <Title level={5}>Phân công dự án</Title>
-              <Input
-                value={dataChange?.effort}
-                onChange={(e) => {
-                  setDataChange((d) => {
-                    return { ...d, effort: Number(e.target.value) };
-                  });
-                }}
-              />
-            </Col>
-            {/* cột 2 */}
-            <Col xs={24} md={{ span: 6, offset: 2 }}>
-              <Title level={5}>Dự án</Title>
+    <Row>
+      {/* {console.log("editassign 126 ", moment(error?.dateStart))} */}
+      <Col span={14} offset={5}>
+        <Row>
+          <Title level={3}>Thêm phân công</Title>
+        </Row>
+        <Row>
+          {/* cột 1 */}
+          <Col
+            xs={24}
+            md={{
+              span: 10,
+            }}
+          >
+            <Title level={5}>Nhân viên</Title>
+            {searchParams.get("idStaff") ? (
+              <Input defaultValue={data?.fullName} disabled />
+            ) : (
               <Select
                 labelInValue
                 onChange={(e) => {
                   console.log("createProject 230", e);
                   setDataChange((d) => {
-                    return { ...d, idProject: e.value };
+                    return { ...d, idStaff: e.value };
                   });
                 }}
                 style={{
                   width: "100%",
                 }}
-                options={optionsProjects}
+                options={optionsStaffs}
               ></Select>
-              <Title level={5}>Đến ngày</Title>
-              <DatePicker
-                format={dateFormat}
-                style={{ width: "100%" }}
-                onChange={(date, dateString) => {
-                  setDataChange((d) => {
-                    return {
-                      ...d,
-                      dateEnd: moment(date).format(iso8601Format),
-                    };
-                  });
-                }}
-              />
-              <Title level={5}>Vai trò</Title>
-              <Select
-                defaultValue={dataChange.role}
-                onSelect={(e) => {
-                  setDataChange((d) => {
-                    return { ...d, role: e };
-                  });
-                }}
-                style={{
-                  width: "100%",
-                }}
-              >
-                <Option value="developer">Lập trình viên</Option>
-                {/* <Option value="Leader">Leader</Option> */}
-                {/* leader là gì khi đã có manager */}
-                <Option value="manager">Quản lý dự án</Option>
-              </Select>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={16} offset={5}>
-              <Row style={{ marginTop: "50px" }}>
-                <Col span={6}>
-                  <Button
-                    style={{ width: "100%" }}
-                    onClick={() => navigate(-1)}
-                  >
-                    <Text>Quay lại</Text>
-                  </Button>
-                </Col>
-                <Col span={6} offset={5}>
-                  <Button style={{ width: "100%" }} onClick={handleSubmit}>
-                    Cập nhật
-                  </Button>
-                  <Modal
-                    title="Thông báo"
-                    open={isModalOpen}
-                    onOk={handleOk}
-                    onCancel={handleCancel}
-                  >
-                    <p>{error?.message}</p>
-                    {error?.assignment && (
-                      <>
-                        <hr></hr>
-                        <p>effort: {error?.assignment?.effort}</p>
-                        <p>
-                          {`dateStart: ${moment(
-                            error?.assignment?.dateStart
-                          ).format("DD-MM-YYYY")}`}
-                        </p>
-                        <p>
-                          {"dateEnd: " +
-                            moment(error?.assignment?.dateEnd).format(
-                              "DD-MM-YYYY"
-                            )}
-                        </p>
-                      </>
-                    )}
-                  </Modal>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </>
+            )}
+
+            <Title level={5}>Từ ngày</Title>
+            <DatePicker
+              format={dateFormat}
+              style={{ width: "100%" }}
+              onChange={(date, dateString) => {
+                setDataChange((d) => {
+                  return {
+                    ...d,
+                    dateStart: moment(date).format(iso8601Format),
+                  };
+                });
+              }}
+            />
+            <Title level={5}>Phân công dự án</Title>
+            <Input
+              value={dataChange?.effort}
+              onChange={(e) => {
+                setDataChange((d) => {
+                  return { ...d, effort: Number(e.target.value) };
+                });
+              }}
+            />
+          </Col>
+          {/* cột 2 */}
+          <Col xs={24} md={{ span: 10, offset: 4 }}>
+            <Title level={5}>Dự án</Title>
+            <Select
+              labelInValue
+              onChange={(e) => {
+                console.log("createProject 230", e);
+                setDataChange((d) => {
+                  return { ...d, idProject: e.value };
+                });
+              }}
+              style={{
+                width: "100%",
+              }}
+              options={optionsProjects}
+            ></Select>
+            <Title level={5}>Đến ngày</Title>
+            <DatePicker
+              format={dateFormat}
+              style={{ width: "100%" }}
+              onChange={(date, dateString) => {
+                setDataChange((d) => {
+                  return {
+                    ...d,
+                    dateEnd: moment(date).format(iso8601Format),
+                  };
+                });
+              }}
+            />
+            <Title level={5}>Vai trò</Title>
+            <Select
+              defaultValue={dataChange.role}
+              onSelect={(e) => {
+                setDataChange((d) => {
+                  return { ...d, role: e };
+                });
+              }}
+              style={{
+                width: "100%",
+              }}
+            >
+              <Option value="developer">Lập trình viên</Option>
+              {/* <Option value="Leader">Leader</Option> */}
+              {/* leader là gì khi đã có manager */}
+              <Option value="manager">Quản lý dự án</Option>
+            </Select>
+          </Col>
+        </Row>
+        <Row style={{ marginTop: "50px" }}>
+          <Col span={5}>
+            <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+              <Text>Quay lại</Text>
+            </Button>
+          </Col>
+          <Col span={5} offset={14}>
+            <Button style={{ width: "100%" }} onClick={handleSubmit}>
+              Cập nhật
+            </Button>
+            <Modal
+              title="Thông báo"
+              open={isModalOpen}
+              onOk={handleOk}
+              onCancel={handleCancel}
+            >
+              <p>{error?.message}</p>
+              {error?.assignment && (
+                <>
+                  <hr></hr>
+                  <p>effort: {error?.assignment?.effort}</p>
+                  <p>
+                    {`dateStart: ${moment(error?.assignment?.dateStart).format(
+                      "DD-MM-YYYY"
+                    )}`}
+                  </p>
+                  <p>
+                    {"dateEnd: " +
+                      moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
+                  </p>
+                </>
+              )}
+            </Modal>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
   );
 };
 

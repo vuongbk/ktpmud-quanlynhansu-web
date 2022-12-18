@@ -12,6 +12,7 @@ const { Column } = Table;
 function ProjectPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [infoAccount, setInfoAccount] = useState();
   const columns = [
     {
       title: "Tên dự án",
@@ -19,7 +20,12 @@ function ProjectPage() {
       key: "projectName",
       render: (projectName, record) => (
         <>
-          <Link to={`/edit-project/${record._id}`} state={{ data: record }}>
+          <Link
+            to={
+              infoAccount?.role === "boss" ? `/edit-project/${record._id}` : "#"
+            }
+            state={{ data: record }}
+          >
             {projectName}
           </Link>
         </>
@@ -70,7 +76,24 @@ function ProjectPage() {
       return (total += workingDay(value.dateStart, currentDay));
     }, 0);
   };
-
+  if (!infoAccount) {
+    getInfoAccount();
+  }
+  async function getInfoAccount() {
+    await Axios({
+      method: "get",
+      url: "../api/staff?infoAccount=true",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setInfoAccount(res.data);
+      })
+      .catch((error) => {
+        console.log("App 39 error", error);
+      });
+  }
   async function getProjects(assignments) {
     setLoading(true);
     await Axios.get("/api/project", {
@@ -134,9 +157,11 @@ function ProjectPage() {
     <>
       <Row justify="space-between">
         <Title level={3}>Danh sách dự án</Title>
-        <Button type="primary" onClick={() => navigate("../create-project")}>
-          Thêm mới
-        </Button>
+        {infoAccount?.role === "boss" && (
+          <Button type="primary" onClick={() => navigate("../create-project")}>
+            Thêm mới
+          </Button>
+        )}
       </Row>
       <Table
         dataSource={data}

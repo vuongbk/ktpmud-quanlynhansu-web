@@ -43,7 +43,7 @@ function Skills() {
   //     };
   //   });
   // }
-  const handleDelete = async (idSkill) => {
+  async function handleDelete(idSkill) {
     setLoading(true);
     await Axios({
       method: "delete",
@@ -61,8 +61,17 @@ function Skills() {
         console.log("skillPage 57", error);
         setLoading(false);
       });
-  };
+  }
   const handleOkSkillModal = async () => {
+    if (Object.keys(newSkill).length === 1) {
+      notification.open({
+        message: <Title level={4}>Thông báo</Title>,
+        description: "Nhập thiếu",
+        duration: 2,
+        placement: "top",
+      });
+      return;
+    }
     setLoading(true);
     await Axios({
       method: "put",
@@ -102,25 +111,31 @@ function Skills() {
     {
       title: "Thao tác",
       fixed: "right",
-      width: 230,
+      width: 190,
       render: (record) => {
         const t = record;
         return (
           <Row>
-            <Col span={18} offset={3}>
+            <Col span={24}>
               <Space wrap>
-                <Button
-                  style={{ width: "100%" }}
-                  ghost
-                  size="small"
-                  type="primary"
-                  onClick={() => handleDelete(record._id)}
+                <Popconfirm
+                  title="Bạn có chắc muốn xóa skill này？"
+                  cancelText="Hủy"
+                  okText="Xóa"
+                  okButtonProps={{ type: "danger" }}
+                  onConfirm={() => handleDelete(record._id)}
                 >
-                  Xóa skill
-                </Button>
+                  <Button
+                    style={{ fontSize: "10px" }}
+                    size="small"
+                    type="primary"
+                  >
+                    Xóa skill
+                  </Button>
+                </Popconfirm>
+
                 <Button
-                  style={{ width: "100%", padding: "1px" }}
-                  ghost
+                  style={{ fontSize: "10px" }}
                   size="small"
                   type="primary"
                   onClick={() => {
@@ -157,6 +172,7 @@ function Skills() {
                 //không hiểu sao record ở đây nó cứ lấy cái ở cuối danh sách,
                 //đáng lẽ click vào cái nào thì phải là record của cái đấy chứ
                 // defaultValue={record.skillName}
+                placeholder="Tên mới"
                 defaultValue={""}
                 onChange={(e) => {
                   setNewSkill((d) => {
@@ -178,10 +194,10 @@ function Skills() {
       console.log("skillpage 308", levelSkillOfStaff);
       if (JSON.stringify(levelSkillOfStaff) === "[]") {
         notification.open({
-          message: "Thông báo",
+          message: <Title level={4}>Thông báo</Title>,
           description: "Không có thay đổi",
           duration: 2,
-          placement: "topLeft",
+          placement: "top",
         });
         return;
       }
@@ -208,15 +224,16 @@ function Skills() {
       });
     } else {
       notification.open({
-        message: "Thông báo",
+        message: <Title level={4}>Thông báo</Title>,
         description: "Không có thay đổi",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     }
   }
   function getSkills() {
+    setLoading(true);
     Axios({
       method: "get",
       url: "/api/skill",
@@ -227,9 +244,11 @@ function Skills() {
       .then((res) => {
         console.log("skillPage 388", res.data.skill);
         setSkills(res.data.skill);
+        setLoading(false);
       })
       .catch((error) => {
         console.log("skillPage 392", error);
+        setLoading(false);
       });
   }
   React.useEffect(() => {
@@ -249,7 +268,7 @@ function Skills() {
       </Row>
       <Table
         dataSource={skills}
-        pagination={{ pageSize: 4 }}
+        pagination={{ pageSize: 15 }}
         rowKey={(data) => data._id}
         columns={columns}
         scroll={{
