@@ -20,6 +20,7 @@ import Loading from "../Components/Modal/Loading.js";
 // import Upload from "antd/lib/upload/Upload.js";
 import { getToken } from "../Components/useToken.js";
 import md5 from "md5";
+import SkillsOfStaff from "../Components/SkillsOfStaff.js";
 const { Option } = Select;
 const { Text, Title } = Typography;
 
@@ -45,14 +46,12 @@ const { Text, Title } = Typography;
 function EditPage() {
   const navigate = useNavigate();
   const [dataStaffChange, setDataStaffChange] = useState({});
-  console.log("editStaffPage 47", dataStaffChange);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   // const [fileList, setFileList] = useState([]);
   const [error, setError] = useState();
   const { idStaff } = useParams();
   // const [data, setData] = useState(null);
   const [data, setData] = useState(useLocation()?.state?.data);
-  const [skillsOfStaff, setSkillsOfStaff] = useState([]);
   const [loading, setLoading] = useState(false);
   // const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [imageUrl, setImageUrl] = useState(
@@ -64,56 +63,10 @@ function EditPage() {
   const inputRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
-  const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [password, setPassword] = useState({});
-  const [newSkill, setNewSkill] = useState({});
-  const [skills, setSkills] = useState();
+
   const dateFormat = "DD/MM/YYYY";
-  let options = skills ? getOptions() : [];
-  function getOptions() {
-    return skills.map((value, index) => {
-      return {
-        value: value._id,
-        label: value.skillName,
-      };
-    });
-  }
-  const handleOkSkillModal = async () => {
-    if (
-      Object.keys(newSkill).length === 1 ||
-      Object.keys(newSkill).length === 0
-    ) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Chọn thiếu",
-        duration: 2,
-        placement: "top",
-      });
-      return;
-    }
-    setLoading(true);
-    await Axios({
-      method: "post",
-      url: "/api/level-skill",
-      data: { ...newSkill, idStaff: idStaff },
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        console.log("editStaff 91", res);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log("editStaff 94", error);
-        setLoading(false);
-      });
-    setIsModalSkillOpen(false);
-    navigate(0);
-  };
-  const handleCancelSkillModal = () => {
-    setIsModalSkillOpen(false);
-  };
+
   const handleOkPasswordModal = async () => {
     if (!password.hasOwnProperty("newPassword")) {
       notification.open({
@@ -326,44 +279,9 @@ function EditPage() {
         console.log("error getStaff", error);
       });
   }
-  async function getLevelSkillAndIdSkill() {
-    await Axios(`/api/level-skill/${data?._id}`, {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        setSkillsOfStaff(res.data.skill);
-      })
-      .catch((error) => {
-        console.log("error.config", error.config);
-      });
-  }
-  function getSkills() {
-    Axios({
-      method: "get",
-      url: "/api/skill",
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        console.log("editstaff 319", res.data.skill);
-        setSkills(res.data.skill);
-      })
-      .catch((error) => {
-        console.log("editStaff 322", error);
-      });
-  }
   useEffect(() => {
     if (!data) {
       getStaff();
-    }
-    if (data) {
-      getLevelSkillAndIdSkill();
-    }
-    if (!skills) {
-      getSkills();
     }
   }, [data]);
 
@@ -632,119 +550,11 @@ function EditPage() {
           </Row>
           <Row>
             <Col span={24}>
-              <Divider orientation="left" orientationMargin={0}>
-                <Title
-                  level={4}
-                  style={{ marginTop: "35px", marginBottom: "35px" }}
-                >
-                  Kinh nghiệm
-                </Title>
-              </Divider>
-              <Row>
-                <Button
-                  type="primary"
-                  onClick={() => setIsModalSkillOpen(true)}
-                >
-                  Thêm skill
-                </Button>
-                <Modal
-                  open={isModalSkillOpen}
-                  title={<Title level={4}>Thêm skill mới</Title>}
-                  // onOk={handleOkSkillModal}
-                  onCancel={handleCancelSkillModal}
-                  footer={[
-                    <Button key="back" onClick={handleCancelSkillModal}>
-                      Hủy
-                    </Button>,
-                    <Button
-                      key="submit"
-                      type="primary"
-                      loading={loading}
-                      onClick={handleOkSkillModal}
-                    >
-                      Thêm skill
-                    </Button>,
-                  ]}
-                >
-                  {/* <Text>Thêm levelSkill mới</Text> */}
-                  <Row justify="space-between">
-                    <Col span={12}>
-                      <Title level={5} style={{ marginTop: "0" }}>
-                        Tên skill
-                      </Title>
-                      <Select
-                        labelInValue
-                        defaultValue={data?.nameLeader}
-                        onChange={(e) => {
-                          console.log("createProject 230", e);
-                          setNewSkill((d) => {
-                            return { ...d, idSkill: e.value };
-                          });
-                        }}
-                        style={{
-                          width: "100%",
-                        }}
-                        options={options}
-                      ></Select>
-                    </Col>
-                    <Col span={6} offset={6}>
-                      <Title level={5} style={{ marginTop: "0" }}>
-                        Cấp
-                      </Title>
-                      <Select
-                        onSelect={(e) => {
-                          setNewSkill((d) => {
-                            return { ...d, level: e };
-                          });
-                        }}
-                      >
-                        <Option value={0}>0</Option>
-                        <Option value={1}>1</Option>
-                        <Option value={2}>2</Option>
-                        <Option value={3}>3</Option>
-                        <Option value={4}>4</Option>
-                        <Option value={5}>5</Option>
-                      </Select>
-                    </Col>
-                  </Row>
-                </Modal>
-              </Row>
-
-              <Row>
-                {skillsOfStaff &&
-                  typeof skillsOfStaff[0] === "object" &&
-                  skillsOfStaff.map((value, index) => {
-                    return (
-                      <Col xs={24} sm={12} lg={6} key={index}>
-                        <Title level={5}>{value.nameSkill}</Title>
-                        <Select
-                          defaultValue={
-                            getDefaultLevelSkillValue(value.nameSkill)
-                              ?.levelSkill || value.levelSkill
-                          }
-                          onSelect={(e) => {
-                            setLevelSkillChange((d) => {
-                              //Lọc skill đã change trước đó ra, để không bị trùng khi chỉnh sửa 1 skill nhiều lần
-                              d = d.filter((dValue) => {
-                                return (
-                                  dValue.idLevelSkill !== value.idLevelSkill
-                                );
-                              });
-                              return [...d, { ...value, levelSkill: e }];
-                            });
-                          }}
-                        >
-                          <Option value={0}>0</Option>
-                          <Option value={1}>1</Option>
-                          <Option value={2}>2</Option>
-                          <Option value={3}>3</Option>
-                          <Option value={4}>4</Option>
-                          <Option value={5}>5</Option>
-                        </Select>
-                      </Col>
-                    );
-                  })}
-              </Row>
+              <SkillsOfStaff
+                infoStaff={data}
+                setLevelSkillChange={setLevelSkillChange}
+                levelSkillChange={levelSkillChange}
+              />
               <Row style={{ marginTop: "50px" }} justify="space-between">
                 <Col span={5}>
                   <Button

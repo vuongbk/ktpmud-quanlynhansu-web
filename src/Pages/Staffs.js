@@ -10,7 +10,6 @@ import moment from "moment";
 const { Title, Text } = Typography;
 
 function Staffs() {
-  console.log("hello");
   const [infoAccount, setInfoAccount] = useState();
   const navigate = useNavigate();
   const emailRef = React.useRef(null);
@@ -61,7 +60,7 @@ function Staffs() {
         >
           <Input
             ref={searchInput}
-            placeholder={`Search ${dataIndex}`}
+            placeholder={`Tên tìm kiếm`}
             value={selectedKeys[0]}
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -82,7 +81,7 @@ function Staffs() {
                 width: 90,
               }}
             >
-              Search
+              Tìm
             </Button>
             <Button
               onClick={() => clearFilters && handleReset(clearFilters)}
@@ -91,7 +90,7 @@ function Staffs() {
                 width: 90,
               }}
             >
-              Reset
+              Đặt lại
             </Button>
             <Button
               type="link"
@@ -104,7 +103,7 @@ function Staffs() {
                 setSearchedColumn(dataIndex);
               }}
             >
-              Filter
+              Lọc
             </Button>
           </Space>
         </div>

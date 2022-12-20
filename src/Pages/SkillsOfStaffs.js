@@ -34,6 +34,8 @@ function SkillsOfStaffs() {
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
   const [skills, setSkills] = useState();
+  const [searchSkill, setSearchSkill] = useState("");
+  const inputSearchSkill = useRef(null);
   let options = skills ? getOptions() : [];
   function getOptions() {
     return skills.map((value, index) => {
@@ -42,6 +44,19 @@ function SkillsOfStaffs() {
         label: value.skillName,
       };
     });
+  }
+  const filterSkill = getFilterSkill();
+  function getFilterSkill() {
+    if (skills) {
+      return skills.map((value, index) => {
+        return {
+          text: value.skillName,
+          value: value.skillName,
+        };
+      });
+    } else {
+      return [];
+    }
   }
   if (!infoAccount) {
     getInfoAccount();
@@ -98,6 +113,7 @@ function SkillsOfStaffs() {
     setIsModalSkillOpen(false);
   };
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    console.log("103");
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
@@ -177,8 +193,13 @@ function SkillsOfStaffs() {
         }}
       />
     ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilter: (value, record) => {
+      console.log("184");
+      return record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes(value.toLowerCase());
+    },
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -206,7 +227,56 @@ function SkillsOfStaffs() {
       }
     },
   });
-
+  const getSearchSkillProps = (dataIndex) => ({
+    filters: filterSkill,
+    // filterIcon: (filtered) => <></>,
+    onFilter: (value, record) => {
+      console.log("288", value);
+      return record.idSkills.find((vl) => vl.skillName === value);
+    },
+    render: (idSkills, record) => {
+      return (
+        <Row>
+          {idSkills.map((skill, index) => {
+            // console.log("227", skill.skillName);
+            return (
+              <Col style={{ marginRight: "20px" }} key={index}>
+                <Row>
+                  <Text>
+                    {searchSkill === skill.skillName
+                      ? // <Highlighter
+                        //   highlightStyle={{
+                        //     backgroundColor: "#ffc069",
+                        //     padding: 0,
+                        //   }}
+                        //   searchWords={[searchSkill]}
+                        //   autoEscape
+                        //   textToHighlight={
+                        //     skill.skillName ? skill.skillName.toString() : ""
+                        //   }
+                        // />
+                        skill.skillName
+                      : skill.skillName}
+                  </Text>
+                </Row>
+                <Row>
+                  <InputNumber
+                    min={0}
+                    max={5}
+                    style={{ width: "50px" }}
+                    defaultValue={skill.level}
+                    onChange={(value) => {
+                      handleChange(value, skill._id, record._id);
+                    }}
+                  />
+                </Row>
+              </Col>
+            );
+          })}
+        </Row>
+      );
+    },
+  });
   const columns = [
     {
       title: "Họ và tên",
@@ -219,32 +289,7 @@ function SkillsOfStaffs() {
     {
       title: "Danh sách kỹ năng",
       dataIndex: "idSkills",
-      render: (idSkills, record) => {
-        return (
-          <Row>
-            {idSkills.map((skill, index) => {
-              return (
-                <Col style={{ marginRight: "20px" }} key={index}>
-                  <Row>
-                    <Text>{skill.skillName}</Text>
-                  </Row>
-                  <Row>
-                    <InputNumber
-                      min={0}
-                      max={5}
-                      style={{ width: "50px" }}
-                      defaultValue={skill.level}
-                      onChange={(value) => {
-                        handleChange(value, skill._id, record._id);
-                      }}
-                    />
-                  </Row>
-                </Col>
-              );
-            })}
-          </Row>
-        );
-      },
+      ...getSearchSkillProps("idSkills"),
     },
     // ...getSkill(),
     //Giám đốc thì mới hiển thị cột thao tác
@@ -428,7 +473,7 @@ function SkillsOfStaffs() {
       },
     })
       .then((res) => {
-        console.log("skillPage 388", res.data.skill);
+        console.log("skillPage 388 getSkills success", res.data.skill);
         setSkills(res.data.skill);
       })
       .catch((error) => {
@@ -436,8 +481,8 @@ function SkillsOfStaffs() {
       });
   }
   React.useEffect(() => {
-    getNameSkillAndStaff();
     getSkills();
+    getNameSkillAndStaff();
   }, []);
 
   if (loading) {
@@ -452,7 +497,21 @@ function SkillsOfStaffs() {
         <Space wrap style={{ marginBottom: "5px" }}>
           {skills
             ? skills.map((value, index) => {
-                return <Button type="danger">{value.skillName}</Button>;
+                return (
+                  <Button
+                    type="danger"
+                    onClick={() => {
+                      setSearchSkill((oldValue) => {
+                        //nếu click lại lần 2 vào button thì nó sẽ reset
+                        if (oldValue === value.skillName) return "";
+                        else return value.skillName;
+                      });
+                      inputSearchSkill.current?.click();
+                    }}
+                  >
+                    {value.skillName}
+                  </Button>
+                );
               })
             : ""}
           {infoAccount?.role === "boss" && (

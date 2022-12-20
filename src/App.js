@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Link } from "react-router-dom";
 import Home from "./Pages/Home";
 import Staffs from "./Pages/Staffs";
 import "./App.css";
@@ -45,8 +45,8 @@ function App() {
     {
       label: (
         <>
-          <Button type="link" onClick={() => navigate("account")}>
-            Thông tin tài khoản
+          <Button type="link">
+            <Link to="/account">Thông tin tài khoản</Link>
           </Button>
         </>
       ),

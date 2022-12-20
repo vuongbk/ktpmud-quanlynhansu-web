@@ -8,6 +8,7 @@ import {
   Typography,
   Modal,
   notification,
+  Divider,
 } from "antd";
 import { useState, useEffect } from "react";
 import moment from "moment";
@@ -17,8 +18,10 @@ import Loading from "../Components/Modal/Loading.js";
 import { getToken } from "../Components/useToken.js";
 import md5 from "md5";
 import Link from "antd/lib/typography/Link.js";
+import SkillsOfStaff from "../Components/SkillsOfStaff.js";
+import { useNavigate } from "react-router-dom";
 const { Option } = Select;
-const { Text } = Typography;
+const { Title, Text } = Typography;
 
 // const getBase64 = (img, callback) => {
 //   console.log("editstaff 23 img", img);
@@ -42,7 +45,9 @@ const { Text } = Typography;
 // Không hiểu tại sao cái trang infoAccount lại lỗi phần lấy data từ api, lấy đc data rồi, nhưng sao nó ko hiển thị
 // thông tin cho vào Text thì được, Vào Input thì ko?
 function Account({}) {
+  const navigate = useNavigate();
   const [infoAccount, setInfoAccount] = useState();
+  const [levelSkillChange, setLevelSkillChange] = useState([]);
   const [dataStaffChange, setDataStaffChange] = useState({});
   // const [fileList, setFileList] = useState([]);
   const [error, setError] = useState();
@@ -52,9 +57,12 @@ function Account({}) {
   const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
   const [password, setPassword] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const dateFormat = "DD/MM/YYYY";
-  console.log("56", infoAccount);
 
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
   async function getInfoAccount() {
     await Axios({
       method: "get",
@@ -76,10 +84,10 @@ function Account({}) {
       !password.hasOwnProperty("newPassword")
     ) {
       notification.open({
-        message: "Thông báo",
+        message: <Title level={4}>Thông báo</Title>,
         description: "Bạn nhập thiếu",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     }
@@ -115,13 +123,14 @@ function Account({}) {
   const handleSubmit = async () => {
     if (
       JSON.stringify(dataStaffChange) === "{}" &&
+      JSON.stringify(levelSkillChange) === "[]" &&
       imageUrl === infoAccount?.imageUrl
     ) {
       notification.open({
-        message: "Thông báo",
+        message: <Title level={4}>Thông báo</Title>,
         description: "Không có thay đổi",
         duration: 2,
-        placement: "topLeft",
+        placement: "top",
       });
       return;
     }
@@ -144,6 +153,31 @@ function Account({}) {
           setIsModalErrorOpen(true);
           setLoading(false);
         });
+    }
+    //thay đổi bảng levelSkill
+    if (JSON.stringify(levelSkillChange) !== "[]") {
+      levelSkillChange.forEach(async (value, index) => {
+        setLoading(true);
+        await Axios.put(
+          `/api/level-skill/${value.idLevelSkill}`,
+          { levelSkill: value.levelSkill },
+          {
+            headers: {
+              Authorization: "Bearer " + getToken(),
+            },
+          }
+        )
+          .then((res) => {
+            console.log("editStaff 131", res);
+            setLoading(false);
+          })
+          .catch((error) => {
+            setError(error.response.data);
+            console.log("editStaff 136", error);
+            setIsModalOpen(true);
+            setLoading(false);
+          });
+      });
     }
 
     //upload image
@@ -208,9 +242,9 @@ function Account({}) {
   return (
     <>
       <Row>
-        <Col span={24}>
+        <Col span={14} offset={5}>
           <Row>
-            <Col span={20} offset={5}>
+            <Col span={24}>
               <Typography.Title level={3}>
                 {dataStaffChange?.fullName || infoAccount?.fullName}
               </Typography.Title>
@@ -287,6 +321,7 @@ function Account({}) {
                   }
                 />
               </Modal>
+              <Divider></Divider>
             </Col>
           </Row>
           <Row>
@@ -294,71 +329,62 @@ function Account({}) {
             <Col
               xs={24}
               md={{
-                span: 6,
-                offset: 5,
+                span: 10,
               }}
             >
               <Typography.Title level={5}>Họ và tên</Typography.Title>
-              <Text>{dataStaffChange?.fullName || infoAccount?.fullName}</Text>
-              {/* <Input
-                defaultValue={dataStaffChange?.fullName || infoAccount?.fullName}
-                onBlur={(e) => {
+              <Input
+                value={dataStaffChange?.fullName || infoAccount?.fullName}
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, fullName: e.target.value };
                   });
                 }}
-              /> */}
+              />
               <Typography.Title level={5}>Điện thoại</Typography.Title>
-              <Text>
-                {dataStaffChange?.phoneNumber || infoAccount?.phoneNumber}
-              </Text>
-              {/* <Input
-                defaultValue={dataStaffChange?.phoneNumber || infoAccount?.phoneNumber}
-                onBlur={(e) => {
+              <Input
+                value={dataStaffChange?.phoneNumber || infoAccount?.phoneNumber}
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, phoneNumber: e.target.value };
                   });
                 }}
-              /> */}
+              />
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
-              <Text>
-                {moment(
-                  dataStaffChange?.birthYear || infoAccount?.birthYear
-                ).format(dateFormat)}
-              </Text>
-              {/* <DatePicker
-                defaultValue={moment(
+              <DatePicker
+                value={moment(
                   dataStaffChange?.birthYear || infoAccount?.birthYear
                 )}
                 style={{ width: "100%" }}
-                onBlur={(e) => {
+                onChange={(date, dateString) => {
                   setDataStaffChange((d) => {
-                    return { ...d, birthYear: e.target.value };
+                    return { ...d, birthYear: dateString };
                   });
                 }}
-              /> */}
+              />
               <Typography.Title level={5}>Phòng ban</Typography.Title>
 
-              <Text>{infoAccount?.department}</Text>
+              <Input value={infoAccount?.department} disabled />
               <Typography.Title level={5}>Cấp bậc</Typography.Title>
 
-              <Text>{infoAccount?.role}</Text>
+              <Input value={infoAccount?.role} disabled />
             </Col>
             {/* cột 2 */}
-            <Col xs={24} md={{ span: 6, offset: 2 }}>
+            <Col xs={24} md={{ span: 10, offset: 4 }}>
               <Typography.Title level={5}>Email</Typography.Title>
-              <Text>{dataStaffChange?.email || infoAccount?.email}</Text>
-              {/* <Input
-                defaultValue={dataStaffChange?.email || infoAccount?.email}
-                onBlur={(e) => {
+              {/* <Text>{dataStaffChange?.email || infoAccount?.email}</Text> */}
+              <Input
+                value={dataStaffChange?.email || infoAccount?.email}
+                onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, email: e.target.value };
                   });
                 }}
-              /> */}
+              />
               <Typography.Title level={5}>Giới tính</Typography.Title>
-              {/* <Select
-                defaultValue={dataStaffChange?.sex || infoAccount?.sex}
+              {/* <Text>{dataStaffChange?.sex || infoAccount?.sex}</Text> */}
+              <Select
+                value={dataStaffChange?.sex || infoAccount?.sex}
                 onSelect={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, sex: e };
@@ -371,17 +397,19 @@ function Account({}) {
                 <Option value="Nam">Nam</Option>
                 <Option value="Nữ">Nữ</Option>
                 <Option value="Khác">Khác</Option>
-              </Select> */}
-              <Text>{dataStaffChange?.sex || infoAccount?.sex}</Text>
+              </Select>
               <Typography.Title level={5}>Vị trí</Typography.Title>
-              <Text>{infoAccount?.level}</Text>
+              <Input value={infoAccount?.level} disabled />
               <Typography.Title level={5}>Trạng thái</Typography.Title>
-              <Text>{infoAccount?.status}</Text>
+              <Input value={infoAccount?.status} disabled />
               <Typography.Title level={5}>Ngày vào làm</Typography.Title>
-              <Text>{moment(infoAccount?.startTL).format(dateFormat)}</Text>
+              <Input
+                value={moment(infoAccount?.startTL).format(dateFormat)}
+                disabled
+              />
             </Col>
           </Row>
-          <Row>
+          {/* <Row>
             <Col span={16} offset={5}>
               <Row style={{ marginTop: "50px" }} justify="space-between">
                 <Col span={6}></Col>
@@ -414,6 +442,63 @@ function Account({}) {
                       </>
                     )}
                   </Modal>
+                </Col>
+              </Row>
+            </Col>
+          </Row> */}
+          <Row>
+            <Col span={24}>
+              <SkillsOfStaff
+                infoStaff={infoAccount}
+                setLevelSkillChange={setLevelSkillChange}
+                levelSkillChange={levelSkillChange}
+              />
+              <Row style={{ marginTop: "50px" }} justify="space-between">
+                <Col span={5}>
+                  <Button
+                    style={{ width: "100%" }}
+                    onClick={() => {
+                      navigate(-1);
+                    }}
+                  >
+                    Quay lại
+                  </Button>
+                </Col>
+                <Col span={5} offset={14}>
+                  <Row>
+                    <Button
+                      type="primary"
+                      style={{ width: "100%" }}
+                      onClick={handleSubmit}
+                    >
+                      Cập nhật
+                    </Button>
+                    <Modal
+                      title="Thông báo"
+                      open={isModalOpen}
+                      onOk={handleOk}
+                      onCancel={handleCancel}
+                    >
+                      <p>{error?.message}</p>
+                      {error?.assignment && (
+                        <>
+                          <hr></hr>
+                          <p>effort: {error?.assignment?.effort}</p>
+                          <p>
+                            {`dateStart: ${moment(
+                              error?.assignment?.dateStart
+                            ).format("DD-MM-YYYY")}`}
+                          </p>
+                          <p>
+                            {"dateEnd: " +
+                              moment(error?.assignment?.dateEnd).format(
+                                "DD-MM-YYYY"
+                              )}
+                          </p>
+                        </>
+                      )}
+                    </Modal>
+                  </Row>
                 </Col>
               </Row>
             </Col>
