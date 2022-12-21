@@ -41,7 +41,7 @@ function SkillsOfStaffs() {
   function getOptions() {
     return skills.map((value, index) => {
       return {
-        value: value._id,
+        value: JSON.stringify(value),
         label: value.skillName,
       };
     });
@@ -332,7 +332,7 @@ function SkillsOfStaffs() {
                   ]}
                 >
                   {/* <Text>Thêm levelSkill mới</Text> */}
-                  <Row>
+                  {/* <Row>
                     <Col span={12}>
                       <Text>Tên skill</Text>
                       <Select
@@ -370,6 +370,47 @@ function SkillsOfStaffs() {
                         <Option value={4}>4</Option>
                         <Option value={5}>5</Option>
                       </Select>
+                    </Col>
+                  </Row> */}
+                  <Row justify="space-between">
+                    <Col span={12}>
+                      <Title level={5} style={{ marginTop: "0" }}>
+                        Tên skill
+                      </Title>
+                      <Select
+                        labelInValue
+                        // defaultValue={data?.nameLeader}
+                        onChange={(event) => {
+                          const e = JSON.parse(event.value);
+                          setNewSkill((d) => {
+                            return {
+                              ...d,
+                              idSkill: e._id,
+                              maxLevel: e.maxLevel,
+                            };
+                          });
+                        }}
+                        style={{
+                          width: "100%",
+                        }}
+                        options={options}
+                      ></Select>
+                    </Col>
+                    <Col span={6} offset={6}>
+                      <Title level={5} style={{ marginTop: "0" }}>
+                        Cấp
+                      </Title>
+                      <InputNumber
+                        min={0}
+                        max={newSkill?.maxLevel}
+                        style={{ width: "50px" }}
+                        defaultValue={newSkill?.maxLevel}
+                        onChange={(e) => {
+                          setNewSkill((d) => {
+                            return { ...d, level: e };
+                          });
+                        }}
+                      />
                     </Col>
                   </Row>
                 </Modal>

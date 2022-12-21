@@ -111,7 +111,8 @@ function Skills() {
       // ...getColumnSearchProps("fullName"),
     },
     {
-      title: "Max level",
+      title: "Cấp lớn nhất",
+      dataIndex: "maxLevel",
     },
     {
       title: "Thao tác",
@@ -186,7 +187,7 @@ function Skills() {
               />
               <Input
                 style={{ marginTop: "20px" }}
-                placeholder="Max level"
+                placeholder="Cấp lớn nhất"
                 defaultValue={""}
                 onChange={(e) => {
                   setNewSkill((d) => {

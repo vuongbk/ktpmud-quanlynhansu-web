@@ -24,6 +24,7 @@ function CreateSkill() {
   const navigate = useNavigate();
   const [error, setError] = useState();
   const [nameSkill, setNameskill] = useState("");
+  const [maxLevel, setMaxLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleOk = () => {
@@ -45,7 +46,7 @@ function CreateSkill() {
     await Axios({
       method: "post",
       url: "/api/skill",
-      data: { skillName: nameSkill },
+      data: { skillName: nameSkill, maxLevel: maxLevel },
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -67,19 +68,16 @@ function CreateSkill() {
   return (
     <>
       <Row>
-        <Col span={24}>
+        <Col span={14} offset={5}>
           <Row>
-            <Col span={19} offset={5}>
-              <Title level={3}>Thông tin kỹ năng mới</Title>
-            </Col>
+            <Title level={3}>Thông tin kỹ năng mới</Title>
           </Row>
           <Row>
             {/* cột 1 */}
             <Col
               xs={24}
               md={{
-                span: 6,
-                offset: 5,
+                span: 10,
               }}
             >
               <Title level={5}>Tên kỹ năng</Title>
@@ -91,50 +89,49 @@ function CreateSkill() {
               />
             </Col>
             {/* cột 2 */}
-            <Col xs={24} md={{ span: 6, offset: 2 }}></Col>
+            <Col xs={24} md={{ span: 10, offset: 4 }}>
+              <Title level={5}>Cấp lớn nhất</Title>
+              <Input
+                defaultValue={maxLevel}
+                onChange={(e) => {
+                  setMaxLevel((d) => e.target.value);
+                }}
+              />
+            </Col>
           </Row>
-          <Row>
-            <Col span={16} offset={5}>
-              <Row gutter={80} style={{ marginTop: "50px" }}>
-                <Col span={6}>
-                  <Button
-                    style={{ width: "100%" }}
-                    onClick={() => navigate(-1)}
-                  >
-                    Quay lại
-                  </Button>
-                </Col>
-                <Col span={6} offset={5}>
-                  <Button style={{ width: "100%" }} onClick={handleSubmit}>
-                    Cập nhật
-                  </Button>
-                  <Modal
-                    title="Thông báo"
-                    open={isModalOpen}
-                    onOk={handleOk}
-                    onCancel={handleCancel}
-                  >
-                    <p>{error?.message}</p>
-                    {error?.assignment && (
-                      <>
-                        <hr></hr>
-                        <p>effort: {error?.assignment?.effort}</p>
-                        <p>
-                          {`dateStart: ${moment(
-                            error?.assignment?.dateStart
-                          ).format("DD-MM-YYYY")}`}
-                        </p>
-                        <p>
-                          {"dateEnd: " +
-                            moment(error?.assignment?.dateEnd).format(
-                              "DD-MM-YYYY"
-                            )}
-                        </p>
-                      </>
-                    )}
-                  </Modal>
-                </Col>
-              </Row>
+          <Row style={{ marginTop: "50px" }}>
+            <Col span={5}>
+              <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                Quay lại
+              </Button>
+            </Col>
+            <Col span={5} offset={14}>
+              <Button style={{ width: "100%" }} onClick={handleSubmit}>
+                Cập nhật
+              </Button>
+              <Modal
+                title="Thông báo"
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+              >
+                <p>{error?.message}</p>
+                {error?.assignment && (
+                  <>
+                    <hr></hr>
+                    <p>effort: {error?.assignment?.effort}</p>
+                    <p>
+                      {`dateStart: ${moment(
+                        error?.assignment?.dateStart
+                      ).format("DD-MM-YYYY")}`}
+                    </p>
+                    <p>
+                      {"dateEnd: " +
+                        moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
+                    </p>
+                  </>
+                )}
+              </Modal>
             </Col>
           </Row>
         </Col>

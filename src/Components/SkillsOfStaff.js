@@ -76,10 +76,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
     return levelSkillChange.find((value) => value.nameSkill === nameSkill);
   }
   const handleOkSkillModal = async () => {
-    if (
-      Object.keys(newSkill).length === 1 ||
-      Object.keys(newSkill).length === 0
-    ) {
+    if (Object.keys(newSkill).length <= 2) {
       notification.open({
         message: <Title level={4}>Thông báo</Title>,
         description: "Chọn thiếu",
