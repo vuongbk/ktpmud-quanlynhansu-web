@@ -9,6 +9,7 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 function AssignmentPage() {
+  console.log("12", moment().startOf("year").year());
   const [infoAccount, setInfoAccount] = useState();
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);

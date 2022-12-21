@@ -7,6 +7,7 @@ import {
   Modal,
   Select,
   notification,
+  InputNumber,
 } from "antd";
 import { useState, useEffect } from "react";
 import Axios from "axios";
@@ -16,16 +17,18 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
+  console.log("20", infoStaff);
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
   const [loading, setLoading] = useState(false);
-  const [skillsOfStaff, setSkillsOfStaff] = useState([]);
+  const [skillsOfStaff, setSkillsOfStaff] = useState();
+  console.log("25", skillsOfStaff);
   const navigate = useNavigate();
   const [skills, setSkills] = useState();
   // const [levelSkillChange, setLevelSkillChange] = useState([]);
   let options = skills ? getOptions() : [];
   async function getLevelSkillAndIdSkill() {
-    await Axios(`/api/level-skill/${infoStaff?._id}`, {
+    await Axios.get(`/api/level-skill/${infoStaff?._id}`, {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -46,7 +49,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
       },
     })
       .then((res) => {
-        console.log("editstaff 319", res.data.skill);
+        console.log("SkillsOfStaff 319", res.data.skill);
         setSkills(res.data.skill);
       })
       .catch((error) => {
@@ -54,8 +57,9 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
       });
   }
   useEffect(() => {
-    getLevelSkillAndIdSkill();
-
+    if (!skillsOfStaff && infoStaff?._id) {
+      getLevelSkillAndIdSkill();
+    }
     if (!skills) {
       getSkills();
     }
@@ -63,7 +67,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
   function getOptions() {
     return skills.map((value, index) => {
       return {
-        value: value._id,
+        value: JSON.stringify(value),
         label: value.skillName,
       };
     });
@@ -146,10 +150,10 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
               <Select
                 labelInValue
                 // defaultValue={data?.nameLeader}
-                onChange={(e) => {
-                  console.log("createProject 230", e);
+                onChange={(event) => {
+                  const e = JSON.parse(event.value);
                   setNewSkill((d) => {
-                    return { ...d, idSkill: e.value };
+                    return { ...d, idSkill: e._id, maxLevel: e.maxLevel };
                   });
                 }}
                 style={{
@@ -162,20 +166,17 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
               <Title level={5} style={{ marginTop: "0" }}>
                 Cấp
               </Title>
-              <Select
-                onSelect={(e) => {
+              <InputNumber
+                min={0}
+                max={newSkill?.maxLevel}
+                style={{ width: "50px" }}
+                defaultValue={newSkill?.maxLevel}
+                onChange={(e) => {
                   setNewSkill((d) => {
                     return { ...d, level: e };
                   });
                 }}
-              >
-                <Option value={0}>0</Option>
-                <Option value={1}>1</Option>
-                <Option value={2}>2</Option>
-                <Option value={3}>3</Option>
-                <Option value={4}>4</Option>
-                <Option value={5}>5</Option>
-              </Select>
+              />
             </Col>
           </Row>
         </Modal>
@@ -188,12 +189,15 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
             return (
               <Col xs={24} sm={12} lg={6} key={index}>
                 <Title level={5}>{value.nameSkill}</Title>
-                <Select
+                <InputNumber
+                  min={0}
+                  max={value.maxLevel}
+                  style={{ width: "50px" }}
                   defaultValue={
                     getDefaultLevelSkillValue(value.nameSkill)?.levelSkill ||
                     value.levelSkill
                   }
-                  onSelect={(e) => {
+                  onChange={(e) => {
                     setLevelSkillChange((d) => {
                       //Lọc skill đã change trước đó ra, để không bị trùng khi chỉnh sửa 1 skill nhiều lần
                       d = d.filter((dValue) => {
@@ -202,14 +206,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
                       return [...d, { ...value, levelSkill: e }];
                     });
                   }}
-                >
-                  <Option value={0}>0</Option>
-                  <Option value={1}>1</Option>
-                  <Option value={2}>2</Option>
-                  <Option value={3}>3</Option>
-                  <Option value={4}>4</Option>
-                  <Option value={5}>5</Option>
-                </Select>
+                />
               </Col>
             );
           })}

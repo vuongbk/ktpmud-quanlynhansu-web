@@ -63,7 +63,7 @@ function Skills() {
       });
   }
   const handleOkSkillModal = async () => {
-    if (Object.keys(newSkill).length === 1) {
+    if (Object.keys(newSkill).length == 1) {
       notification.open({
         message: <Title level={4}>Thông báo</Title>,
         description: "Nhập thiếu",
@@ -76,7 +76,10 @@ function Skills() {
     await Axios({
       method: "put",
       url: `/api/skill/${newSkill.idSkill}`,
-      data: { skillName: newSkill.skillName },
+      data: {
+        skillName: newSkill.skillName,
+        maxLevel: newSkill.maxLevel,
+      },
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -85,6 +88,7 @@ function Skills() {
         console.log("Skills 55", res);
         setLoading(false);
         setIsModalSkillOpen(false);
+        setNewSkill({});
         navigate(0);
       })
       .catch((error) => {
@@ -92,6 +96,7 @@ function Skills() {
         setLoading(false);
       });
   };
+
   const handleCancelSkillModal = () => {
     setIsModalSkillOpen(false);
   };
@@ -112,8 +117,7 @@ function Skills() {
       title: "Thao tác",
       fixed: "right",
       width: 190,
-      render: (record) => {
-        const t = record;
+      render: (value, record) => {
         return (
           <Row>
             <Col span={24}>
@@ -177,6 +181,16 @@ function Skills() {
                 onChange={(e) => {
                   setNewSkill((d) => {
                     return { ...d, skillName: e.target.value };
+                  });
+                }}
+              />
+              <Input
+                style={{ marginTop: "20px" }}
+                placeholder="Max level"
+                defaultValue={""}
+                onChange={(e) => {
+                  setNewSkill((d) => {
+                    return { ...d, maxLevel: e.target.value };
                   });
                 }}
               />

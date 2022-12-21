@@ -20,6 +20,7 @@ import md5 from "md5";
 import Link from "antd/lib/typography/Link.js";
 import SkillsOfStaff from "../Components/SkillsOfStaff.js";
 import { useNavigate } from "react-router-dom";
+import { ControlOutlined } from "@ant-design/icons";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
@@ -47,6 +48,7 @@ const { Title, Text } = Typography;
 function Account({}) {
   const navigate = useNavigate();
   const [infoAccount, setInfoAccount] = useState();
+  console.log("50", infoAccount);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   const [dataStaffChange, setDataStaffChange] = useState({});
   // const [fileList, setFileList] = useState([]);
@@ -64,6 +66,7 @@ function Account({}) {
     setIsModalOpen(false);
   };
   async function getInfoAccount() {
+    console.log("account 69", infoAccount);
     await Axios({
       method: "get",
       url: "../api/staff?infoAccount=true",

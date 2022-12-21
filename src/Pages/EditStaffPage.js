@@ -51,7 +51,8 @@ function EditPage() {
   const [error, setError] = useState();
   const { idStaff } = useParams();
   // const [data, setData] = useState(null);
-  const [data, setData] = useState(useLocation()?.state?.data);
+  const [data, setData] = useState();
+  console.log("55", data);
   const [loading, setLoading] = useState(false);
   // const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [imageUrl, setImageUrl] = useState(
@@ -280,10 +281,8 @@ function EditPage() {
       });
   }
   useEffect(() => {
-    if (!data) {
-      getStaff();
-    }
-  }, [data]);
+    getStaff();
+  }, []);
 
   if (loading) {
     return <Loading />;

@@ -31,6 +31,7 @@ function SkillsOfStaffs() {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [loading, setLoading] = useState(false);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
+  console.log("34", levelSkillChange);
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
   const [skills, setSkills] = useState();
@@ -242,27 +243,12 @@ function SkillsOfStaffs() {
             return (
               <Col style={{ marginRight: "20px" }} key={index}>
                 <Row>
-                  <Text>
-                    {searchSkill === skill.skillName
-                      ? // <Highlighter
-                        //   highlightStyle={{
-                        //     backgroundColor: "#ffc069",
-                        //     padding: 0,
-                        //   }}
-                        //   searchWords={[searchSkill]}
-                        //   autoEscape
-                        //   textToHighlight={
-                        //     skill.skillName ? skill.skillName.toString() : ""
-                        //   }
-                        // />
-                        skill.skillName
-                      : skill.skillName}
-                  </Text>
+                  <Text>{skill.skillName}</Text>
                 </Row>
                 <Row>
                   <InputNumber
                     min={0}
-                    max={5}
+                    max={skill.maxLevel}
                     style={{ width: "50px" }}
                     defaultValue={skill.level}
                     onChange={(value) => {
@@ -443,10 +429,25 @@ function SkillsOfStaffs() {
     }
   }
   function handleChange(levelSkill, idLevelSkill, idStaff) {
-    setLevelSkillChange((d) => [
-      ...d,
-      { levelSkill: levelSkill, idLevelSkill: idLevelSkill, idStaff: idStaff },
-    ]);
+    setLevelSkillChange((d) => {
+      //tìm vị trí trùng skill
+      const indexOfSkill = d.findIndex(
+        (value) => value.idLevelSkill === idLevelSkill
+      );
+      if (indexOfSkill !== -1) {
+        d[indexOfSkill].levelSkill = levelSkill;
+        return d;
+      } else {
+        return [
+          ...d,
+          {
+            levelSkill: levelSkill,
+            idLevelSkill: idLevelSkill,
+            idStaff: idStaff,
+          },
+        ];
+      }
+    });
   }
   async function getNameSkillAndStaff() {
     setLoading(true);
