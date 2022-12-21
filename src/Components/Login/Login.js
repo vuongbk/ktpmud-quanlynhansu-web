@@ -68,7 +68,7 @@ import md5 from "md5";
 const { Title } = Typography;
 
 async function loginUser(credentials) {
-  return await Axios("/login", {
+  return await Axios("/api/login", {
     method: "POST",
     data: credentials,
   })
