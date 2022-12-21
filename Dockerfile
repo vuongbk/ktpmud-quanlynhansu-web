@@ -16,7 +16,9 @@ WORKDIR /app
 COPY package.json .
 RUN yarn install
 COPY . .
-RUN yarn run start
+RUN yarn run build
 
-EXPOSE 8072
-CMD [ "npm", "start" ]
+FROM nginx:1.18.0-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build-step /app/build /usr/share/nginx/html
+CMD ["nginx", "-g", "daemon off;"]
