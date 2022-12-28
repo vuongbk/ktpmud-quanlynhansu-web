@@ -5,7 +5,7 @@ import { Button } from "antd";
 export default function Lougout({ setToken, setInfoAccount }) {
   const logoutOne = async (e) => {
     e.preventDefault();
-    await Axios("/logout-one", {
+    await Axios("/api/logout-one", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + getToken(),
@@ -19,7 +19,7 @@ export default function Lougout({ setToken, setInfoAccount }) {
   const logoutAll = async (e) => {
     e.preventDefault();
     await Axios({
-      url: "/logout-all",
+      url: "/api/logout-all",
       method: "POST",
       headers: {
         Authorization: "Bearer " + getToken(),

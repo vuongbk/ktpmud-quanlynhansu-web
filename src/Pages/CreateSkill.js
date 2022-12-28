@@ -9,6 +9,7 @@ import {
   Popconfirm,
   Modal,
   notification,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ const { Option } = Select;
 const { Title, Text } = Typography;
 
 function CreateSkill() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [error, setError] = useState();
   const [nameSkill, setNameskill] = useState("");
@@ -35,11 +37,9 @@ function CreateSkill() {
   };
   const handleSubmit = async () => {
     if (nameSkill === "") {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Nhập thiếu",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Nhập thiếu",
       });
       return;
     }
@@ -68,6 +68,7 @@ function CreateSkill() {
   return (
     <>
       <Row>
+        {contextHolder}
         <Col span={14} offset={5}>
           <Row>
             <Title level={3}>Thông tin kỹ năng mới</Title>

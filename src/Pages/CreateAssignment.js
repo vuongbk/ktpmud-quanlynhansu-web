@@ -10,7 +10,7 @@ import {
   Dropdown,
   Menu,
   Modal,
-  notification,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import {
@@ -29,6 +29,7 @@ const { Option } = Select;
 const { Title, Text } = Typography;
 
 const CreateAssignment = () => {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation()?.state?.data);
   const [error, setError] = useState();
@@ -36,9 +37,7 @@ const CreateAssignment = () => {
   const [dataChange, setDataChange] = useState({
     idStaff: searchParams.get("idStaff"),
   });
-  console.log("createassign 36", dataChange);
   const [projects, setProjects] = useState([]);
-  console.log("createassign 38", projects);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dateFormat = "DD/MM/YYYY";
@@ -77,11 +76,9 @@ const CreateAssignment = () => {
       !dataChange.hasOwnProperty("dateStart") ||
       !dataChange.hasOwnProperty("idProject")
     ) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Nhập thiếu",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Nhập thiếu",
       });
       return;
     } else {
@@ -159,6 +156,7 @@ const CreateAssignment = () => {
 
   return (
     <Row>
+      {contextHolder}
       {/* {console.log("editassign 126 ", moment(error?.dateStart))} */}
       <Col span={14} offset={5}>
         <Row>
@@ -204,7 +202,7 @@ const CreateAssignment = () => {
                 });
               }}
             />
-            <Title level={5}>Phân công dự án</Title>
+            <Title level={5}>Phân công dự án (%)</Title>
             <Input
               value={dataChange?.effort}
               onChange={(e) => {
@@ -213,6 +211,47 @@ const CreateAssignment = () => {
                 });
               }}
             />
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                  <Text>Quay lại</Text>
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Button
+                  style={{ width: "100%" }}
+                  type={"primary"}
+                  onClick={handleSubmit}
+                >
+                  Cập nhật
+                </Button>
+                <Modal
+                  title="Thông báo"
+                  open={isModalOpen}
+                  onOk={handleOk}
+                  onCancel={handleCancel}
+                >
+                  <p>{error?.message}</p>
+                  {error?.assignment && (
+                    <>
+                      <hr></hr>
+                      <p>effort: {error?.assignment?.effort}</p>
+                      <p>
+                        {`dateStart: ${moment(
+                          error?.assignment?.dateStart
+                        ).format("DD-MM-YYYY")}`}
+                      </p>
+                      <p>
+                        {"dateEnd: " +
+                          moment(error?.assignment?.dateEnd).format(
+                            "DD-MM-YYYY"
+                          )}
+                      </p>
+                    </>
+                  )}
+                </Modal>
+              </Col>
+            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -260,41 +299,6 @@ const CreateAssignment = () => {
               {/* leader là gì khi đã có manager */}
               <Option value="manager">Quản lý dự án</Option>
             </Select>
-          </Col>
-        </Row>
-        <Row style={{ marginTop: "50px" }}>
-          <Col span={5}>
-            <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
-              <Text>Quay lại</Text>
-            </Button>
-          </Col>
-          <Col span={5} offset={14}>
-            <Button style={{ width: "100%" }} onClick={handleSubmit}>
-              Cập nhật
-            </Button>
-            <Modal
-              title="Thông báo"
-              open={isModalOpen}
-              onOk={handleOk}
-              onCancel={handleCancel}
-            >
-              <p>{error?.message}</p>
-              {error?.assignment && (
-                <>
-                  <hr></hr>
-                  <p>effort: {error?.assignment?.effort}</p>
-                  <p>
-                    {`dateStart: ${moment(error?.assignment?.dateStart).format(
-                      "DD-MM-YYYY"
-                    )}`}
-                  </p>
-                  <p>
-                    {"dateEnd: " +
-                      moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
-                  </p>
-                </>
-              )}
-            </Modal>
           </Col>
         </Row>
       </Col>

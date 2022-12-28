@@ -25,6 +25,7 @@ const { Option } = Select;
 const { Text, Title } = Typography;
 
 function CreateStaff() {
+  const [messageApi, contextHolder] = message.useMessage();
   const defaultPassword = "12345678";
   const navigate = useNavigate();
   const [dataStaffChange, setDataStaffChange] = useState({
@@ -69,11 +70,9 @@ function CreateStaff() {
       !dataStaffChange.hasOwnProperty("fullName") ||
       !dataStaffChange.hasOwnProperty("email")
     ) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Bắt buộc nhập trường họ tên, email",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu họ tên, email",
       });
       return;
     }
@@ -105,6 +104,7 @@ function CreateStaff() {
 
   return (
     <Row>
+      {contextHolder}
       <Col span={14} offset={5}>
         <Row>
           <Typography.Title level={4}>Thêm nhân viên mới</Typography.Title>
@@ -216,6 +216,52 @@ function CreateStaff() {
                 });
               }}
             />
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button
+                  style={{ width: "100%" }}
+                  onClick={() => {
+                    navigate(-1);
+                  }}
+                >
+                  Quay lại
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Button
+                  style={{ width: "100%" }}
+                  type="primary"
+                  onClick={handleSubmit}
+                >
+                  Cập nhật
+                </Button>
+                <Modal
+                  title="Thông báo"
+                  open={isModalOpen}
+                  onOk={handleOk}
+                  onCancel={handleCancel}
+                >
+                  <p>{error?.message}</p>
+                  {error?.assignment && (
+                    <>
+                      <hr></hr>
+                      <p>effort: {error?.assignment?.effort}</p>
+                      <p>
+                        {`dateStart: ${moment(
+                          error?.assignment?.dateStart
+                        ).format("DD-MM-YYYY")}`}
+                      </p>
+                      <p>
+                        {"dateEnd: " +
+                          moment(error?.assignment?.dateEnd).format(
+                            "DD-MM-YYYY"
+                          )}
+                      </p>
+                    </>
+                  )}
+                </Modal>
+              </Col>
+            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -293,46 +339,6 @@ function CreateStaff() {
                 });
               }}
             />
-          </Col>
-        </Row>
-        <Row style={{ marginTop: "50px" }}>
-          <Col span={5}>
-            <Button
-              style={{ width: "100%" }}
-              onClick={() => {
-                navigate(-1);
-              }}
-            >
-              Quay lại
-            </Button>
-          </Col>
-          <Col span={5} offset={14}>
-            <Button style={{ width: "100%" }} onClick={handleSubmit}>
-              Cập nhật
-            </Button>
-            <Modal
-              title="Thông báo"
-              open={isModalOpen}
-              onOk={handleOk}
-              onCancel={handleCancel}
-            >
-              <p>{error?.message}</p>
-              {error?.assignment && (
-                <>
-                  <hr></hr>
-                  <p>effort: {error?.assignment?.effort}</p>
-                  <p>
-                    {`dateStart: ${moment(error?.assignment?.dateStart).format(
-                      "DD-MM-YYYY"
-                    )}`}
-                  </p>
-                  <p>
-                    {"dateEnd: " +
-                      moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
-                  </p>
-                </>
-              )}
-            </Modal>
           </Col>
         </Row>
       </Col>

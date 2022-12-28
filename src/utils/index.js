@@ -1,3 +1,5 @@
+import { Typography } from "antd";
+
 function workingDay(date1, date2) {
   console.log("utls/index 2", date1);
   console.log("utls/index 2", date2);
@@ -23,4 +25,29 @@ function workingDay(date1, date2) {
   return mm;
 }
 
+const listRole = [
+  "Admin",
+  "BA",
+  "CEO",
+  "Cộng tác viên",
+  "Kế toán",
+  "Lập trình viên",
+  "Leader",
+  "Tester",
+  "Thực tập sinh",
+];
+
+const roleAdmin = "Admin";
+const TitleTable = (props) => {
+  return (
+    <Typography.Title level={5} style={{ margin: 0, fontSize: "1.25em" }}>
+      {props.value}
+    </Typography.Title>
+  );
+};
+const TitleModal = (props) => {
+  return <Typography.Title level={4}>{props.value}</Typography.Title>;
+};
+
+export { listRole, roleAdmin, TitleTable, TitleModal };
 export default workingDay;

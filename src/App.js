@@ -1,21 +1,11 @@
 import React, { useState } from "react";
-import { Routes, Route, useNavigate, Link } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import Home from "./Pages/Home";
 import Staffs from "./Pages/Staffs";
 import "./App.css";
 import EditStaffPage from "./Pages/EditStaffPage";
 import EditProjectPage from "./Pages/EditProjectPage";
-import {
-  Layout,
-  Col,
-  Row,
-  Space,
-  Dropdown,
-  Typography,
-  Button,
-  Avatar,
-  Popover,
-} from "antd";
+import { Layout, Col, Row, Space, Dropdown, Button, Avatar } from "antd";
 import { Outlet, NavLink } from "react-router-dom";
 import ProjectPage from "./Pages/ProjectPage";
 import AssignmentPage from "./Pages/AssignmentPage";
@@ -40,7 +30,6 @@ function App() {
   const { token, setToken } = useToken();
   const [infoAccount, setInfoAccount] = useState();
   const { logoutOne, logoutAll } = Logout({ setToken, setInfoAccount });
-  const navigate = useNavigate();
   const items = [
     {
       label: (
@@ -105,6 +94,10 @@ function App() {
     <Layout>
       <Header
         style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          width: "100%",
           padding: "0 80px",
           backgroundColor: "#283b6e",
         }}
@@ -122,8 +115,9 @@ function App() {
                   <NavLink
                     style={({ isActive }) => {
                       return {
+                        fontSize: "16px",
                         display: "block",
-                        color: isActive ? "red" : "",
+                        color: isActive ? "gray" : "white",
                       };
                     }}
                     to="/assignment"
@@ -133,8 +127,9 @@ function App() {
                   <NavLink
                     style={({ isActive }) => {
                       return {
+                        fontSize: "16px",
                         display: "block",
-                        color: isActive ? "red" : "",
+                        color: isActive ? "gray" : "white",
                       };
                     }}
                     to="/staff"
@@ -144,8 +139,9 @@ function App() {
                   <NavLink
                     style={({ isActive }) => {
                       return {
+                        fontSize: "16px",
                         display: "block",
-                        color: isActive ? "red" : "",
+                        color: isActive ? "gray" : "white",
                       };
                     }}
                     to="/project"
@@ -155,8 +151,9 @@ function App() {
                   <NavLink
                     style={({ isActive }) => {
                       return {
+                        fontSize: "16px",
                         display: "block",
-                        color: isActive ? "red" : "",
+                        color: isActive ? "gray" : "white",
                       };
                     }}
                     to="/skills-of-staffs"
@@ -175,17 +172,21 @@ function App() {
                 }}
                 trigger={["click"]}
               >
-                <a onClick={(e) => e.preventDefault()}>
-                  <Space>
-                    <Avatar
-                      size="small"
-                      src={`/${infoAccount?.imageUrl}`}
-                      alt="avat"
-                    />
-                    {infoAccount?.fullName}
-                    <DownOutlined />
-                  </Space>
-                </a>
+                <Space
+                  style={{
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    color: "white",
+                  }}
+                >
+                  <Avatar
+                    size="small"
+                    src={`/${infoAccount?.imageUrl}`}
+                    alt="avat"
+                  />
+                  {infoAccount?.fullName}
+                  <DownOutlined />
+                </Space>
               </Dropdown>
             </Row>
           </Col>
@@ -194,7 +195,7 @@ function App() {
       <Content
         style={{
           padding: "50px 80px",
-          minHeight: "640px",
+          minHeight: "90vh",
         }}
       >
         <Routes>
@@ -237,10 +238,10 @@ function App() {
           textAlign: "center",
           backgroundColor: "#2d3f70",
           color: "white",
-          height: "30px",
+          height: "9vh",
         }}
       >
-        Ant Design ©2018 Created by Ant UED
+        ThinkLab
       </Footer>
     </Layout>
   );

@@ -11,6 +11,7 @@ import {
   Select,
   Popconfirm,
   notification,
+  message,
 } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -19,10 +20,12 @@ import { Link, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
+import { TitleTable } from "../utils";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 function Skills() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const searchInput = useRef(null);
@@ -33,7 +36,7 @@ function Skills() {
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
   const [skills, setSkills] = useState();
-  console.log("skills 35", skills);
+  const [skillSelected, setSkillSelected] = useState(null);
   // let options = skills ? getOptions() : [];
   // function getOptions() {
   //   return skills.map((value, index) => {
@@ -63,16 +66,15 @@ function Skills() {
       });
   }
   const handleOkSkillModal = async () => {
-    if (Object.keys(newSkill).length == 1) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Nhập thiếu",
-        duration: 2,
-        placement: "top",
+    if (JSON.stringify(newSkill) === JSON.stringify(skillSelected)) {
+      messageApi.open({
+        type: "warning",
+        content: "Không có thay đổi",
       });
       return;
     }
     setLoading(true);
+    setIsModalSkillOpen(false);
     await Axios({
       method: "put",
       url: `/api/skill/${newSkill.idSkill}`,
@@ -87,7 +89,8 @@ function Skills() {
       .then((res) => {
         console.log("Skills 55", res);
         setLoading(false);
-        setIsModalSkillOpen(false);
+
+        setSkillSelected(null);
         setNewSkill({});
         navigate(0);
       })
@@ -99,11 +102,28 @@ function Skills() {
 
   const handleCancelSkillModal = () => {
     setIsModalSkillOpen(false);
+    setSkillSelected(null);
   };
 
+  const openModalEditSkill = (skill) => {
+    setSkillSelected({
+      idSkill: skill._id,
+      skillName: skill.skillName,
+      maxLevel: skill.maxLevel,
+    });
+    setNewSkill((d) => {
+      return {
+        ...d,
+        idSkill: skill._id,
+        skillName: skill.skillName,
+        maxLevel: skill.maxLevel,
+      };
+    });
+    setIsModalSkillOpen(true);
+  };
   const columns = [
     {
-      title: "Tên skill",
+      title: <TitleTable value="Tên skill" />,
       dataIndex: "skillName",
       key: "skillName",
       width: 170,
@@ -111,11 +131,11 @@ function Skills() {
       // ...getColumnSearchProps("fullName"),
     },
     {
-      title: "Cấp lớn nhất",
+      title: <TitleTable value="Cấp lớn nhất" />,
       dataIndex: "maxLevel",
     },
     {
-      title: "Thao tác",
+      title: <TitleTable value="Thao tác" />,
       fixed: "right",
       width: 190,
       render: (value, record) => {
@@ -130,11 +150,7 @@ function Skills() {
                   okButtonProps={{ type: "danger" }}
                   onConfirm={() => handleDelete(record._id)}
                 >
-                  <Button
-                    style={{ fontSize: "10px" }}
-                    size="small"
-                    type="primary"
-                  >
+                  <Button style={{ fontSize: "10px" }} size="small" danger>
                     Xóa skill
                   </Button>
                 </Popconfirm>
@@ -144,58 +160,55 @@ function Skills() {
                   size="small"
                   type="primary"
                   onClick={() => {
-                    setIsModalSkillOpen(true);
-                    setNewSkill((d) => {
-                      return { ...d, idSkill: record._id };
-                    });
+                    openModalEditSkill(record);
                   }}
                 >
                   Sửa skill
                 </Button>
+                <Modal
+                  // maskStyle={{ opacity: 0.5 }}
+                  open={isModalSkillOpen}
+                  title={<Title level={3}>Sửa skill</Title>}
+                  onOk={() => handleOkSkillModal()}
+                  onCancel={() => handleCancelSkillModal()}
+                  footer={[
+                    <Button key="back" onClick={() => handleCancelSkillModal()}>
+                      Hủy
+                    </Button>,
+                    <Button
+                      key="submit"
+                      type="primary"
+                      onClick={() => handleOkSkillModal()}
+                    >
+                      Sửa
+                    </Button>,
+                  ]}
+                >
+                  <Input
+                    //không hiểu sao record ở đây nó cứ lấy cái ở cuối danh sách,
+                    //đáng lẽ click vào cái nào thì phải là record của cái đấy chứ
+                    value={newSkill?.skillName}
+                    placeholder="Tên mới"
+                    // defaultValue={""}
+                    onChange={(e) => {
+                      setNewSkill((d) => {
+                        return { ...d, skillName: e.target.value };
+                      });
+                    }}
+                  />
+                  <Input
+                    style={{ marginTop: "20px" }}
+                    placeholder="Cấp lớn nhất"
+                    value={newSkill?.maxLevel}
+                    onChange={(e) => {
+                      setNewSkill((d) => {
+                        return { ...d, maxLevel: e.target.value };
+                      });
+                    }}
+                  />
+                </Modal>
               </Space>
             </Col>
-            <Modal
-              // maskStyle={{ opacity: 0.5 }}
-              open={isModalSkillOpen}
-              title="Sửa skill"
-              onOk={() => handleOkSkillModal()}
-              onCancel={handleCancelSkillModal}
-              footer={[
-                <Button key="back" onClick={handleCancelSkillModal}>
-                  Hủy
-                </Button>,
-                <Button
-                  key="submit"
-                  type="primary"
-                  onClick={() => handleOkSkillModal()}
-                >
-                  Sửa
-                </Button>,
-              ]}
-            >
-              <Input
-                //không hiểu sao record ở đây nó cứ lấy cái ở cuối danh sách,
-                //đáng lẽ click vào cái nào thì phải là record của cái đấy chứ
-                // defaultValue={record.skillName}
-                placeholder="Tên mới"
-                defaultValue={""}
-                onChange={(e) => {
-                  setNewSkill((d) => {
-                    return { ...d, skillName: e.target.value };
-                  });
-                }}
-              />
-              <Input
-                style={{ marginTop: "20px" }}
-                placeholder="Cấp lớn nhất"
-                defaultValue={""}
-                onChange={(e) => {
-                  setNewSkill((d) => {
-                    return { ...d, maxLevel: e.target.value };
-                  });
-                }}
-              />
-            </Modal>
           </Row>
         );
       },
@@ -208,11 +221,9 @@ function Skills() {
       });
       console.log("skillpage 308", levelSkillOfStaff);
       if (JSON.stringify(levelSkillOfStaff) === "[]") {
-        notification.open({
-          message: <Title level={4}>Thông báo</Title>,
-          description: "Không có thay đổi",
-          duration: 2,
-          placement: "top",
+        messageApi.open({
+          type: "warning",
+          content: "Không có thay đổi",
         });
         return;
       }
@@ -238,11 +249,9 @@ function Skills() {
           });
       });
     } else {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Không có thay đổi",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Không có thay đổi",
       });
       return;
     }
@@ -275,6 +284,8 @@ function Skills() {
   }
   return (
     <>
+      {contextHolder}
+
       <Row justify="space-between">
         <Title level={3}>Danh sách các kỹ năng của nhân viên</Title>
         <Button type="primary" onClick={() => navigate("../create-skill")}>

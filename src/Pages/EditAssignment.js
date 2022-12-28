@@ -10,7 +10,7 @@ import {
   Dropdown,
   Menu,
   Modal,
-  notification,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
@@ -23,6 +23,7 @@ const { Option } = Select;
 const { Title, Text } = Typography;
 
 const EditAssignment = () => {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation()?.state?.data);
   const { idAssignment } = useParams();
@@ -43,11 +44,9 @@ const EditAssignment = () => {
   };
   const handleSubmit = async () => {
     if (JSON.stringify(dataChange) === "{}") {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Không có thay đổi",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Không có thay đổi",
       });
       return;
     }
@@ -125,6 +124,7 @@ const EditAssignment = () => {
 
   return (
     <Row>
+      {contextHolder}
       <Col span={14} offset={5}>
         <Row>
           <Title level={3}>Chỉnh sửa phân công</Title>
@@ -179,6 +179,71 @@ const EditAssignment = () => {
                 });
               }}
             />
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                  <Text>Quay lại</Text>
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Row>
+                  <Button
+                    type="primary"
+                    style={{ width: "100%" }}
+                    onClick={handleSubmit}
+                  >
+                    Cập nhật
+                  </Button>
+                  <Modal
+                    title="Thông báo"
+                    open={isModalOpen}
+                    onOk={handleOk}
+                    onCancel={handleCancel}
+                  >
+                    <p>{error?.message}</p>
+                    {error?.assignment && (
+                      <>
+                        <hr></hr>
+                        <p>effort: {error?.assignment?.effort}</p>
+                        <p>
+                          {`dateStart: ${moment(
+                            error?.assignment?.dateStart
+                          ).format("DD-MM-YYYY")}`}
+                        </p>
+                        <p>
+                          {"dateEnd: " +
+                            moment(error?.assignment?.dateEnd).format(
+                              "DD-MM-YYYY"
+                            )}
+                        </p>
+                      </>
+                    )}
+                  </Modal>
+                </Row>
+                <Row>
+                  <Popconfirm
+                    title="Bạn có chắc muốn xóa nhân viên？"
+                    cancelText="Hủy"
+                    okText="Xóa"
+                    okButtonProps={{ type: "danger" }}
+                    onConfirm={handleDelete}
+                  >
+                    <Button
+                      style={{
+                        width: "100%",
+                        textAlign: "right",
+                        fontSize: "0.75em",
+                        padding: "0",
+                      }}
+                      type="link"
+                      danger
+                    >
+                      Xóa phân công
+                    </Button>
+                  </Popconfirm>
+                </Row>
+              </Col>
+            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -220,61 +285,6 @@ const EditAssignment = () => {
               //   });
               // }}
             />
-          </Col>
-        </Row>
-
-        <Row style={{ marginTop: "50px" }}>
-          <Col span={5}>
-            <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
-              <Text>Quay lại</Text>
-            </Button>
-          </Col>
-          <Col span={5} offset={14}>
-            <Row>
-              <Button
-                type="primary"
-                style={{ width: "100%" }}
-                onClick={handleSubmit}
-              >
-                Cập nhật
-              </Button>
-              <Modal
-                title="Thông báo"
-                open={isModalOpen}
-                onOk={handleOk}
-                onCancel={handleCancel}
-              >
-                <p>{error?.message}</p>
-                {error?.assignment && (
-                  <>
-                    <hr></hr>
-                    <p>effort: {error?.assignment?.effort}</p>
-                    <p>
-                      {`dateStart: ${moment(
-                        error?.assignment?.dateStart
-                      ).format("DD-MM-YYYY")}`}
-                    </p>
-                    <p>
-                      {"dateEnd: " +
-                        moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
-                    </p>
-                  </>
-                )}
-              </Modal>
-            </Row>
-            <Row>
-              <Popconfirm
-                title="Bạn có chắc muốn xóa nhân viên？"
-                cancelText="Hủy"
-                okText="Xóa"
-                okButtonProps={{ type: "danger" }}
-                onConfirm={handleDelete}
-              >
-                <Button style={{ width: "100%" }} type="link" danger>
-                  Xóa phân công
-                </Button>
-              </Popconfirm>
-            </Row>
           </Col>
         </Row>
       </Col>

@@ -2,7 +2,7 @@ import { Button, Row, Table, Typography } from "antd";
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Axios from "axios";
-import workingDay from "../utils";
+import workingDay, { TitleTable } from "../utils";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 import moment from "moment";
@@ -15,7 +15,7 @@ function AssignmentsOfStaff() {
   const [loading, setLoading] = useState(false);
   const columns = [
     {
-      title: "Khoảng ngày",
+      title: <TitleTable value="Khoảng ngày" />,
       dataIndex: "_id",
       render: (text, record) => {
         return (
@@ -27,11 +27,11 @@ function AssignmentsOfStaff() {
       },
     },
     {
-      title: "Vai trò",
+      title: <TitleTable value="Vai trò" />,
       dataIndex: "role",
     },
     {
-      title: "Phân công",
+      title: <TitleTable value="Phân công" />,
       dataIndex: "effort",
       render: (text) => {
         return <Text>{text}%</Text>;

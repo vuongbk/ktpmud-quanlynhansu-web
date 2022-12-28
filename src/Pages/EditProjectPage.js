@@ -9,6 +9,7 @@ import {
   Popconfirm,
   Modal,
   notification,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ const { Option } = Select;
 const { Title, Text } = Typography;
 
 function EditProjectPage() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation().state?.data);
   const { idProject } = useParams();
@@ -60,11 +62,9 @@ function EditProjectPage() {
   };
   const handleSubmit = async () => {
     if (JSON.stringify(dataProjectChange) === "{}" && leaderChange === "") {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Không có thay đổi",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Không có thay đổi",
       });
       return;
     }
@@ -217,6 +217,7 @@ function EditProjectPage() {
 
   return (
     <Row>
+      {contextHolder}
       <Col span={14} offset={5}>
         <Row>
           <Title level={3}>
@@ -270,6 +271,71 @@ function EditProjectPage() {
             <Text>
               Ước tính: {Math.round(timeWorkingEstimation * 100) / 100} mm
             </Text>
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                  Quay lại
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Row>
+                  <Button
+                    type="primary"
+                    style={{ width: "100%" }}
+                    onClick={handleSubmit}
+                  >
+                    Cập nhật
+                  </Button>
+                  <Modal
+                    title="Thông báo"
+                    open={isModalOpen}
+                    onOk={handleOk}
+                    onCancel={handleCancel}
+                  >
+                    <p>{error?.message}</p>
+                    {error?.assignment && (
+                      <>
+                        <hr></hr>
+                        <p>effort: {error?.assignment?.effort}</p>
+                        <p>
+                          {`dateStart: ${moment(
+                            error?.assignment?.dateStart
+                          ).format("DD-MM-YYYY")}`}
+                        </p>
+                        <p>
+                          {"dateEnd: " +
+                            moment(error?.assignment?.dateEnd).format(
+                              "DD-MM-YYYY"
+                            )}
+                        </p>
+                      </>
+                    )}
+                  </Modal>
+                </Row>
+                <Row>
+                  <Popconfirm
+                    title="Bạn có chắc muốn xóa dự án？"
+                    cancelText="Hủy"
+                    okText="Xóa"
+                    okButtonProps={{ type: "danger" }}
+                    onConfirm={handleDelete}
+                  >
+                    <Button
+                      style={{
+                        width: "100%",
+                        textAlign: "right",
+                        fontSize: "0.75em",
+                        padding: "0",
+                      }}
+                      type="link"
+                      danger
+                    >
+                      Xóa dự án
+                    </Button>
+                  </Popconfirm>
+                </Row>
+              </Col>
+            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -332,60 +398,6 @@ function EditProjectPage() {
                 100}{" "}
               {" mm"}
             </Text>
-          </Col>
-        </Row>
-        <Row style={{ marginTop: "50px" }}>
-          <Col span={5}>
-            <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
-              Quay lại
-            </Button>
-          </Col>
-          <Col span={5} offset={14}>
-            <Row>
-              <Button
-                type="primary"
-                style={{ width: "100%" }}
-                onClick={handleSubmit}
-              >
-                Cập nhật
-              </Button>
-              <Modal
-                title="Thông báo"
-                open={isModalOpen}
-                onOk={handleOk}
-                onCancel={handleCancel}
-              >
-                <p>{error?.message}</p>
-                {error?.assignment && (
-                  <>
-                    <hr></hr>
-                    <p>effort: {error?.assignment?.effort}</p>
-                    <p>
-                      {`dateStart: ${moment(
-                        error?.assignment?.dateStart
-                      ).format("DD-MM-YYYY")}`}
-                    </p>
-                    <p>
-                      {"dateEnd: " +
-                        moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
-                    </p>
-                  </>
-                )}
-              </Modal>
-            </Row>
-            <Row>
-              <Popconfirm
-                title="Bạn có chắc muốn xóa dự án？"
-                cancelText="Hủy"
-                okText="Xóa"
-                okButtonProps={{ type: "danger" }}
-                onConfirm={handleDelete}
-              >
-                <Button style={{ width: "100%" }} type="link" danger>
-                  Xóa dự án
-                </Button>
-              </Popconfirm>
-            </Row>
           </Col>
         </Row>
       </Col>

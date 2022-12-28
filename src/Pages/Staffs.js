@@ -7,6 +7,8 @@ import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 import moment from "moment";
+import { listRole, TitleTable } from "../utils";
+import { roleAdmin } from "../utils";
 const { Title, Text } = Typography;
 
 function Staffs() {
@@ -128,7 +130,9 @@ function Staffs() {
         return (
           <Link
             to={
-              infoAccount?.role === "boss" ? `/edit-staff/${record._id}` : "#"
+              infoAccount?.role === roleAdmin
+                ? `/edit-staff/${record._id}`
+                : "#"
             }
             state={{ data: record }}
           >
@@ -153,53 +157,22 @@ function Staffs() {
 
   const columns = [
     {
-      title: "Họ và tên",
+      title: <TitleTable value="Họ và tên" />,
       dataIndex: "fullName",
       key: "fullName",
       ...getColumnSearchProps("fullName"),
     },
     {
-      title: "Điện thoại",
+      title: <TitleTable value="Điện thoại" />,
       dataIndex: "phoneNumber",
       key: "phoneNumber",
     },
     {
-      title: "Vị trí",
+      title: <TitleTable value="Vị trí" />,
       dataIndex: "role",
-      filters: [
-        {
-          text: "Lập trình viên",
-          value: "Lập trình viên",
-        },
-        {
-          text: "Leader",
-          value: "Leader",
-        },
-        {
-          text: "Tester",
-          value: "Tester",
-        },
-        {
-          text: "Cộng tác viên",
-          value: "Cộng tác viên",
-        },
-        {
-          text: "BA",
-          value: "BA",
-        },
-        {
-          text: "Kế toán",
-          value: "Kế toán",
-        },
-        {
-          text: "Thực tập sinh",
-          value: "Thực tập sinh",
-        },
-        {
-          text: "CEO",
-          value: "CEO",
-        },
-      ],
+      filters: listRole.map((value) => {
+        return { text: value, value: value };
+      }),
       onFilter: (value, record) => {
         return record?.role === value;
       },
@@ -207,13 +180,13 @@ function Staffs() {
       responsive: ["sm"],
     },
     {
-      title: "Email",
+      title: <TitleTable value="Email" />,
       dataIndex: "email",
       key: "email",
       ref: { emailRef },
     },
     {
-      title: "Cấp bậc",
+      title: <TitleTable value="Cấp bậc" />,
       dataIndex: "level",
       key: "level",
       responsive: ["md"],
@@ -236,7 +209,7 @@ function Staffs() {
       },
     },
     {
-      title: "Trạng thái",
+      title: <TitleTable value="Trạng thái" />,
       dataIndex: "status",
       key: "status",
       responsive: ["lg"],
@@ -267,7 +240,7 @@ function Staffs() {
       },
     },
     {
-      title: "Phòng ban",
+      title: <TitleTable value="Phòng ban" />,
       dataIndex: "department",
       key: "department",
       responsive: ["lg"],
@@ -286,7 +259,7 @@ function Staffs() {
       },
     },
     {
-      title: "Ngày vào làm",
+      title: <TitleTable value="Ngày vào làm" />,
       dataIndex: "startTL",
       key: "startTL",
       responsive: ["xl"],
@@ -296,7 +269,7 @@ function Staffs() {
       },
     },
     {
-      title: "Giới tính",
+      title: <TitleTable value="Giới tính" />,
       dataIndex: "sex",
       key: "sex",
       responsive: ["xl"],
@@ -343,7 +316,7 @@ function Staffs() {
     <>
       <Row justify="space-between">
         <Title level={3}>Danh sách nhân viên</Title>
-        {infoAccount?.role === "boss" && (
+        {infoAccount?.role === roleAdmin && (
           <Button type="primary" onClick={() => navigate("../../create-staff")}>
             Thêm mới
           </Button>

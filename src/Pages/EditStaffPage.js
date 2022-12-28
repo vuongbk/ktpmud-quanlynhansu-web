@@ -9,6 +9,7 @@ import {
   Popconfirm,
   Modal,
   notification,
+  message,
 } from "antd";
 import { useState, useEffect, useRef } from "react";
 import { PlusOutlined } from "@ant-design/icons";
@@ -21,6 +22,7 @@ import Loading from "../Components/Modal/Loading.js";
 import { getToken } from "../Components/useToken.js";
 import md5 from "md5";
 import SkillsOfStaff from "../Components/SkillsOfStaff.js";
+import { listRole } from "../utils/index.js";
 const { Option } = Select;
 const { Text, Title } = Typography;
 
@@ -44,6 +46,7 @@ const { Text, Title } = Typography;
 // };
 
 function EditPage() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [dataStaffChange, setDataStaffChange] = useState({});
   const [levelSkillChange, setLevelSkillChange] = useState([]);
@@ -70,11 +73,9 @@ function EditPage() {
 
   const handleOkPasswordModal = async () => {
     if (!password.hasOwnProperty("newPassword")) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Nhập thiếu",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Nhập thiếu",
       });
       return;
     }
@@ -129,11 +130,9 @@ function EditPage() {
       JSON.stringify(levelSkillChange) === "[]" &&
       imageUrl === data.imageUrl
     ) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Không có thay đổi",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Không có thay đổi",
       });
       return;
     }
@@ -291,6 +290,7 @@ function EditPage() {
   return (
     <>
       <Row>
+        {contextHolder}
         <Col span={14} offset={5}>
           <Row>
             <Col span={24}>
@@ -506,14 +506,17 @@ function EditPage() {
                   width: "100%",
                 }}
               >
-                <Option value="Lập trình viên">Lập trình viên</Option>
+                {/* <Option value="Lập trình viên">Lập trình viên</Option>
                 <Option value="Leader">Leader</Option>
                 <Option value="Tester">Tester</Option>
                 <Option value="Cộng tác viên">Cộng tác viên</Option>
                 <Option value="BA">BA</Option>
                 <Option value="Kế toán">Kế toán</Option>
                 <Option value="Thực tập sinh">Thực tập sinh</Option>
-                <Option value="CEO">CEO</Option>
+                <Option value="CEO">CEO</Option> */}
+                {listRole.map((value, index) => {
+                  return <Option value={value}>{value}</Option>;
+                })}
               </Select>
               <Title level={5}>Trạng thái</Title>
               <Select
@@ -554,8 +557,17 @@ function EditPage() {
                 setLevelSkillChange={setLevelSkillChange}
                 levelSkillChange={levelSkillChange}
               />
-              <Row style={{ marginTop: "50px" }} justify="space-between">
-                <Col span={5}>
+            </Col>
+          </Row>
+          <Row>
+            <Col
+              xs={24}
+              md={{
+                span: 10,
+              }}
+            >
+              <Row style={{ marginTop: "80px" }} justify="space-between">
+                <Col span={10}>
                   <Button
                     style={{ width: "100%" }}
                     onClick={() => {
@@ -565,7 +577,7 @@ function EditPage() {
                     Quay lại
                   </Button>
                 </Col>
-                <Col span={5} offset={14}>
+                <Col span={10}>
                   <Row>
                     <Button
                       type="primary"
@@ -608,7 +620,16 @@ function EditPage() {
                       okButtonProps={{ type: "danger" }}
                       onConfirm={handleDelete}
                     >
-                      <Button style={{ width: "100%" }} type="link" danger>
+                      <Button
+                        style={{
+                          width: "100%",
+                          textAlign: "right",
+                          fontSize: "0.75em",
+                          padding: "0",
+                        }}
+                        type="link"
+                        danger
+                      >
                         Xóa nhân viên
                       </Button>
                     </Popconfirm>

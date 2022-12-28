@@ -5,6 +5,7 @@ import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 import moment from "moment";
+import { roleAdmin, TitleTable } from "../utils";
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
@@ -38,7 +39,7 @@ function AssignmentPage() {
   }
   const columnAssignments = [
     {
-      title: "Nhân viên",
+      title: <TitleTable value="Nhân viên" />,
       dataIndex: "fullName",
       width: "200px",
       key: "fullName",
@@ -76,7 +77,7 @@ function AssignmentPage() {
         return title;
       }
       monthArray.push({
-        title: j.format(monthFormat),
+        title: <TitleTable value={j.format(monthFormat)} />,
         width: "100px",
         dataIndex: "totalEffort",
         render: (totalEffort) => {
@@ -176,7 +177,7 @@ function AssignmentPage() {
             setMonthColumnEnd(dates[1]);
           }}
         />
-        {infoAccount?.role === "boss" && (
+        {infoAccount?.role === roleAdmin && (
           <Button type="primary">
             <Link to="/create-assignment">Thêm mới</Link>
           </Button>

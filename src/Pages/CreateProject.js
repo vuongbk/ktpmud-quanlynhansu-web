@@ -9,6 +9,7 @@ import {
   Popconfirm,
   Modal,
   notification,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ const { Option } = Select;
 const { Title, Text } = Typography;
 
 function CreateProject() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation()?.state?.data);
   const { idProject } = useParams();
@@ -50,11 +52,9 @@ function CreateProject() {
   };
   const handleSubmit = async () => {
     if (JSON.stringify(dataProjectChange) === "{}" && leaderChange === "") {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Không có thay đổi",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Nhập thiếu",
       });
       return;
     }
@@ -167,6 +167,7 @@ function CreateProject() {
 
   return (
     <Row>
+      {contextHolder}
       <Col span={14} offset={5}>
         <Row>
           <Title level={3}>Thông tin dự án mới</Title>
@@ -233,6 +234,47 @@ function CreateProject() {
                 },
               ]}
             ></Select>
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                  Quay lại
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Button
+                  style={{ width: "100%" }}
+                  type="primary"
+                  onClick={handleSubmit}
+                >
+                  Cập nhật
+                </Button>
+                <Modal
+                  title="Thông báo"
+                  open={isModalOpen}
+                  onOk={handleOk}
+                  onCancel={handleCancel}
+                >
+                  <p>{error?.message}</p>
+                  {error?.assignment && (
+                    <>
+                      <hr></hr>
+                      <p>effort: {error?.assignment?.effort}</p>
+                      <p>
+                        {`dateStart: ${moment(
+                          error?.assignment?.dateStart
+                        ).format("DD-MM-YYYY")}`}
+                      </p>
+                      <p>
+                        {"dateEnd: " +
+                          moment(error?.assignment?.dateEnd).format(
+                            "DD-MM-YYYY"
+                          )}
+                      </p>
+                    </>
+                  )}
+                </Modal>
+              </Col>
+            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -271,41 +313,6 @@ function CreateProject() {
               ) / 100}{" "}
               mm
             </Text>
-          </Col>
-        </Row>
-        <Row style={{ marginTop: "50px" }}>
-          <Col span={5}>
-            <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
-              Quay lại
-            </Button>
-          </Col>
-          <Col span={5} offset={14}>
-            <Button style={{ width: "100%" }} onClick={handleSubmit}>
-              Cập nhật
-            </Button>
-            <Modal
-              title="Thông báo"
-              open={isModalOpen}
-              onOk={handleOk}
-              onCancel={handleCancel}
-            >
-              <p>{error?.message}</p>
-              {error?.assignment && (
-                <>
-                  <hr></hr>
-                  <p>effort: {error?.assignment?.effort}</p>
-                  <p>
-                    {`dateStart: ${moment(error?.assignment?.dateStart).format(
-                      "DD-MM-YYYY"
-                    )}`}
-                  </p>
-                  <p>
-                    {"dateEnd: " +
-                      moment(error?.assignment?.dateEnd).format("DD-MM-YYYY")}
-                  </p>
-                </>
-              )}
-            </Modal>
           </Col>
         </Row>
       </Col>

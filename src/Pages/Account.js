@@ -9,6 +9,7 @@ import {
   Modal,
   notification,
   Divider,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import moment from "moment";
@@ -45,28 +46,24 @@ const { Title, Text } = Typography;
 
 // Không hiểu tại sao cái trang infoAccount lại lỗi phần lấy data từ api, lấy đc data rồi, nhưng sao nó ko hiển thị
 // thông tin cho vào Text thì được, Vào Input thì ko?
-function Account({}) {
+function Account() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [infoAccount, setInfoAccount] = useState();
-  console.log("50", infoAccount);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   const [dataStaffChange, setDataStaffChange] = useState({});
   // const [fileList, setFileList] = useState([]);
   const [error, setError] = useState();
+  const [notify, setNotify] = useState();
   const [loading, setLoading] = useState(false);
   // const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [imageUrl, setImageUrl] = useState();
-  const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
   const [password, setPassword] = useState({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  console.log("63", password);
   const dateFormat = "DD/MM/YYYY";
 
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
   async function getInfoAccount() {
-    console.log("account 69", infoAccount);
     await Axios({
       method: "get",
       url: "../api/staff?infoAccount=true",
@@ -76,21 +73,17 @@ function Account({}) {
     })
       .then((res) => {
         setInfoAccount(res.data);
+        setDataStaffChange(res.data);
       })
       .catch((error) => {
         console.log("App 39 error", error);
       });
   }
   const handleOkPasswordModal = async () => {
-    if (
-      !password.hasOwnProperty("oldPassword") ||
-      !password.hasOwnProperty("newPassword")
-    ) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Bạn nhập thiếu",
-        duration: 2,
-        placement: "top",
+    if (!password?.oldPassword || !password?.newPassword) {
+      messageApi.open({
+        type: "warning",
+        content: "Nhập thiếu",
       });
       return;
     }
@@ -101,45 +94,38 @@ function Account({}) {
       },
     })
       .then((res) => {
-        console.log("editStaff 106", res);
-        setPassword({});
+        message.success("Đổi mk thành công");
         setLoading(false);
+        setPassword({});
       })
       .catch((error) => {
+        message.error(error.response.data.message);
         setError(error.response.data);
-        console.log("editStaff 111", error);
-        setIsModalErrorOpen(true);
+        setPassword({});
         setLoading(false);
       });
+
     setIsModalPasswordOpen(false);
   };
   const handleCancelPasswordModal = () => {
     setIsModalPasswordOpen(false);
   };
-  const handleErrorOk = () => {
-    setIsModalErrorOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalErrorOpen(false);
-  };
 
   const handleSubmit = async () => {
     if (
-      JSON.stringify(dataStaffChange) === "{}" &&
+      JSON.stringify(dataStaffChange) === JSON.stringify(infoAccount) &&
       JSON.stringify(levelSkillChange) === "[]" &&
       imageUrl === infoAccount?.imageUrl
     ) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Không có thay đổi",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Không có thay đổi",
       });
       return;
     }
 
     //thay đổi bảng staff
-    if (JSON.stringify(dataStaffChange) !== "{}") {
+    if (JSON.stringify(dataStaffChange) !== JSON.stringify(infoAccount)) {
       setLoading(true);
       await Axios.put(`/api/staff/${infoAccount?._id}`, dataStaffChange, {
         headers: {
@@ -153,7 +139,6 @@ function Account({}) {
         .catch((error) => {
           setError(error.response.data);
           console.log("editStaff 111", error);
-          setIsModalErrorOpen(true);
           setLoading(false);
         });
     }
@@ -177,7 +162,6 @@ function Account({}) {
           .catch((error) => {
             setError(error.response.data);
             console.log("editStaff 136", error);
-            setIsModalOpen(true);
             setLoading(false);
           });
       });
@@ -244,6 +228,7 @@ function Account({}) {
 
   return (
     <>
+      {contextHolder}
       <Row>
         <Col span={14} offset={5}>
           <Row>
@@ -301,27 +286,45 @@ function Account({}) {
                 {/* <Text>Mật khẩu cũ</Text> */}
                 <Input.Password
                   placeholder="Mật khẩu cũ"
-                  onChange={(e) =>
-                    setPassword((p) => {
-                      return {
-                        ...p,
-                        oldPassword: md5(e.target.value),
-                      };
-                    })
-                  }
+                  onChange={(e) => {
+                    if (e.target.value !== "") {
+                      setPassword((p) => {
+                        return {
+                          ...p,
+                          oldPassword: md5(e.target.value),
+                        };
+                      });
+                    } else {
+                      setPassword((p) => {
+                        return {
+                          ...p,
+                          oldPassword: "",
+                        };
+                      });
+                    }
+                  }}
                 />
                 {/* <Text>Mật khẩu mới</Text> */}
                 <Input.Password
                   style={{ marginTop: "20px" }}
                   placeholder="Mật khẩu mới"
-                  onChange={(e) =>
-                    setPassword((p) => {
-                      return {
-                        ...p,
-                        newPassword: md5(e.target.value),
-                      };
-                    })
-                  }
+                  onChange={(e) => {
+                    if (e.target.value !== "") {
+                      setPassword((p) => {
+                        return {
+                          ...p,
+                          newPassword: md5(e.target.value),
+                        };
+                      });
+                    } else {
+                      setPassword((p) => {
+                        return {
+                          ...p,
+                          newPassword: "",
+                        };
+                      });
+                    }
+                  }}
                 />
               </Modal>
               <Divider></Divider>
@@ -337,7 +340,7 @@ function Account({}) {
             >
               <Typography.Title level={5}>Họ và tên</Typography.Title>
               <Input
-                value={dataStaffChange?.fullName || infoAccount?.fullName}
+                value={dataStaffChange?.fullName}
                 onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, fullName: e.target.value };
@@ -346,7 +349,7 @@ function Account({}) {
               />
               <Typography.Title level={5}>Điện thoại</Typography.Title>
               <Input
-                value={dataStaffChange?.phoneNumber || infoAccount?.phoneNumber}
+                value={dataStaffChange?.phoneNumber}
                 onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, phoneNumber: e.target.value };
@@ -355,9 +358,7 @@ function Account({}) {
               />
               <Typography.Title level={5}>Ngày sinh</Typography.Title>
               <DatePicker
-                value={moment(
-                  dataStaffChange?.birthYear || infoAccount?.birthYear
-                )}
+                value={moment(dataStaffChange?.birthYear)}
                 style={{ width: "100%" }}
                 onChange={(date, dateString) => {
                   setDataStaffChange((d) => {
@@ -476,31 +477,6 @@ function Account({}) {
                     >
                       Cập nhật
                     </Button>
-                    <Modal
-                      title="Thông báo"
-                      open={isModalOpen}
-                      onOk={handleOk}
-                      onCancel={handleCancel}
-                    >
-                      <p>{error?.message}</p>
-                      {error?.assignment && (
-                        <>
-                          <hr></hr>
-                          <p>effort: {error?.assignment?.effort}</p>
-                          <p>
-                            {`dateStart: ${moment(
-                              error?.assignment?.dateStart
-                            ).format("DD-MM-YYYY")}`}
-                          </p>
-                          <p>
-                            {"dateEnd: " +
-                              moment(error?.assignment?.dateEnd).format(
-                                "DD-MM-YYYY"
-                              )}
-                          </p>
-                        </>
-                      )}
-                    </Modal>
                   </Row>
                 </Col>
               </Row>

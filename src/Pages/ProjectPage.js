@@ -6,6 +6,7 @@ import workingDay from "../utils";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 import moment from "moment";
+import { roleAdmin, TitleTable } from "../utils";
 const { Title, Text } = Typography;
 const { Column } = Table;
 
@@ -15,14 +16,16 @@ function ProjectPage() {
   const [infoAccount, setInfoAccount] = useState();
   const columns = [
     {
-      title: "Tên dự án",
+      title: <TitleTable value="Tên dự án" />,
       dataIndex: "projectName",
       key: "projectName",
       render: (projectName, record) => (
         <>
           <Link
             to={
-              infoAccount?.role === "boss" ? `/edit-project/${record._id}` : "#"
+              infoAccount?.role === roleAdmin
+                ? `/edit-project/${record._id}`
+                : "#"
             }
             state={{ data: record }}
           >
@@ -32,28 +35,28 @@ function ProjectPage() {
       ),
     },
     {
-      title: "Thời gian dự kiến (mm)",
+      title: <TitleTable value="Thời gian dự kiến (mm)" />,
       dataIndex: "thoigiandukien",
       render: (text) => text,
     },
     {
-      title: "Đã chạy (mm)",
+      title: <TitleTable value="Đã chạy (mm)" />,
       dataIndex: "dachay",
       key: "dachay",
       render: (text) => text,
     },
     {
-      title: "Còn lại (mm)",
+      title: <TitleTable value="Còn lại (mm)" />,
       render: (text, record) => {
         return Math.round((record.thoigiandukien - record.dachay) * 100) / 100;
       },
     },
     {
-      title: "PM/Leader",
+      title: <TitleTable value="PM/Leader" />,
       dataIndex: "nameLeader",
     },
     {
-      title: "Ngày bắt đầu",
+      title: <TitleTable value="Ngày bắt đầu" />,
       dataIndex: "dateStart",
       render: (dateStart) => {
         let dtStart = new Date(dateStart);
@@ -62,7 +65,7 @@ function ProjectPage() {
       key: "dateStart",
     },
     {
-      title: "Trạng thái",
+      title: <TitleTable value="Trạng thái" />,
       dataIndex: "status",
       key: "status",
     },
@@ -157,7 +160,7 @@ function ProjectPage() {
     <>
       <Row justify="space-between">
         <Title level={3}>Danh sách dự án</Title>
-        {infoAccount?.role === "boss" && (
+        {infoAccount?.role === roleAdmin && (
           <Button type="primary" onClick={() => navigate("../create-project")}>
             Thêm mới
           </Button>

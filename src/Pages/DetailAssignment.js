@@ -5,6 +5,7 @@ import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import moment from "moment";
 import { getToken } from "../Components/useToken";
+import { roleAdmin, TitleTable } from "../utils";
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
@@ -25,12 +26,12 @@ function DetailAssignment() {
       dataIndex: "projectName",
       fixed: "left",
       width: "200px",
-      title: "Dự án",
+      title: <TitleTable value="Dự án" />,
       render: (projectName, record) => {
         return (
           <Link
             to={
-              infoAccount?.role === "boss"
+              infoAccount?.role === roleAdmin
                 ? `/assignments-of-staff?idStaff=${idStaff}&idProject=${record._id}`
                 : "#"
             }
@@ -81,8 +82,8 @@ function DetailAssignment() {
       i = moment(i).add(1, "days")
     ) {
       dateColumnList.push({
-        title: i.format("DD/MM"),
-        width: "70px",
+        title: <TitleTable value={i.format("DD/MM")} />,
+        width: "90px",
         dataIndex: "totalEffort",
         render: (totalEffort, record) => {
           //check xem có phải t7, cn không
@@ -138,7 +139,7 @@ function DetailAssignment() {
             return (
               <Link
                 to={
-                  infoAccount?.role === "boss"
+                  infoAccount?.role === roleAdmin
                     ? `/edit-assignment/${totalEffort[indexOfAssignment]?._id}`
                     : "#"
                 }
@@ -253,7 +254,7 @@ function DetailAssignment() {
             setDateColumnEnd(dates[1]);
           }}
         />
-        {infoAccount?.role === "boss" && (
+        {infoAccount?.role === roleAdmin && (
           <Button type="primary">
             <Link to={`/create-assignment?idStaff=${idStaff}`} state={{ data }}>
               Thêm mới

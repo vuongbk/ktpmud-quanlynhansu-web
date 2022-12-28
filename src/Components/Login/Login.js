@@ -63,7 +63,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "./Login.css";
 import Axios from "axios";
-import { Button, Input, Modal, Typography } from "antd";
+import { Button, Input, Modal, Typography, message } from "antd";
 import md5 from "md5";
 const { Title } = Typography;
 
@@ -73,18 +73,26 @@ async function loginUser(credentials) {
     data: credentials,
   })
     .then((res) => res.data.token)
-    .catch((error) => console.log("Login 11", error));
+    .catch((error) => {});
 }
 export default function Login({ setToken, setInfoAccount }) {
+  const [messageApi, contextHolder] = message.useMessage();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("login 23");
-    const token = await loginUser({
-      email,
-      password,
-    });
+    const token = await Axios("/api/login", {
+      method: "POST",
+      data: { email, password },
+    })
+      .then((res) => res.data.token)
+      .catch((error) => {
+        messageApi.open({
+          type: "error",
+          content: error.response.data.message,
+        });
+      });
     setToken(token);
   };
   return (
@@ -94,6 +102,7 @@ export default function Login({ setToken, setInfoAccount }) {
         backgroundImage: "url('login.jpg')",
       }}
     >
+      {contextHolder}
       <Modal
         title={<h1>Đăng nhập</h1>}
         open

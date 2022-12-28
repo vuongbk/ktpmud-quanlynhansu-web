@@ -11,6 +11,7 @@ import {
   Select,
   Popconfirm,
   notification,
+  message,
 } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -19,10 +20,12 @@ import { Link, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
+import { roleAdmin, TitleModal, TitleTable } from "../utils";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 function SkillsOfStaffs() {
+  const [messageApi, contextHolder] = message.useMessage();
   const [infoAccount, setInfoAccount] = useState();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -34,6 +37,7 @@ function SkillsOfStaffs() {
   console.log("34", levelSkillChange);
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
+  console.log("40", newSkill);
   const [skills, setSkills] = useState();
   const [searchSkill, setSearchSkill] = useState("");
   const inputSearchSkill = useRef(null);
@@ -82,11 +86,9 @@ function SkillsOfStaffs() {
       Object.keys(newSkill).length === 1 ||
       Object.keys(newSkill).length === 2
     ) {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Chọn thiếu",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Chọn thiếu",
       });
       return;
     }
@@ -100,18 +102,19 @@ function SkillsOfStaffs() {
       },
     })
       .then((res) => {
-        console.log("SkillsOfStaffs 69", res);
         setLoading(false);
         setIsModalSkillOpen(false);
+        setNewSkill({});
         navigate(0);
       })
       .catch((error) => {
-        console.log("SkillsOfStaffs 75", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   };
   const handleCancelSkillModal = () => {
     setIsModalSkillOpen(false);
+    setNewSkill({});
   };
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     console.log("103");
@@ -265,7 +268,7 @@ function SkillsOfStaffs() {
   });
   const columns = [
     {
-      title: "Họ và tên",
+      title: <TitleTable value="Họ và tên" />,
       dataIndex: "fullName",
       key: "fullName",
       width: 170,
@@ -273,18 +276,18 @@ function SkillsOfStaffs() {
       ...getColumnSearchProps("fullName"),
     },
     {
-      title: "Danh sách kỹ năng",
+      title: <TitleTable value="Danh sách kỹ năng" />,
       dataIndex: "idSkills",
       ...getSearchSkillProps("idSkills"),
     },
     // ...getSkill(),
     //Giám đốc thì mới hiển thị cột thao tác
     {
-      title: "Thao tác",
+      title: <TitleTable value="Thao tác" />,
       fixed: "right",
       width: 190,
       render: (record) => {
-        if (infoAccount?.role === "boss") {
+        if (infoAccount?.role === roleAdmin) {
           return (
             <Row>
               <Col span={24}>
@@ -315,7 +318,7 @@ function SkillsOfStaffs() {
                 <Modal
                   // maskStyle={{ opacity: 0.5 }}
                   open={isModalSkillOpen}
-                  title="Thêm skill mới"
+                  title={<TitleModal value="Thêm skill mới" />}
                   onOk={() => handleOkSkillModal()}
                   onCancel={handleCancelSkillModal}
                   footer={[
@@ -428,13 +431,10 @@ function SkillsOfStaffs() {
       const levelSkillOfStaff = levelSkillChange.filter((value) => {
         return value.idStaff === idStaff;
       });
-      console.log("skillpage 308", levelSkillOfStaff);
       if (JSON.stringify(levelSkillOfStaff) === "[]") {
-        notification.open({
-          message: <Title level={4}>Thông báo</Title>,
-          description: "Không có thay đổi",
-          duration: 2,
-          placement: "top",
+        messageApi.open({
+          type: "warning",
+          content: "Không có thay đổi",
         });
         return;
       }
@@ -460,11 +460,9 @@ function SkillsOfStaffs() {
           });
       });
     } else {
-      notification.open({
-        message: <Title level={4}>Thông báo</Title>,
-        description: "Không có thay đổi",
-        duration: 2,
-        placement: "top",
+      messageApi.open({
+        type: "warning",
+        content: "Không có thay đổi",
       });
       return;
     }
@@ -532,38 +530,18 @@ function SkillsOfStaffs() {
   }
   return (
     <>
+      {contextHolder}
+
       <Row justify="space-between">
         <Title level={3}>Danh sách các kỹ năng của nhân viên</Title>
-      </Row>
-      <Row>
-        <Space wrap style={{ marginBottom: "5px" }}>
-          {skills
-            ? skills.map((value, index) => {
-                return (
-                  <Button
-                    type="danger"
-                    onClick={() => {
-                      setSearchSkill((oldValue) => {
-                        //nếu click lại lần 2 vào button thì nó sẽ reset
-                        if (oldValue === value.skillName) return "";
-                        else return value.skillName;
-                      });
-                      inputSearchSkill.current?.click();
-                    }}
-                  >
-                    {value.skillName}
-                  </Button>
-                );
-              })
-            : ""}
-          {infoAccount?.role === "boss" && (
-            <Button type="primary" onClick={() => navigate("../skills")}>
-              Chỉnh sửa danh sách kỹ năng
-            </Button>
-          )}
-        </Space>
+        {infoAccount?.role === roleAdmin && (
+          <Button type="primary" onClick={() => navigate("../skills")}>
+            Danh sách kỹ năng
+          </Button>
+        )}
       </Row>
       <Table
+        locale={{ filterReset: "Đặt lại" }}
         dataSource={data}
         pagination={{ pageSize: 4 }}
         rowKey={(data) => data.email}

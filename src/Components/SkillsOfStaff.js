@@ -12,17 +12,16 @@ import {
 import { useState, useEffect } from "react";
 import Axios from "axios";
 import { getToken } from "./useToken";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
-  console.log("20", infoStaff);
+  const location = useLocation();
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
   const [loading, setLoading] = useState(false);
   const [skillsOfStaff, setSkillsOfStaff] = useState();
-  console.log("25", skillsOfStaff);
   const navigate = useNavigate();
   const [skills, setSkills] = useState();
   // const [levelSkillChange, setLevelSkillChange] = useState([]);
@@ -103,7 +102,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
         setLoading(false);
       });
     setIsModalSkillOpen(false);
-    navigate(0);
+    // navigate(0);
   };
   const handleCancelSkillModal = () => {
     setIsModalSkillOpen(false);
@@ -111,73 +110,10 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
   return (
     <>
       <Divider orientation="left" orientationMargin={0}>
-        <Title level={4} style={{ marginTop: "35px", marginBottom: "35px" }}>
+        <Title level={4} style={{ marginTop: "35px", marginBottom: "15px" }}>
           Kinh nghiệm
         </Title>
       </Divider>
-      <Row>
-        <Button type="primary" onClick={() => setIsModalSkillOpen(true)}>
-          Thêm skill
-        </Button>
-        <Modal
-          open={isModalSkillOpen}
-          title={<Title level={4}>Thêm skill mới</Title>}
-          // onOk={handleOkSkillModal}
-          onCancel={handleCancelSkillModal}
-          footer={[
-            <Button key="back" onClick={handleCancelSkillModal}>
-              Hủy
-            </Button>,
-            <Button
-              key="submit"
-              type="primary"
-              loading={loading}
-              onClick={handleOkSkillModal}
-            >
-              Thêm skill
-            </Button>,
-          ]}
-        >
-          {/* <Text>Thêm levelSkill mới</Text> */}
-          <Row justify="space-between">
-            <Col span={12}>
-              <Title level={5} style={{ marginTop: "0" }}>
-                Tên skill
-              </Title>
-              <Select
-                labelInValue
-                // defaultValue={data?.nameLeader}
-                onChange={(event) => {
-                  const e = JSON.parse(event.value);
-                  setNewSkill((d) => {
-                    return { ...d, idSkill: e._id, maxLevel: e.maxLevel };
-                  });
-                }}
-                style={{
-                  width: "100%",
-                }}
-                options={options}
-              ></Select>
-            </Col>
-            <Col span={6} offset={6}>
-              <Title level={5} style={{ marginTop: "0" }}>
-                Cấp
-              </Title>
-              <InputNumber
-                min={0}
-                max={newSkill?.maxLevel}
-                style={{ width: "50px" }}
-                defaultValue={newSkill?.maxLevel}
-                onChange={(e) => {
-                  setNewSkill((d) => {
-                    return { ...d, level: e };
-                  });
-                }}
-              />
-            </Col>
-          </Row>
-        </Modal>
-      </Row>
 
       <Row>
         {skillsOfStaff &&
@@ -187,6 +123,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
               <Col xs={24} sm={12} lg={6} key={index}>
                 <Title level={5}>{value.nameSkill}</Title>
                 <InputNumber
+                  disabled={location.pathname === "/account" ? true : false}
                   min={0}
                   max={value.maxLevel}
                   style={{ width: "50px" }}
