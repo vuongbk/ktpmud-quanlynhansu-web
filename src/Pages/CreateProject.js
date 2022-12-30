@@ -246,7 +246,7 @@ function CreateProject() {
                   type="primary"
                   onClick={handleSubmit}
                 >
-                  Cập nhật
+                  Thêm mới
                 </Button>
                 <Modal
                   title="Thông báo"

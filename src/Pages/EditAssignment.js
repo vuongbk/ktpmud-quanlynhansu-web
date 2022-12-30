@@ -12,7 +12,7 @@ import {
   Modal,
   message,
 } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import moment, { ISO_8601 } from "moment";
 import Axios from "axios";
@@ -23,6 +23,7 @@ const { Option } = Select;
 const { Title, Text } = Typography;
 
 const EditAssignment = () => {
+  const effortRef = useRef();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation()?.state?.data);
@@ -64,7 +65,8 @@ const EditAssignment = () => {
           navigate(-1);
         })
         .catch((error) => {
-          setError(error.response.data);
+          // setError(error.response.data);
+          message.error(error.response.data.message);
           console.log("editAssign 62", error);
           setIsModalOpen(true);
           setLoading(false);
@@ -87,7 +89,8 @@ const EditAssignment = () => {
         setLoading(false);
       })
       .catch((error) => {
-        setError(error.response.data);
+        // setError(error.response.data);
+        message.error(error.response.data.message);
         console.log("editAssign 87", error);
         setIsModalOpen(true);
         setLoading(false);
@@ -166,13 +169,10 @@ const EditAssignment = () => {
                 });
               }}
             />
-            <Title level={5}>Phân công dự án</Title>
+            <Title level={5}>Phân công dự án (%)</Title>
             <Input
-              value={
-                dataChange.effort !== undefined
-                  ? dataChange.effort
-                  : data?.asignment.effort
-              }
+              ref={effortRef}
+              defaultValue={dataChange.effort || data?.asignment.effort}
               onChange={(e) => {
                 setDataChange((d) => {
                   return { ...d, effort: Number(e.target.value) };
@@ -194,7 +194,8 @@ const EditAssignment = () => {
                   >
                     Cập nhật
                   </Button>
-                  <Modal
+                  {/* thông báo thông tin lỗi, effort, ngày bđ, kt */}
+                  {/* <Modal
                     title="Thông báo"
                     open={isModalOpen}
                     onOk={handleOk}
@@ -218,7 +219,7 @@ const EditAssignment = () => {
                         </p>
                       </>
                     )}
-                  </Modal>
+                  </Modal> */}
                 </Row>
                 <Row>
                   <Popconfirm

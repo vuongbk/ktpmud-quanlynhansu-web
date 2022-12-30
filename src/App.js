@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import Home from "./Pages/Home";
 import Staffs from "./Pages/Staffs";
 import "./App.css";
 import EditStaffPage from "./Pages/EditStaffPage";
@@ -22,7 +21,6 @@ import CreateProject from "./Pages/CreateProject";
 import CreateAssignment from "./Pages/CreateAssignment";
 import Account from "./Pages/Account";
 import AssignmentsOfStaff from "./Pages/AssignmentsOfStaff";
-import CreateSkill from "./Pages/CreateSkill";
 import Skills from "./Pages/Skills";
 
 const { Header, Footer, Content } = Layout;
@@ -117,7 +115,7 @@ function App() {
                       return {
                         fontSize: "16px",
                         display: "block",
-                        color: isActive ? "gray" : "white",
+                        color: isActive ? "#40a9ff" : "white",
                       };
                     }}
                     to="/assignment"
@@ -129,7 +127,7 @@ function App() {
                       return {
                         fontSize: "16px",
                         display: "block",
-                        color: isActive ? "gray" : "white",
+                        color: isActive ? "#40a9ff" : "white",
                       };
                     }}
                     to="/staff"
@@ -141,7 +139,7 @@ function App() {
                       return {
                         fontSize: "16px",
                         display: "block",
-                        color: isActive ? "gray" : "white",
+                        color: isActive ? "#40a9ff" : "white",
                       };
                     }}
                     to="/project"
@@ -153,7 +151,7 @@ function App() {
                       return {
                         fontSize: "16px",
                         display: "block",
-                        color: isActive ? "gray" : "white",
+                        color: isActive ? "#40a9ff" : "white",
                       };
                     }}
                     to="/skills-of-staffs"
@@ -199,7 +197,8 @@ function App() {
         }}
       >
         <Routes>
-          <Route index element={<Home />} />
+          <Route index element={<AssignmentPage />} />
+          <Route path="/assignment" element={<AssignmentPage />} />
           <Route path="/staff" element={<Staffs />} />
           <Route path="/edit-staff/:idStaff" element={<EditStaffPage />} />
           <Route path="/create-staff" element={<CreateStaff />} />
@@ -210,9 +209,7 @@ function App() {
             element={<EditProjectPage />}
           />
           <Route path="/skills-of-staffs" element={<SkillsOfStaffs />} />
-          <Route path="/create-skill" element={<CreateSkill />} />
           <Route path="/skills" element={<Skills />} />
-          <Route path="/assignment" element={<AssignmentPage />} />
           <Route
             path="/assignments-of-staff"
             element={<AssignmentsOfStaff />}

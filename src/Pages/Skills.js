@@ -21,10 +21,12 @@ import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 import { TitleTable } from "../utils";
+import CreateSkill from "./CreateSkill";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 function Skills() {
+  const [isModalCreateSkillOpen, setIsModalCreateSkillOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -288,9 +290,13 @@ function Skills() {
 
       <Row justify="space-between">
         <Title level={3}>Danh sách các kỹ năng của nhân viên</Title>
-        <Button type="primary" onClick={() => navigate("../create-skill")}>
+        <Button type="primary" onClick={() => setIsModalCreateSkillOpen(true)}>
           Thêm mới
         </Button>
+        <CreateSkill
+          isModalCreateSkillOpen={isModalCreateSkillOpen}
+          setIsModalCreateSkillOpen={setIsModalCreateSkillOpen}
+        />
       </Row>
       <Table
         dataSource={skills}

@@ -12,7 +12,7 @@ import {
   Modal,
   message,
 } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Link,
   useLocation,
@@ -22,13 +22,14 @@ import {
 } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
-import workingDay from "../utils";
+import workingDay, { TitleModal } from "../utils";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 const CreateAssignment = () => {
+  const effortRef = useRef();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation()?.state?.data);
@@ -81,6 +82,13 @@ const CreateAssignment = () => {
         content: "Nhập thiếu",
       });
       return;
+    }
+    if (dataChange.effort <= 0 || dataChange.effort > 100) {
+      messageApi.open({
+        type: "warning",
+        content: "phân công dự án lớn phải hơn 0%, bé hơn 100%",
+      });
+      effortRef.current.focus();
     } else {
       setLoading(true);
       await Axios.post(`../api/assignment`, dataChange, {
@@ -94,7 +102,8 @@ const CreateAssignment = () => {
           navigate(-1);
         })
         .catch((error) => {
-          setError(error.response.data);
+          // setError(error.response.data);
+          message.error(error.response.data.message);
           console.log("createAssign 68", error);
           setIsModalOpen(true);
           setLoading(false);
@@ -176,10 +185,11 @@ const CreateAssignment = () => {
             ) : (
               <Select
                 labelInValue
+                value={dataChange?.nameStaff}
                 onChange={(e) => {
                   console.log("createProject 230", e);
                   setDataChange((d) => {
-                    return { ...d, idStaff: e.value };
+                    return { ...d, idStaff: e.value, nameStaff: e.label };
                   });
                 }}
                 style={{
@@ -193,6 +203,7 @@ const CreateAssignment = () => {
             <DatePicker
               format={dateFormat}
               style={{ width: "100%" }}
+              value={moment(dataChange?.dateStart)}
               onChange={(date, dateString) => {
                 setDataChange((d) => {
                   return {
@@ -204,7 +215,8 @@ const CreateAssignment = () => {
             />
             <Title level={5}>Phân công dự án (%)</Title>
             <Input
-              value={dataChange?.effort}
+              ref={effortRef}
+              defaultValue={dataChange?.effort}
               onChange={(e) => {
                 setDataChange((d) => {
                   return { ...d, effort: Number(e.target.value) };
@@ -223,10 +235,11 @@ const CreateAssignment = () => {
                   type={"primary"}
                   onClick={handleSubmit}
                 >
-                  Cập nhật
+                  Thêm mới
                 </Button>
-                <Modal
-                  title="Thông báo"
+                {/* modal thông báo lỗi, thông báo thông tin như tổng effort, ngày bắt đầu trùng */}
+                {/* <Modal
+                  title={<TitleModal value="Thông báo" />}
                   open={isModalOpen}
                   onOk={handleOk}
                   onCancel={handleCancel}
@@ -235,21 +248,21 @@ const CreateAssignment = () => {
                   {error?.assignment && (
                     <>
                       <hr></hr>
-                      <p>effort: {error?.assignment?.effort}</p>
+                      <p>Phân công: {error?.assignment?.effort}%</p>
                       <p>
-                        {`dateStart: ${moment(
+                        {`Ngày bắt đầu: ${moment(
                           error?.assignment?.dateStart
                         ).format("DD-MM-YYYY")}`}
                       </p>
                       <p>
-                        {"dateEnd: " +
+                        {"Ngày kết thúc: " +
                           moment(error?.assignment?.dateEnd).format(
                             "DD-MM-YYYY"
                           )}
                       </p>
                     </>
                   )}
-                </Modal>
+                </Modal> */}
               </Col>
             </Row>
           </Col>
@@ -258,10 +271,11 @@ const CreateAssignment = () => {
             <Title level={5}>Dự án</Title>
             <Select
               labelInValue
+              value={dataChange.nameProject}
               onChange={(e) => {
                 console.log("createProject 230", e);
                 setDataChange((d) => {
-                  return { ...d, idProject: e.value };
+                  return { ...d, idProject: e.value, nameProject: e.label };
                 });
               }}
               style={{
@@ -273,6 +287,7 @@ const CreateAssignment = () => {
             <DatePicker
               format={dateFormat}
               style={{ width: "100%" }}
+              value={moment(dataChange?.dateEnd)}
               onChange={(date, dateString) => {
                 setDataChange((d) => {
                   return {

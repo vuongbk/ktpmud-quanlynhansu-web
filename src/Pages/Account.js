@@ -457,8 +457,17 @@ function Account() {
                 setLevelSkillChange={setLevelSkillChange}
                 levelSkillChange={levelSkillChange}
               />
-              <Row style={{ marginTop: "50px" }} justify="space-between">
-                <Col span={5}>
+            </Col>
+          </Row>
+          <Row>
+            <Col
+              xs={24}
+              md={{
+                span: 10,
+              }}
+            >
+              <Row style={{ marginTop: "80px" }} justify="space-between">
+                <Col span={10}>
                   <Button
                     style={{ width: "100%" }}
                     onClick={() => {
@@ -468,7 +477,7 @@ function Account() {
                     Quay lại
                   </Button>
                 </Col>
-                <Col span={5} offset={14}>
+                <Col span={10}>
                   <Row>
                     <Button
                       type="primary"

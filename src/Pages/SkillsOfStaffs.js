@@ -29,10 +29,12 @@ function SkillsOfStaffs() {
   const [infoAccount, setInfoAccount] = useState();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  console.log("32", data);
   const searchInput = useRef(null);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [loading, setLoading] = useState(false);
+  console.log("loading", loading);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   console.log("34", levelSkillChange);
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
@@ -114,7 +116,6 @@ function SkillsOfStaffs() {
   };
   const handleCancelSkillModal = () => {
     setIsModalSkillOpen(false);
-    setNewSkill({});
   };
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     console.log("103");
@@ -296,6 +297,7 @@ function SkillsOfStaffs() {
                     style={{ fontSize: "10px" }}
                     size="small"
                     type="primary"
+                    ghost
                     onClick={() => handleSubmit(record._id)}
                   >
                     Cập nhật
@@ -404,11 +406,14 @@ function SkillsOfStaffs() {
                         Cấp
                       </Title>
                       <InputNumber
-                        min={0}
+                        min={1}
                         max={newSkill?.maxLevel}
                         style={{ width: "50px" }}
-                        defaultValue={newSkill?.maxLevel}
+                        defaultValue={
+                          newSkill?.maxLevel ? newSkill?.maxLevel : ""
+                        }
                         onChange={(e) => {
+                          console.log("417", newSkill);
                           setNewSkill((d) => {
                             return { ...d, level: e };
                           });
@@ -496,6 +501,7 @@ function SkillsOfStaffs() {
       },
     })
       .then((res) => {
+        console.log("501", res);
         setLoading(false);
         setData(res.data.staffSkill);
       })
@@ -505,6 +511,7 @@ function SkillsOfStaffs() {
       });
   }
   function getSkills() {
+    setLoading(true);
     Axios({
       method: "get",
       url: "/api/skill",
@@ -515,9 +522,11 @@ function SkillsOfStaffs() {
       .then((res) => {
         console.log("skillPage 388 getSkills success", res.data.skill);
         setSkills(res.data.skill);
+        setLoading(false);
       })
       .catch((error) => {
         console.log("skillPage 392", error);
+        setLoading(false);
       });
   }
   React.useEffect(() => {
