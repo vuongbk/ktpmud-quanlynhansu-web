@@ -21,6 +21,7 @@ import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 import { roleAdmin, TitleModal, TitleTable } from "../utils";
+import RowSkillPage from "../Components/RowSkillPage";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
@@ -29,20 +30,15 @@ function SkillsOfStaffs() {
   const [infoAccount, setInfoAccount] = useState();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
-  console.log("32", data);
   const searchInput = useRef(null);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [loading, setLoading] = useState(false);
-  console.log("loading", loading);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
-  console.log("34", levelSkillChange);
+  console.log("38", levelSkillChange);
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
-  console.log("40", newSkill);
   const [skills, setSkills] = useState();
-  const [searchSkill, setSearchSkill] = useState("");
-  const inputSearchSkill = useRef(null);
   let options = skills ? getOptions() : [];
   function getOptions() {
     return skills.map((value, index) => {
@@ -84,13 +80,16 @@ function SkillsOfStaffs() {
       });
   }
   const handleOkSkillModal = async () => {
-    if (
-      Object.keys(newSkill).length === 1 ||
-      Object.keys(newSkill).length === 2
-    ) {
+    if (!newSkill.idSkill) {
       messageApi.open({
         type: "warning",
-        content: "Chọn thiếu",
+        content: "Thiếu tên skill",
+      });
+      return;
+    } else if (!newSkill.level) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu cấp độ",
       });
       return;
     }
@@ -127,6 +126,7 @@ function SkillsOfStaffs() {
     clearFilters();
     setSearchText("");
   };
+
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -234,36 +234,18 @@ function SkillsOfStaffs() {
   });
   const getSearchSkillProps = (dataIndex) => ({
     filters: filterSkill,
-    // filterIcon: (filtered) => <></>,
     onFilter: (value, record) => {
       console.log("288", value);
       return record.idSkills.find((vl) => vl.skillName === value);
     },
     render: (idSkills, record) => {
       return (
-        <Row>
-          {idSkills.map((skill, index) => {
-            // console.log("227", skill.skillName);
-            return (
-              <Col style={{ marginRight: "20px" }} key={index}>
-                <Row>
-                  <Text>{skill.skillName}</Text>
-                </Row>
-                <Row>
-                  <InputNumber
-                    min={0}
-                    max={skill.maxLevel}
-                    style={{ width: "50px" }}
-                    defaultValue={skill.level}
-                    onChange={(value) => {
-                      handleChange(value, skill._id, record._id);
-                    }}
-                  />
-                </Row>
-              </Col>
-            );
-          })}
-        </Row>
+        <RowSkillPage
+          idSkills={idSkills}
+          record={record}
+          setLevelSkillChange={setLevelSkillChange}
+          levelSkillChange={levelSkillChange}
+        />
       );
     },
   });
@@ -310,7 +292,7 @@ function SkillsOfStaffs() {
                     onClick={() => {
                       setIsModalSkillOpen(true);
                       setNewSkill((d) => {
-                        return { ...d, idStaff: record._id };
+                        return { idStaff: record._id };
                       });
                     }}
                   >
@@ -433,6 +415,7 @@ function SkillsOfStaffs() {
   ];
   async function handleSubmit(idStaff) {
     if (JSON.stringify(levelSkillChange) !== "[]") {
+      //Lọc ra nhân viên nằm cùng hàng với nút cập nhật vừa bấm
       const levelSkillOfStaff = levelSkillChange.filter((value) => {
         return value.idStaff === idStaff;
       });
@@ -455,12 +438,11 @@ function SkillsOfStaffs() {
           }
         )
           .then((res) => {
-            console.log("skillpage 205", res);
             setLoading(false);
             navigate(0);
           })
           .catch((error) => {
-            console.log("skillpage 208", error);
+            message.error(error.message);
             setLoading(false);
           });
       });
@@ -472,27 +454,7 @@ function SkillsOfStaffs() {
       return;
     }
   }
-  function handleChange(levelSkill, idLevelSkill, idStaff) {
-    setLevelSkillChange((d) => {
-      //tìm vị trí trùng skill
-      const indexOfSkill = d.findIndex(
-        (value) => value.idLevelSkill === idLevelSkill
-      );
-      if (indexOfSkill !== -1) {
-        d[indexOfSkill].levelSkill = levelSkill;
-        return d;
-      } else {
-        return [
-          ...d,
-          {
-            levelSkill: levelSkill,
-            idLevelSkill: idLevelSkill,
-            idStaff: idStaff,
-          },
-        ];
-      }
-    });
-  }
+
   async function getNameSkillAndStaff() {
     setLoading(true);
     await Axios.get("/api/name-of-staff-and-skill", {
@@ -501,7 +463,6 @@ function SkillsOfStaffs() {
       },
     })
       .then((res) => {
-        console.log("501", res);
         setLoading(false);
         setData(res.data.staffSkill);
       })
@@ -520,7 +481,6 @@ function SkillsOfStaffs() {
       },
     })
       .then((res) => {
-        console.log("skillPage 388 getSkills success", res.data.skill);
         setSkills(res.data.skill);
         setLoading(false);
       })
