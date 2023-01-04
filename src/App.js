@@ -12,7 +12,7 @@ import DetailAssignment from "./Pages/DetailAssignment";
 import EditAssignment from "./Pages/EditAssignment";
 import SkillsOfStaffs from "./Pages/SkillsOfStaffs";
 import Login from "./Components/Login/Login";
-import useToken from "./Components/useToken";
+import useToken, { removeToken } from "./Components/useToken";
 import Logout from "./Components/Logout";
 import CreateStaff from "./Pages/CreateStaff";
 import Axios from "axios";
@@ -84,7 +84,7 @@ function App() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
-        console.log("App 39 error", error);
+        return <Login setToken={setToken} setInfoAccount={setInfoAccount} />;
       });
   }
 
