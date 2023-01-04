@@ -11,7 +11,6 @@ function RowSkillPage({
   console.log("RowSkillPage");
   const getChangeLevelSkill = (idLevelSkill) => {
     if (JSON.stringify(levelSkillChange) !== "[]") {
-      console.log("14", levelSkillChange);
       return levelSkillChange.find(
         (value) => value.idLevelSkill === idLevelSkill
       );
@@ -41,7 +40,6 @@ function RowSkillPage({
   return (
     <Row>
       {idSkills.map((skill, index) => {
-        console.log("43", skill);
         return (
           <Col style={{ marginRight: "20px" }} key={index}>
             <Row>

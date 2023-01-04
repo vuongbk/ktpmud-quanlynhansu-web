@@ -8,6 +8,7 @@ import {
   Select,
   notification,
   InputNumber,
+  message,
 } from "antd";
 import { useState, useEffect } from "react";
 import Axios from "axios";
@@ -36,7 +37,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
         setSkillsOfStaff(res.data.skill);
       })
       .catch((error) => {
-        console.log("error.config", error.config);
+        message.error(error.message);
       });
   }
   function getSkills() {
