@@ -23,6 +23,7 @@ import Upload from "antd/lib/upload/Upload.js";
 import { getToken } from "../Components/useToken.js";
 const { Option } = Select;
 const { Text, Title } = Typography;
+const hassedemptypassword = "d41d8cd98f00b204e9800998ecf8427e";
 
 function CreateStaff() {
   const [messageApi, contextHolder] = message.useMessage();
@@ -40,39 +41,25 @@ function CreateStaff() {
   // console.log("edit staff 57", imageUrl);
   //state dùng để thêm department
   const [departments, setDepartments] = useState(["Thanh Hóa", "Hà Nội"]);
-  const [nameDepartment, setNameDepartment] = useState("");
   const dateFormat = "DD/MM/YYYY";
-  const inputRef = useRef(null);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-  const onNameDepartmentChange = (event) => {
-    setNameDepartment(event.target.value);
-  };
-
-  const addItem = (e) => {
-    e.preventDefault();
-    setDepartments([...departments, nameDepartment]);
-    setNameDepartment("");
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
-  };
 
   const handleSubmit = async () => {
-    if (
-      Object.keys(dataStaffChange).length === 1 ||
-      !dataStaffChange.hasOwnProperty("fullName") ||
-      !dataStaffChange.hasOwnProperty("email")
-    ) {
+    if (!dataStaffChange?.fullName) {
       messageApi.open({
         type: "warning",
-        content: "Thiếu họ tên, email",
+        content: "Thiếu họ tên",
+      });
+      return;
+    } else if (!dataStaffChange?.email) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu email",
+      });
+      return;
+    } else if (dataStaffChange?.password === hassedemptypassword) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu password",
       });
       return;
     }
@@ -86,13 +73,10 @@ function CreateStaff() {
         },
       })
         .then((res) => {
-          console.log("editStaff 101", res);
           navigate(-1);
         })
         .catch((error) => {
-          setError(error.response.data);
-          console.log("editStaff 105", error);
-          setIsModalOpen(true);
+          message.error(error.response.data.message);
         });
     }
     setLoading(false);
@@ -157,35 +141,35 @@ function CreateStaff() {
                   return { ...d, department: e };
                 });
               }}
-              dropdownRender={(menu) => (
-                <>
-                  {menu}
-                  <Divider
-                    style={{
-                      margin: "8px 0",
-                    }}
-                  />
-                  <Space
-                    style={{
-                      padding: "0 8px 4px",
-                    }}
-                  >
-                    <Input
-                      placeholder="Please enter item"
-                      ref={inputRef}
-                      defaultValue={nameDepartment}
-                      onChange={onNameDepartmentChange}
-                    />
-                    <Button
-                      type="text"
-                      icon={<PlusOutlined />}
-                      onClick={addItem}
-                    >
-                      Add item
-                    </Button>
-                  </Space>
-                </>
-              )}
+              // dropdownRender={(menu) => (
+              //   <>
+              //     {menu}
+              //     <Divider
+              //       style={{
+              //         margin: "8px 0",
+              //       }}
+              //     />
+              //     <Space
+              //       style={{
+              //         padding: "0 8px 4px",
+              //       }}
+              //     >
+              //       <Input
+              //         placeholder="Thêm phòng ban"
+              //         ref={inputRef}
+              //         defaultValue={nameDepartment}
+              //         onChange={onNameDepartmentChange}
+              //       />
+              //       <Button
+              //         type="text"
+              //         icon={<PlusOutlined />}
+              //         onClick={addItem}
+              //       >
+              //         Thêm
+              //       </Button>
+              //     </Space>
+              //   </>
+              // )}
             >
               {departments.map((item) => (
                 <Option key={item}>{item}</Option>
@@ -235,31 +219,6 @@ function CreateStaff() {
                 >
                   Cập nhật
                 </Button>
-                <Modal
-                  title="Thông báo"
-                  open={isModalOpen}
-                  onOk={handleOk}
-                  onCancel={handleCancel}
-                >
-                  <p>{error?.message}</p>
-                  {error?.assignment && (
-                    <>
-                      <hr></hr>
-                      <p>effort: {error?.assignment?.effort}</p>
-                      <p>
-                        {`dateStart: ${moment(
-                          error?.assignment?.dateStart
-                        ).format("DD-MM-YYYY")}`}
-                      </p>
-                      <p>
-                        {"dateEnd: " +
-                          moment(error?.assignment?.dateEnd).format(
-                            "DD-MM-YYYY"
-                          )}
-                      </p>
-                    </>
-                  )}
-                </Modal>
               </Col>
             </Row>
           </Col>

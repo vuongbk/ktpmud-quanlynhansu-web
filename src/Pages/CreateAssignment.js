@@ -38,6 +38,7 @@ const CreateAssignment = () => {
   const [dataChange, setDataChange] = useState({
     idStaff: searchParams.get("idStaff"),
   });
+  console.log("41", dataChange);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,24 +63,38 @@ const CreateAssignment = () => {
       };
     });
   }
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
   const handleSubmit = async () => {
-    if (
-      Object.keys(dataChange).length === 1 ||
-      !dataChange.hasOwnProperty("role") ||
-      !dataChange.hasOwnProperty("effort") ||
-      !dataChange.hasOwnProperty("dateEnd") ||
-      !dataChange.hasOwnProperty("dateStart") ||
-      !dataChange.hasOwnProperty("idProject")
-    ) {
+    if (!dataChange?.idStaff) {
       messageApi.open({
         type: "warning",
-        content: "Nhập thiếu",
+        content: "Thiếu nhân viên",
+      });
+      return;
+    } else if (!dataChange?.idProject) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu dự án",
+      });
+      return;
+    } else if (!dataChange?.effort) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu phân công",
+      });
+      return;
+    } else if (!dataChange?.role) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu vai trò",
+      });
+      return;
+    }
+    if (
+      moment(dataChange.dateStart).isSameOrAfter(moment(dataChange.dateEnd))
+    ) {
+      messageApi.open({
+        type: "error",
+        content: "Ngày bắt đầu phải trước ngày kết thúc",
       });
       return;
     }

@@ -25,14 +25,10 @@ function CreateProject() {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const [data, setData] = useState(useLocation()?.state?.data);
-  const { idProject } = useParams();
-  const [error, setError] = useState();
   const [dataProjectChange, setDataProjectChange] = useState({});
   console.log("editpj 27", dataProjectChange);
-  const [leaderChange, setLeaderChange] = useState("");
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   let options = managers ? getOptions() : [];
   const dateFormat = "DD/MM/YYYY";
   const iso8601Format = "YYYY-MM-DD";
@@ -44,17 +40,33 @@ function CreateProject() {
       };
     });
   }
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
   const handleSubmit = async () => {
-    if (JSON.stringify(dataProjectChange) === "{}" && leaderChange === "") {
+    if (!dataProjectChange.projectName) {
       messageApi.open({
         type: "warning",
-        content: "Nhập thiếu",
+        content: "Thiếu tên dự án",
+      });
+      return;
+    } else if (!dataProjectChange.idLeader) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu leader",
+      });
+      return;
+    } else if (!dataProjectChange.status) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu trạng thái",
+      });
+      return;
+    } else if (
+      moment(dataProjectChange.dateStart).isSameOrAfter(
+        moment(dataProjectChange.dateEnd)
+      )
+    ) {
+      messageApi.open({
+        type: "error",
+        content: "Ngày bắt đầu phải trước ngày kết thúc",
       });
       return;
     }
@@ -68,66 +80,14 @@ function CreateProject() {
         },
       })
         .then((res) => {
-          console.log("editProject 52", res);
+          setDataProjectChange({});
           navigate(-1);
         })
         .catch((error) => {
-          console.log("editProject 55", error);
-          setError(error.response.data);
-          setIsModalOpen(true);
+          message.error(error.message);
         });
       setLoading(false);
     }
-  };
-
-  const handleDelete = async () => {
-    setLoading(true);
-    await Axios.delete(`/api/project/${data._id}`, {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
-      .then((res) => {
-        console.log("editAssignment 81", res.data);
-        navigate(-1);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error.response.data);
-        console.log("editAssign 87", error);
-        setIsModalOpen(true);
-        setLoading(false);
-      });
-
-    //lấy danh sách assignment có liên quan để xóa luôn
-    let listAssignment = await Axios.get(
-      `/api/assignment-id-project/${data._id}`,
-      {
-        headers: {
-          Authorization: "Bearer " + getToken(),
-        },
-      }
-    );
-    listAssignment.data.infoAssignment
-      .map(async (value) => {
-        await Axios.delete(`/api/assignment/${value._id}`, {
-          headers: {
-            Authorization: "Bearer " + getToken(),
-          },
-        });
-      })
-      .then((res) => {
-        console.log("editAssignment 81", res.data);
-        navigate(-1);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error.response.data);
-        console.log("editAssign 87", error);
-        setIsModalOpen(true);
-        setLoading(false);
-      });
-    setLoading(false);
   };
 
   async function getManagers() {
@@ -248,31 +208,6 @@ function CreateProject() {
                 >
                   Thêm mới
                 </Button>
-                <Modal
-                  title="Thông báo"
-                  open={isModalOpen}
-                  onOk={handleOk}
-                  onCancel={handleCancel}
-                >
-                  <p>{error?.message}</p>
-                  {error?.assignment && (
-                    <>
-                      <hr></hr>
-                      <p>effort: {error?.assignment?.effort}</p>
-                      <p>
-                        {`dateStart: ${moment(
-                          error?.assignment?.dateStart
-                        ).format("DD-MM-YYYY")}`}
-                      </p>
-                      <p>
-                        {"dateEnd: " +
-                          moment(error?.assignment?.dateEnd).format(
-                            "DD-MM-YYYY"
-                          )}
-                      </p>
-                    </>
-                  )}
-                </Modal>
               </Col>
             </Row>
           </Col>

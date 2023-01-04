@@ -22,7 +22,7 @@ import Loading from "../Components/Modal/Loading.js";
 import { getToken } from "../Components/useToken.js";
 import md5 from "md5";
 import SkillsOfStaff from "../Components/SkillsOfStaff.js";
-import { listRole } from "../utils/index.js";
+import { listRole, TitleModal } from "../utils/index.js";
 const { Option } = Select;
 const { Text, Title } = Typography;
 
@@ -51,11 +51,9 @@ function EditPage() {
   const [dataStaffChange, setDataStaffChange] = useState({});
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   // const [fileList, setFileList] = useState([]);
-  const [error, setError] = useState();
   const { idStaff } = useParams();
   // const [data, setData] = useState(null);
   const [data, setData] = useState();
-  console.log("55", data);
   const [loading, setLoading] = useState(false);
   // const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [imageUrl, setImageUrl] = useState(
@@ -63,82 +61,67 @@ function EditPage() {
   );
   //state dùng để thêm department
   const [departments, setDepartments] = useState(["Thanh Hóa", "Hà Nội"]);
-  const [nameDepartment, setNameDepartment] = useState("");
-  const inputRef = useRef(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
   const [password, setPassword] = useState({});
 
   const dateFormat = "DD/MM/YYYY";
 
   const handleOkPasswordModal = async () => {
-    if (!password.hasOwnProperty("newPassword")) {
+    if (!password?.newPassword) {
       messageApi.open({
         type: "warning",
-        content: "Nhập thiếu",
+        content: "Chưa nhập mật khẩu mới",
       });
       return;
     }
     setLoading(true);
-    await Axios.put(`/api/staff/${data._id}`, password, {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
+    await Axios.put(
+      `/api/password/${data._id}`,
+      { newPassword: md5(password.newPassword) },
+      {
+        headers: {
+          Authorization: "Bearer " + getToken(),
+        },
+      }
+    )
       .then((res) => {
-        console.log("editStaff 106", res);
-        setPassword({});
         setLoading(false);
+        message.success("Đặt lại mật khẩu thành công");
+        setPassword({});
+        setIsModalPasswordOpen(false);
       })
       .catch((error) => {
-        setError(error.response.data);
-        console.log("editStaff 111", error);
-        setIsModalOpen(true);
+        message.error(error.response.data.message);
         setLoading(false);
       });
-    setIsModalPasswordOpen(false);
   };
   const handleCancelPasswordModal = () => {
     setIsModalPasswordOpen(false);
   };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-  function getDefaultLevelSkillValue(nameSkill) {
-    return levelSkillChange.find((value) => value.nameSkill === nameSkill);
-  }
-  const onNameDepartmentChange = (event) => {
-    setNameDepartment(event.target.value);
-  };
-
-  const addItem = (e) => {
-    e.preventDefault();
-    setDepartments([...departments, nameDepartment]);
-    setNameDepartment("");
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
-  };
-
   const handleSubmit = async () => {
     if (
-      JSON.stringify(dataStaffChange) === "{}" &&
-      JSON.stringify(levelSkillChange) === "[]" &&
-      imageUrl === data.imageUrl
+      JSON.stringify(dataStaffChange) === JSON.stringify(data) &&
+      JSON.stringify(levelSkillChange) === "[]"
+      // imageUrl === data.imageUrl
     ) {
       messageApi.open({
         type: "warning",
         content: "Không có thay đổi",
       });
       return;
+    } else if (!dataStaffChange?.fullName) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu họ tên",
+      });
+      return;
+    } else if (!dataStaffChange?.email) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu email",
+      });
+      return;
     }
-    console.log("editStaff 97", imageUrl === data.imageUrl);
-    console.log("editStaff 97", JSON.stringify(dataStaffChange) === "{}");
-    console.log("editStaff 97", JSON.stringify(levelSkillChange) === "[]");
     //thay đổi bảng staff
     if (JSON.stringify(dataStaffChange) !== "{}") {
       setLoading(true);
@@ -148,13 +131,11 @@ function EditPage() {
         },
       })
         .then((res) => {
-          console.log("editStaff 106", res);
+          setDataStaffChange(data);
           setLoading(false);
         })
         .catch((error) => {
-          setError(error.response.data);
-          console.log("editStaff 111", error);
-          setIsModalOpen(true);
+          message.error(error.response.data.message);
           setLoading(false);
         });
     }
@@ -173,18 +154,15 @@ function EditPage() {
           }
         )
           .then((res) => {
-            console.log("editStaff 131", res);
+            setLevelSkillChange([]);
             setLoading(false);
           })
           .catch((error) => {
-            setError(error.response.data);
-            console.log("editStaff 136", error);
-            setIsModalOpen(true);
+            message.error(error.response.data.message);
             setLoading(false);
           });
       });
     }
-
     //upload image
     // if (imageUrl !== data.imageUrl) {
     //   let formData = new FormData();
@@ -203,7 +181,6 @@ function EditPage() {
     //       console.log("edit 240 err", err);
     //     });
     // }
-    navigate(-1);
   };
 
   const handleDelete = async () => {
@@ -219,9 +196,7 @@ function EditPage() {
         setLoading(false);
       })
       .catch((error) => {
-        setError(error.response.data);
-        console.log("editAssign 87", error);
-        setIsModalOpen(true);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   };
@@ -272,6 +247,7 @@ function EditPage() {
       .then((res) => {
         setLoading(false);
         setData(res.data.infoStaff);
+        setDataStaffChange(res.data.infoStaff);
         setImageUrl(res.data.infoStaff.imageUrl);
       })
       .catch((error) => {
@@ -332,7 +308,7 @@ function EditPage() {
                 </Button>
                 <Modal
                   open={isModalPasswordOpen}
-                  title="Đặt lại mật khẩu"
+                  title={<TitleModal value="Đặt lại mật khẩu" />}
                   onOk={handleOkPasswordModal}
                   onCancel={handleCancelPasswordModal}
                   footer={[
@@ -353,11 +329,12 @@ function EditPage() {
                   <Input.Password
                     style={{ marginTop: "20px" }}
                     placeholder="Mật khẩu mới"
+                    defaultValue={password?.newPassword}
                     onChange={(e) =>
                       setPassword((p) => {
                         return {
                           ...p,
-                          newPassword: md5(e.target.value),
+                          newPassword: e.target.value,
                         };
                       })
                     }
@@ -395,9 +372,7 @@ function EditPage() {
               <Title level={5}>Ngày sinh</Title>
               <DatePicker
                 format={dateFormat}
-                defaultValue={moment(
-                  dataStaffChange.birthYear || data?.birthYear
-                )}
+                defaultValue={moment(dataStaffChange?.birthYear || undefined)}
                 style={{ width: "100%" }}
                 onChange={(e) => {
                   setDataStaffChange((d) => {
@@ -416,35 +391,6 @@ function EditPage() {
                     return { ...d, department: e };
                   });
                 }}
-                dropdownRender={(menu) => (
-                  <>
-                    {menu}
-                    <Divider
-                      style={{
-                        margin: "8px 0",
-                      }}
-                    />
-                    <Space
-                      style={{
-                        padding: "0 8px 4px",
-                      }}
-                    >
-                      <Input
-                        placeholder="Please enter item"
-                        ref={inputRef}
-                        defaultValue={nameDepartment}
-                        onChange={onNameDepartmentChange}
-                      />
-                      <Button
-                        type="text"
-                        icon={<PlusOutlined />}
-                        onClick={addItem}
-                      >
-                        Add item
-                      </Button>
-                    </Space>
-                  </>
-                )}
               >
                 {departments.map((item) => (
                   <Option key={item}>{item}</Option>
@@ -540,7 +486,7 @@ function EditPage() {
               <Title level={5}>Ngày vào làm</Title>
               <DatePicker
                 format={dateFormat}
-                defaultValue={moment(dataStaffChange.startTL || data?.startTL)}
+                defaultValue={moment(dataStaffChange.startTL || undefined)}
                 style={{ width: "100%" }}
                 onChange={(e) => {
                   setDataStaffChange((d) => {
@@ -586,31 +532,6 @@ function EditPage() {
                     >
                       Cập nhật
                     </Button>
-                    <Modal
-                      title="Thông báo"
-                      open={isModalOpen}
-                      onOk={handleOk}
-                      onCancel={handleCancel}
-                    >
-                      <p>{error?.message}</p>
-                      {error?.assignment && (
-                        <>
-                          <hr></hr>
-                          <p>effort: {error?.assignment?.effort}</p>
-                          <p>
-                            {`dateStart: ${moment(
-                              error?.assignment?.dateStart
-                            ).format("DD-MM-YYYY")}`}
-                          </p>
-                          <p>
-                            {"dateEnd: " +
-                              moment(error?.assignment?.dateEnd).format(
-                                "DD-MM-YYYY"
-                              )}
-                          </p>
-                        </>
-                      )}
-                    </Modal>
                   </Row>
                   <Row>
                     <Popconfirm

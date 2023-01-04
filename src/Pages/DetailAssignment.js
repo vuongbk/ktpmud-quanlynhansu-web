@@ -23,10 +23,10 @@ function DetailAssignment() {
 
   const columnAssignments = [
     {
+      title: <TitleTable value="Dự án" />,
       dataIndex: "projectName",
       fixed: "left",
       width: "200px",
-      title: <TitleTable value="Dự án" />,
       render: (projectName, record) => {
         return (
           <Link

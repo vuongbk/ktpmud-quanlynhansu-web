@@ -26,28 +26,31 @@ const EditAssignment = () => {
   const effortRef = useRef();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const [data, setData] = useState(useLocation()?.state?.data);
+  const [data, setData] = useState();
   const { idAssignment } = useParams();
-  const [error, setError] = useState();
-  const [indexAssign, setIndexAssign] = useState(0);
   const [dataChange, setDataChange] = useState({});
-  console.log("32", dataChange);
-  const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const dateFormat = "DD/MM/YYYY";
   const iso8601Format = "YYYY-MM-DD";
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
   const handleSubmit = async () => {
-    if (JSON.stringify(dataChange) === "{}") {
+    if (JSON.stringify(dataChange) === JSON.stringify(data)) {
       messageApi.open({
         type: "warning",
         content: "Không có thay đổi",
+      });
+      return;
+    } else if (!dataChange?.effort) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu phân công",
+      });
+      return;
+    } else if (
+      moment(dataChange.dateStart).isSameOrAfter(moment(dataChange.dateEnd))
+    ) {
+      messageApi.open({
+        type: "error",
+        content: "Ngày bắt đầu phải trước ngày kết thúc",
       });
       return;
     }
@@ -68,7 +71,6 @@ const EditAssignment = () => {
           // setError(error.response.data);
           message.error(error.response.data.message);
           console.log("editAssign 62", error);
-          setIsModalOpen(true);
           setLoading(false);
         });
     }
@@ -91,8 +93,6 @@ const EditAssignment = () => {
       .catch((error) => {
         // setError(error.response.data);
         message.error(error.response.data.message);
-        console.log("editAssign 87", error);
-        setIsModalOpen(true);
         setLoading(false);
       });
   };
@@ -108,10 +108,12 @@ const EditAssignment = () => {
     })
       .then((res) => {
         setData(res.data);
+        console.log("res.data", res.data);
+        setDataChange(res.data.asignment);
         setLoading(false);
       })
       .catch((error) => {
-        console.log("message error", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }
@@ -154,11 +156,7 @@ const EditAssignment = () => {
             <Title level={5}>Từ ngày</Title>
             <DatePicker
               format={dateFormat}
-              value={
-                dataChange.dateStart
-                  ? moment(dataChange.dateStart, [dateFormat, iso8601Format])
-                  : moment(data?.asignment.dateStart)
-              }
+              value={moment(dataChange.dateStart)}
               style={{ width: "100%" }}
               onChange={(date, dateString) => {
                 setDataChange((d) => {
@@ -261,11 +259,7 @@ const EditAssignment = () => {
             <Title level={5}>Đến ngày</Title>
             <DatePicker
               format={dateFormat}
-              value={moment(
-                dataChange.dateEnd
-                  ? moment(dataChange.dateEnd, [dateFormat, iso8601Format])
-                  : moment(data?.asignment.dateEnd)
-              )}
+              value={moment(dataChange.dateEnd)}
               style={{ width: "100%" }}
               onChange={(date, dateString) => {
                 setDataChange((d) => {

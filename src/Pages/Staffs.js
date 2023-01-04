@@ -276,11 +276,11 @@ function Staffs() {
       filters: [
         {
           text: "Nam",
-          value: "male",
+          value: "Nam",
         },
         {
           text: "Nữ",
-          value: "female",
+          value: "Nữ",
         },
       ],
       onFilter: (value, record) => {
@@ -323,6 +323,7 @@ function Staffs() {
         )}
       </Row>
       <Table
+        locale={{ filterReset: "Đặt lại" }}
         dataSource={data}
         pagination={{ pageSize: 6 }}
         rowKey="email"

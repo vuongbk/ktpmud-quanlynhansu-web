@@ -24,12 +24,10 @@ const { Title, Text } = Typography;
 function EditProjectPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  const [data, setData] = useState(useLocation().state?.data);
+  const [data, setData] = useState();
   const { idProject } = useParams();
   const [error, setError] = useState();
   const [dataProjectChange, setDataProjectChange] = useState({});
-  // console.log("editpj 29", dataProjectChange);
-  const [leaderChange, setLeaderChange] = useState("");
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,10 +59,26 @@ function EditProjectPage() {
     setIsModalOpen(false);
   };
   const handleSubmit = async () => {
-    if (JSON.stringify(dataProjectChange) === "{}" && leaderChange === "") {
+    if (JSON.stringify(dataProjectChange) === JSON.stringify(data)) {
       messageApi.open({
         type: "warning",
         content: "Không có thay đổi",
+      });
+      return;
+    } else if (!dataProjectChange.projectName) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu tên dự án",
+      });
+      return;
+    } else if (
+      moment(dataProjectChange.dateStart).isSameOrAfter(
+        moment(dataProjectChange.dateEnd)
+      )
+    ) {
+      messageApi.open({
+        type: "error",
+        content: "Ngày bắt đầu phải trước ngày kết thúc",
       });
       return;
     }
@@ -180,6 +194,7 @@ function EditProjectPage() {
         setData({
           ...infoProject,
         });
+        setDataProjectChange({ ...infoProject });
         setLoading(false);
       })
       .catch((error) => {

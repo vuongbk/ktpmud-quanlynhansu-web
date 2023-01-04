@@ -53,14 +53,12 @@ function Account() {
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   const [dataStaffChange, setDataStaffChange] = useState({});
   // const [fileList, setFileList] = useState([]);
-  const [error, setError] = useState();
   const [notify, setNotify] = useState();
   const [loading, setLoading] = useState(false);
   // const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [imageUrl, setImageUrl] = useState();
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
   const [password, setPassword] = useState({});
-  console.log("63", password);
   const dateFormat = "DD/MM/YYYY";
 
   async function getInfoAccount() {
@@ -97,15 +95,12 @@ function Account() {
         message.success("Đổi mk thành công");
         setLoading(false);
         setPassword({});
+        setIsModalPasswordOpen(false);
       })
       .catch((error) => {
         message.error(error.response.data.message);
-        setError(error.response.data);
-        setPassword({});
         setLoading(false);
       });
-
-    setIsModalPasswordOpen(false);
   };
   const handleCancelPasswordModal = () => {
     setIsModalPasswordOpen(false);
@@ -137,7 +132,6 @@ function Account() {
           setLoading(false);
         })
         .catch((error) => {
-          setError(error.response.data);
           console.log("editStaff 111", error);
           setLoading(false);
         });
@@ -160,7 +154,6 @@ function Account() {
             setLoading(false);
           })
           .catch((error) => {
-            setError(error.response.data);
             console.log("editStaff 136", error);
             setLoading(false);
           });
