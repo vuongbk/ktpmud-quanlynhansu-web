@@ -29,11 +29,13 @@ const EditAssignment = () => {
   const [data, setData] = useState();
   const { idAssignment } = useParams();
   const [dataChange, setDataChange] = useState({});
+  console.log("32", dataChange);
+  console.log("33", data);
   const [loading, setLoading] = useState(false);
   const dateFormat = "DD/MM/YYYY";
   const iso8601Format = "YYYY-MM-DD";
   const handleSubmit = async () => {
-    if (JSON.stringify(dataChange) === JSON.stringify(data)) {
+    if (JSON.stringify(dataChange) === JSON.stringify(data.asignment)) {
       messageApi.open({
         type: "warning",
         content: "Không có thay đổi",
