@@ -78,19 +78,32 @@ function Account() {
       });
   }
   const handleOkPasswordModal = async () => {
-    if (!password?.oldPassword || !password?.newPassword) {
+    if (!password?.oldPassword) {
       messageApi.open({
         type: "warning",
-        content: "Nhập thiếu",
+        content: "Thiếu mật khẩu cũ",
+      });
+      return;
+    } else if (!password?.newPassword) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu mật khẩu mới",
       });
       return;
     }
     setLoading(true);
-    await Axios.put(`/api/staff/${infoAccount?._id}`, password, {
-      headers: {
-        Authorization: "Bearer " + getToken(),
+    await Axios.put(
+      `/api/password/${infoAccount?._id}`,
+      {
+        oldPassword: md5(password.oldPassword),
+        newPassword: md5(password.newPassword),
       },
-    })
+      {
+        headers: {
+          Authorization: "Bearer " + getToken(),
+        },
+      }
+    )
       .then((res) => {
         message.success("Đổi mk thành công");
         setLoading(false);
@@ -117,6 +130,18 @@ function Account() {
         content: "Không có thay đổi",
       });
       return;
+    } else if (!dataStaffChange.fullName) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu họ tên",
+      });
+      return;
+    } else if (!dataStaffChange.email) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu email",
+      });
+      return;
     }
 
     //thay đổi bảng staff
@@ -128,36 +153,13 @@ function Account() {
         },
       })
         .then((res) => {
-          console.log("editStaff 106", res);
+          message.success("Cập nhật thành công");
           setLoading(false);
         })
         .catch((error) => {
-          console.log("editStaff 111", error);
+          message.error(error.response.data.message);
           setLoading(false);
         });
-    }
-    //thay đổi bảng levelSkill
-    if (JSON.stringify(levelSkillChange) !== "[]") {
-      levelSkillChange.forEach(async (value, index) => {
-        setLoading(true);
-        await Axios.put(
-          `/api/level-skill/${value.idLevelSkill}`,
-          { levelSkill: value.levelSkill },
-          {
-            headers: {
-              Authorization: "Bearer " + getToken(),
-            },
-          }
-        )
-          .then((res) => {
-            console.log("editStaff 131", res);
-            setLoading(false);
-          })
-          .catch((error) => {
-            console.log("editStaff 136", error);
-            setLoading(false);
-          });
-      });
     }
 
     //upload image
@@ -279,12 +281,13 @@ function Account() {
                 {/* <Text>Mật khẩu cũ</Text> */}
                 <Input.Password
                   placeholder="Mật khẩu cũ"
+                  defaultValue={password?.oldPassword}
                   onChange={(e) => {
                     if (e.target.value !== "") {
                       setPassword((p) => {
                         return {
                           ...p,
-                          oldPassword: md5(e.target.value),
+                          oldPassword: e.target.value,
                         };
                       });
                     } else {
@@ -301,12 +304,13 @@ function Account() {
                 <Input.Password
                   style={{ marginTop: "20px" }}
                   placeholder="Mật khẩu mới"
+                  defaultValue={password?.newPassword}
                   onChange={(e) => {
                     if (e.target.value !== "") {
                       setPassword((p) => {
                         return {
                           ...p,
-                          newPassword: md5(e.target.value),
+                          newPassword: e.target.value,
                         };
                       });
                     } else {
@@ -371,7 +375,7 @@ function Account() {
               <Typography.Title level={5}>Email</Typography.Title>
               {/* <Text>{dataStaffChange?.email || infoAccount?.email}</Text> */}
               <Input
-                value={dataStaffChange?.email || infoAccount?.email}
+                value={dataStaffChange?.email}
                 onChange={(e) => {
                   setDataStaffChange((d) => {
                     return { ...d, email: e.target.value };
@@ -406,43 +410,6 @@ function Account() {
               />
             </Col>
           </Row>
-          {/* <Row>
-            <Col span={16} offset={5}>
-              <Row style={{ marginTop: "50px" }} justify="space-between">
-                <Col span={6}></Col>
-                <Col span={6} offset={5}>
-                  <Button style={{ width: "100%" }} onClick={handleSubmit}>
-                    Cập nhật
-                  </Button>
-                  <Modal
-                    title="Thông báo"
-                    open={isModalErrorOpen}
-                    onOk={handleErrorOk}
-                    onCancel={handleCancel}
-                  >
-                    <p>{error?.message}</p>
-                    {error?.assignment && (
-                      <>
-                        <hr></hr>
-                        <p>effort: {error?.assignment?.effort}</p>
-                        <p>
-                          {`dateStart: ${moment(
-                            error?.assignment?.dateStart
-                          ).format(dateFormat)}`}
-                        </p>
-                        <p>
-                          {"dateEnd: " +
-                            moment(error?.assignment?.dateEnd).format(
-                              dateFormat
-                            )}
-                        </p>
-                      </>
-                    )}
-                  </Modal>
-                </Col>
-              </Row>
-            </Col>
-          </Row> */}
           <Row>
             <Col span={24}>
               <SkillsOfStaff

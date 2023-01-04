@@ -8,7 +8,6 @@ function RowSkillPage({
   levelSkillChange,
   setLevelSkillChange,
 }) {
-  console.log("RowSkillPage");
   const getChangeLevelSkill = (idLevelSkill) => {
     if (JSON.stringify(levelSkillChange) !== "[]") {
       return levelSkillChange.find(

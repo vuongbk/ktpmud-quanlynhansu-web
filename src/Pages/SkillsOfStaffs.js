@@ -35,7 +35,6 @@ function SkillsOfStaffs() {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [loading, setLoading] = useState(false);
   const [levelSkillChange, setLevelSkillChange] = useState([]);
-  console.log("38", levelSkillChange);
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
   const [skills, setSkills] = useState();
@@ -90,6 +89,12 @@ function SkillsOfStaffs() {
       messageApi.open({
         type: "warning",
         content: "Thiếu cấp độ",
+      });
+      return;
+    } else if (newSkill.level > newSkill.maxLevel) {
+      messageApi.open({
+        type: "warning",
+        content: `Cấp độ không được vượt quá maxLevel (${newSkill.maxLevel})`,
       });
       return;
     }
@@ -292,7 +297,7 @@ function SkillsOfStaffs() {
                     onClick={() => {
                       setIsModalSkillOpen(true);
                       setNewSkill((d) => {
-                        return { idStaff: record._id };
+                        return { ...d, idStaff: record._id };
                       });
                     }}
                   >
@@ -318,47 +323,6 @@ function SkillsOfStaffs() {
                     </Button>,
                   ]}
                 >
-                  {/* <Text>Thêm levelSkill mới</Text> */}
-                  {/* <Row>
-                    <Col span={12}>
-                      <Text>Tên skill</Text>
-                      <Select
-                        labelInValue
-                        onChange={(e) => {
-                          console.log("createProject 230", e);
-                          setNewSkill((d) => {
-                            return { ...d, idSkill: e.value };
-                          });
-                        }}
-                        style={{
-                          width: "100%",
-                        }}
-                        options={options}
-                      ></Select>
-                    </Col>
-                    <Col span={6} offset={6}>
-                      <Row>
-                        <Text>Cấp độ</Text>
-                      </Row>
-                      <Select
-                        Chọn
-                        cấp
-                        độ
-                        onSelect={(e) => {
-                          setNewSkill((d) => {
-                            return { ...d, level: e };
-                          });
-                        }}
-                      >
-                        <Option value={0}>0</Option>
-                        <Option value={1}>1</Option>
-                        <Option value={2}>2</Option>
-                        <Option value={3}>3</Option>
-                        <Option value={4}>4</Option>
-                        <Option value={5}>5</Option>
-                      </Select>
-                    </Col>
-                  </Row> */}
                   <Row justify="space-between">
                     <Col span={12}>
                       <Title level={5} style={{ marginTop: "0" }}>
@@ -366,12 +330,14 @@ function SkillsOfStaffs() {
                       </Title>
                       <Select
                         labelInValue
-                        // defaultValue={data?.nameLeader}
+                        defaultValue={newSkill?.skillName}
                         onChange={(event) => {
                           const e = JSON.parse(event.value);
+                          console.log("337", e);
                           setNewSkill((d) => {
                             return {
                               ...d,
+                              skillName: e.skillName,
                               idSkill: e._id,
                               maxLevel: e.maxLevel,
                             };
@@ -391,9 +357,7 @@ function SkillsOfStaffs() {
                         min={1}
                         max={newSkill?.maxLevel}
                         style={{ width: "50px" }}
-                        defaultValue={
-                          newSkill?.maxLevel ? newSkill?.maxLevel : ""
-                        }
+                        defaultValue={newSkill?.level}
                         onChange={(e) => {
                           console.log("417", newSkill);
                           setNewSkill((d) => {

@@ -36,10 +36,16 @@ function CreateSkill(props) {
     props.setIsModalCreateSkillOpen(false);
   };
   const handleSubmit = async () => {
-    if (nameSkill === "" || maxLevel === "") {
+    if (nameSkill === "") {
       messageApi.open({
         type: "warning",
-        content: "Nhập thiếu",
+        content: "Thiếu tên skill",
+      });
+      return;
+    } else if (maxLevel === "") {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu maxLevel",
       });
       return;
     }
