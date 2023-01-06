@@ -45,9 +45,19 @@ const TitleTable = (props) => {
     </Typography.Title>
   );
 };
+const roleLeader = "leader";
+const roleDeveloper = "developer";
+
 const TitleModal = (props) => {
   return <Typography.Title level={4}>{props.value}</Typography.Title>;
 };
 
-export { listRole, roleAdmin, TitleTable, TitleModal };
+export {
+  listRole,
+  roleAdmin,
+  TitleTable,
+  TitleModal,
+  roleLeader,
+  roleDeveloper,
+};
 export default workingDay;

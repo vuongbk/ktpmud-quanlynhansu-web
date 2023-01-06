@@ -73,13 +73,14 @@ function CreateStaff() {
         },
       })
         .then((res) => {
+          setLoading(false);
           navigate(-1);
         })
         .catch((error) => {
+          setLoading(false);
           message.error(error.response.data.message);
         });
     }
-    setLoading(false);
   };
 
   if (loading) {

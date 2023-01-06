@@ -16,7 +16,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import moment, { ISO_8601 } from "moment";
 import Axios from "axios";
-import workingDay from "../utils";
+import workingDay, { TitleModal } from "../utils";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 const { Option } = Select;
@@ -29,9 +29,9 @@ const EditAssignment = () => {
   const [data, setData] = useState();
   const { idAssignment } = useParams();
   const [dataChange, setDataChange] = useState({});
-  console.log("32", dataChange);
-  console.log("33", data);
+  const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
+  const [isModalOpenHandleError, setIsModalOpenHandleError] = useState(false);
   const dateFormat = "DD/MM/YYYY";
   const iso8601Format = "YYYY-MM-DD";
   const handleSubmit = async () => {
@@ -65,17 +65,26 @@ const EditAssignment = () => {
         },
       })
         .then((res) => {
-          console.log("editAssign 46", res);
           setLoading(false);
           navigate(-1);
         })
         .catch((error) => {
-          // setError(error.response.data);
           message.error(error.response.data.message);
-          console.log("editAssign 62", error);
+          if (error.response.data.hasOwnProperty("assignment")) {
+            setIsModalOpenHandleError(true);
+            setError(error.response.data);
+          }
           setLoading(false);
         });
     }
+  };
+
+  const handleCancelHandleError = () => {
+    setIsModalOpenHandleError(false);
+  };
+
+  const handleOkHandleError = () => {
+    setIsModalOpenHandleError(false);
   };
 
   const handleDelete = async () => {
@@ -88,12 +97,11 @@ const EditAssignment = () => {
       },
     })
       .then((res) => {
-        console.log("editAssignment 81", res.data);
-        navigate(-1);
+        message.success("Đã xóa phân công");
         setLoading(false);
+        navigate(-1);
       })
       .catch((error) => {
-        // setError(error.response.data);
         message.error(error.response.data.message);
         setLoading(false);
       });
@@ -110,7 +118,6 @@ const EditAssignment = () => {
     })
       .then((res) => {
         setData(res.data);
-        console.log("res.data", res.data);
         setDataChange(res.data.asignment);
         setLoading(false);
       })
@@ -195,31 +202,31 @@ const EditAssignment = () => {
                     Cập nhật
                   </Button>
                   {/* thông báo thông tin lỗi, effort, ngày bđ, kt */}
-                  {/* <Modal
-                    title="Thông báo"
-                    open={isModalOpen}
-                    onOk={handleOk}
-                    onCancel={handleCancel}
+                  <Modal
+                    title={<TitleModal value="Thông báo" />}
+                    open={isModalOpenHandleError}
+                    onOk={handleOkHandleError}
+                    onCancel={handleCancelHandleError}
                   >
                     <p>{error?.message}</p>
                     {error?.assignment && (
                       <>
                         <hr></hr>
-                        <p>effort: {error?.assignment?.effort}</p>
+                        <p>Phân công: {error?.assignment?.effort}%</p>
                         <p>
-                          {`dateStart: ${moment(
+                          {`Ngày bắt đầu: ${moment(
                             error?.assignment?.dateStart
-                          ).format("DD-MM-YYYY")}`}
+                          ).format(dateFormat)}`}
                         </p>
                         <p>
-                          {"dateEnd: " +
+                          {"Ngày kết thúc: " +
                             moment(error?.assignment?.dateEnd).format(
-                              "DD-MM-YYYY"
+                              dateFormat
                             )}
                         </p>
                       </>
                     )}
-                  </Modal> */}
+                  </Modal>
                 </Row>
                 <Row>
                   <Popconfirm

@@ -73,7 +73,9 @@ async function loginUser(credentials) {
     data: credentials,
   })
     .then((res) => res.data.token)
-    .catch((error) => {});
+    .catch((error) => {
+      console.log("login 77", error);
+    });
 }
 export default function Login({ setToken, setInfoAccount }) {
   const [messageApi, contextHolder] = message.useMessage();

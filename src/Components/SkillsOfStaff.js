@@ -37,7 +37,7 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
         setSkillsOfStaff(res.data.skill);
       })
       .catch((error) => {
-        message.error(error.message);
+        message.error(error.response.data.message);
       });
   }
   function getSkills() {
@@ -49,11 +49,10 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
       },
     })
       .then((res) => {
-        console.log("SkillsOfStaff 319", res.data.skill);
         setSkills(res.data.skill);
       })
       .catch((error) => {
-        console.log("editStaff 322", error);
+        message.error(error.response.data.message);
       });
   }
   useEffect(() => {
@@ -95,11 +94,10 @@ function SkillsOfStaff({ infoStaff, setLevelSkillChange, levelSkillChange }) {
       },
     })
       .then((res) => {
-        console.log("editStaff 91", res);
         setLoading(false);
       })
       .catch((error) => {
-        console.log("editStaff 94", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
     setIsModalSkillOpen(false);

@@ -37,6 +37,7 @@ function Skills() {
   const [levelSkillChange, setLevelSkillChange] = useState([]);
   const [isModalSkillOpen, setIsModalSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({});
+  console.log("40", newSkill);
   const [skills, setSkills] = useState();
   const [skillSelected, setSkillSelected] = useState(null);
   // let options = skills ? getOptions() : [];
@@ -58,12 +59,11 @@ function Skills() {
       },
     })
       .then((res) => {
-        console.log("skillPage 53", res);
         setLoading(false);
         navigate(0);
       })
       .catch((error) => {
-        console.log("skillPage 57", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }
@@ -74,9 +74,22 @@ function Skills() {
         content: "Không có thay đổi",
       });
       return;
+    } else if (!newSkill.skillName) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu tên skill",
+      });
+      return;
+    } else if (!newSkill.maxLevel) {
+      messageApi.open({
+        type: "warning",
+        content: "Thiếu maxLevel",
+      });
+      return;
     }
+
     setLoading(true);
-    setIsModalSkillOpen(false);
+
     await Axios({
       method: "put",
       url: `/api/skill/${newSkill.idSkill}`,
@@ -89,15 +102,15 @@ function Skills() {
       },
     })
       .then((res) => {
-        console.log("Skills 55", res);
         setLoading(false);
 
         setSkillSelected(null);
         setNewSkill({});
+        setIsModalSkillOpen(false);
         navigate(0);
       })
       .catch((error) => {
-        console.log("Skills 59", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   };
@@ -216,48 +229,6 @@ function Skills() {
       },
     },
   ];
-  async function handleSubmit(idStaff) {
-    if (JSON.stringify(levelSkillChange) !== "[]") {
-      const levelSkillOfStaff = levelSkillChange.filter((value) => {
-        return value.idStaff === idStaff;
-      });
-      console.log("skillpage 308", levelSkillOfStaff);
-      if (JSON.stringify(levelSkillOfStaff) === "[]") {
-        messageApi.open({
-          type: "warning",
-          content: "Không có thay đổi",
-        });
-        return;
-      }
-      setLoading(true);
-      await levelSkillOfStaff.forEach(async (value, index) => {
-        await Axios.put(
-          `/api/level-skill/${value.idLevelSkill}`,
-          { levelSkill: value.levelSkill },
-          {
-            headers: {
-              Authorization: "Bearer " + getToken(),
-            },
-          }
-        )
-          .then((res) => {
-            console.log("skillpage 205", res);
-            setLoading(false);
-            navigate(0);
-          })
-          .catch((error) => {
-            console.log("skillpage 208", error);
-            setLoading(false);
-          });
-      });
-    } else {
-      messageApi.open({
-        type: "warning",
-        content: "Không có thay đổi",
-      });
-      return;
-    }
-  }
   function getSkills() {
     setLoading(true);
     Axios({
@@ -268,12 +239,11 @@ function Skills() {
       },
     })
       .then((res) => {
-        console.log("skillPage 388", res.data.skill);
         setSkills(res.data.skill);
         setLoading(false);
       })
       .catch((error) => {
-        console.log("skillPage 392", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }

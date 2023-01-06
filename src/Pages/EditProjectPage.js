@@ -26,11 +26,9 @@ function EditProjectPage() {
   const navigate = useNavigate();
   const [data, setData] = useState();
   const { idProject } = useParams();
-  const [error, setError] = useState();
   const [dataProjectChange, setDataProjectChange] = useState({});
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   let options = managers ? getOptions() : [];
   const [assignments, setAssignments] = useState([]);
   const timeWorkingEstimation = workingDay(
@@ -52,12 +50,6 @@ function EditProjectPage() {
       };
     });
   }
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
   const handleSubmit = async () => {
     if (JSON.stringify(dataProjectChange) === JSON.stringify(data)) {
       messageApi.open({
@@ -92,15 +84,13 @@ function EditProjectPage() {
         },
       })
         .then((res) => {
-          console.log("editProject 52", res);
+          setLoading(false);
           navigate(-1);
         })
         .catch((error) => {
-          console.log("editProject 55", error);
-          setError(error.response.data);
-          setIsModalOpen(true);
+          message.error(error.response.data.message);
+          setLoading(false);
         });
-      setLoading(false);
     }
   };
 
@@ -112,14 +102,11 @@ function EditProjectPage() {
       },
     })
       .then((res) => {
-        console.log("editAssignment 81", res.data);
         navigate(-1);
         setLoading(false);
       })
       .catch((error) => {
-        setError(error.response.data);
-        console.log("editAssign 87", error);
-        setIsModalOpen(true);
+        message.error(error.response.data.message);
         setLoading(false);
       });
 
@@ -141,14 +128,10 @@ function EditProjectPage() {
         });
       })
       .then((res) => {
-        console.log("editAssignment 81", res.data);
-        navigate(-1);
         setLoading(false);
       })
       .catch((error) => {
-        setError(error.response.data);
-        console.log("editAssign 87", error);
-        setIsModalOpen(true);
+        message.error(error.response.data.message);
         setLoading(false);
       });
     setLoading(false);
@@ -198,7 +181,7 @@ function EditProjectPage() {
         setLoading(false);
       })
       .catch((error) => {
-        console.log("message error", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }
@@ -210,10 +193,12 @@ function EditProjectPage() {
       },
     })
       .then((res) => {
+        setLoading(false);
         setAssignments(res.data?.infoAssignment);
       })
       .catch((error) => {
-        console.log("message error", error);
+        setLoading(false);
+        message.error(error.response.data.message);
       });
   }
 
@@ -301,31 +286,6 @@ function EditProjectPage() {
                   >
                     Cập nhật
                   </Button>
-                  <Modal
-                    title="Thông báo"
-                    open={isModalOpen}
-                    onOk={handleOk}
-                    onCancel={handleCancel}
-                  >
-                    <p>{error?.message}</p>
-                    {error?.assignment && (
-                      <>
-                        <hr></hr>
-                        <p>effort: {error?.assignment?.effort}</p>
-                        <p>
-                          {`dateStart: ${moment(
-                            error?.assignment?.dateStart
-                          ).format("DD-MM-YYYY")}`}
-                        </p>
-                        <p>
-                          {"dateEnd: " +
-                            moment(error?.assignment?.dateEnd).format(
-                              "DD-MM-YYYY"
-                            )}
-                        </p>
-                      </>
-                    )}
-                  </Modal>
                 </Row>
                 <Row>
                   <Popconfirm

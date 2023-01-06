@@ -1,4 +1,4 @@
-import { Table, Typography, Input, Space, Button, Row } from "antd";
+import { Table, Typography, Input, Space, Button, Row, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import React, { useRef, useState } from "react";
@@ -44,7 +44,7 @@ function Staffs() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
-        console.log("App 39 error", error);
+        message.error(error.response.data.message);
       });
   }
   const getColumnSearchProps = (dataIndex) => ({
@@ -301,7 +301,7 @@ function Staffs() {
         setLoading(false);
       })
       .catch((error) => {
-        console.log("error getStaff", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }

@@ -10,6 +10,8 @@ export default function Lougout({ setToken, setInfoAccount }) {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
+    }).catch((err) => {
+      console.log("logout 14", err);
     });
     removeToken();
     setToken(getToken());
@@ -24,6 +26,8 @@ export default function Lougout({ setToken, setInfoAccount }) {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
+    }).catch((err) => {
+      console.log("logout 30", err);
     });
     removeToken();
     setToken(getToken());

@@ -1,4 +1,4 @@
-import { Button, Row, Table, Typography } from "antd";
+import { Button, message, Row, Table, Typography } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Axios from "axios";
@@ -94,7 +94,7 @@ function ProjectPage() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
-        console.log("App 39 error", error);
+        message.error(error.response.data.message);
       });
   }
   async function getProjects(assignments) {
@@ -121,8 +121,7 @@ function ProjectPage() {
       })
       .catch((error) => {
         setLoading(false);
-
-        console.log("error getProjects", error);
+        message.error(error.response.data.message);
       });
   }
 
@@ -138,7 +137,7 @@ function ProjectPage() {
         setLoading(false);
       })
       .catch((error) => {
-        console.log("message error", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }

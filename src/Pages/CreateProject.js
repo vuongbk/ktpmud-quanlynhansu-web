@@ -84,7 +84,7 @@ function CreateProject() {
           navigate(-1);
         })
         .catch((error) => {
-          message.error(error.message);
+          message.error(error.response.data.message);
         });
       setLoading(false);
     }
@@ -97,11 +97,10 @@ function CreateProject() {
       },
     })
       .then((res) => {
-        console.log("editpjpage 116", res.data);
         setManagers(res.data);
       })
       .catch((error) => {
-        console.log("message error", error.config);
+        message.error(error.response.data.message);
       });
   }
   function checkStatus(date1, date2) {

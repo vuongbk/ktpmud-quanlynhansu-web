@@ -1,4 +1,4 @@
-import { Button, Row, Table, Typography, DatePicker } from "antd";
+import { Button, Row, Table, Typography, DatePicker, message } from "antd";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
@@ -34,7 +34,7 @@ function AssignmentPage() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
-        console.log("App 39 error", error);
+        message.error(error.response.data.message);
       });
   }
   const columnAssignments = [
@@ -144,7 +144,7 @@ function AssignmentPage() {
       })
       .catch((error) => {
         setLoading(false);
-        console.log("error getAssignmentAndStaff", error);
+        message.error(error.response.data.message);
       });
   }
 

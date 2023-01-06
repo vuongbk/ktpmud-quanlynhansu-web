@@ -74,7 +74,7 @@ function Account() {
         setDataStaffChange(res.data);
       })
       .catch((error) => {
-        console.log("App 39 error", error);
+        message.error(error.response.data.message);
       });
   }
   const handleOkPasswordModal = async () => {
@@ -155,6 +155,7 @@ function Account() {
         .then((res) => {
           message.success("Cập nhật thành công");
           setLoading(false);
+          navigate(0);
         })
         .catch((error) => {
           message.error(error.response.data.message);

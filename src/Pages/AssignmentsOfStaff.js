@@ -1,4 +1,4 @@
-import { Button, Row, Table, Typography } from "antd";
+import { Button, message, Row, Table, Typography } from "antd";
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Axios from "axios";
@@ -57,7 +57,7 @@ function AssignmentsOfStaff() {
       })
       .catch((error) => {
         setLoading(false);
-        console.log("error getAssignments", error);
+        message.error(error.response.data.message);
       });
   }
 

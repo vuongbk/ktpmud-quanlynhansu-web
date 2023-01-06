@@ -75,7 +75,7 @@ function SkillsOfStaffs() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
-        console.log("App 39 error", error);
+        message.error(error.response.data.message);
       });
   }
   const handleOkSkillModal = async () => {
@@ -406,7 +406,7 @@ function SkillsOfStaffs() {
             navigate(0);
           })
           .catch((error) => {
-            message.error(error.message);
+            message.error(error.response.data.message);
             setLoading(false);
           });
       });
@@ -432,7 +432,7 @@ function SkillsOfStaffs() {
       })
       .catch((error) => {
         setLoading(false);
-        console.log("error getNameSkillAndStaff", error);
+        message.error(error.response.data.message);
       });
   }
   function getSkills() {
@@ -449,7 +449,7 @@ function SkillsOfStaffs() {
         setLoading(false);
       })
       .catch((error) => {
-        console.log("skillPage 392", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }

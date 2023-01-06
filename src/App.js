@@ -84,6 +84,9 @@ function App() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
+        //Chỗ này vẫn chưa test được
+        //Trước là đg bật tab local, xong bật sang tab build thì nó ko dùng được token kia, nó ko hiển thị dữ liệu
+        //cx ko render ra trang login, cứ phải vào localStorage xóa token bằng tay
         return <Login setToken={setToken} setInfoAccount={setInfoAccount} />;
       });
   }

@@ -1,4 +1,4 @@
-import { Table, Typography, Row, DatePicker, Button } from "antd";
+import { Table, Typography, Row, DatePicker, Button, message } from "antd";
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Axios from "axios";
@@ -59,7 +59,7 @@ function DetailAssignment() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
-        console.log("App 39 error", error);
+        message.error(error.response.data.message);
       });
   }
   function removeDuplicateIds(listId) {
@@ -202,7 +202,7 @@ function DetailAssignment() {
         setLoading(false);
       })
       .catch((error) => {
-        console.log("error detail 41", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }
@@ -222,7 +222,7 @@ function DetailAssignment() {
         setLoading(false);
       })
       .catch((error) => {
-        console.log("error getAssignmentAndStaff", error);
+        message.error(error.response.data.message);
         setLoading(false);
       });
   }

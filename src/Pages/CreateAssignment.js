@@ -22,7 +22,7 @@ import {
 } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
-import workingDay, { TitleModal } from "../utils";
+import workingDay, { roleDeveloper, roleLeader, TitleModal } from "../utils";
 import Loading from "../Components/Modal/Loading";
 import { getToken } from "../Components/useToken";
 const { Option } = Select;
@@ -41,9 +41,9 @@ const CreateAssignment = () => {
   console.log("41", dataChange);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const dateFormat = "DD/MM/YYYY";
   const iso8601Format = "YYYY-MM-DD";
+  const [isModalOpenHandleError, setIsModalOpenHandleError] = useState(false);
 
   let optionsStaffs = Array.isArray(data) ? getOptionsStaffs() : [];
   function getOptionsStaffs() {
@@ -63,6 +63,15 @@ const CreateAssignment = () => {
       };
     });
   }
+
+  const handleCancelHandleError = () => {
+    setIsModalOpenHandleError(false);
+  };
+
+  const handleOkHandleError = () => {
+    setIsModalOpenHandleError(false);
+  };
+
   const handleSubmit = async () => {
     if (!dataChange?.idStaff) {
       messageApi.open({
@@ -112,22 +121,22 @@ const CreateAssignment = () => {
         },
       })
         .then((res) => {
-          console.log("createAssign 63", res);
           setLoading(false);
           navigate(-1);
         })
         .catch((error) => {
-          // setError(error.response.data);
           message.error(error.response.data.message);
-          console.log("createAssign 68", error);
-          setIsModalOpen(true);
+          console.log("119", error);
+          if (error.response.data.hasOwnProperty("assignment")) {
+            setIsModalOpenHandleError(true);
+            setError(error.response.data);
+          }
           setLoading(false);
         });
     }
   };
 
   async function getStaff() {
-    setLoading(true);
     await Axios.get(
       `/api/staff/${
         searchParams.get("idStaff") ? searchParams.get("idStaff") : ""
@@ -140,16 +149,13 @@ const CreateAssignment = () => {
     )
       .then((res) => {
         setData(res.data);
-        setLoading(false);
       })
       .catch((error) => {
-        console.log("error createAssignment 106", error);
-        setLoading(false);
+        message.error(error.response.data.message);
       });
   }
 
   async function getProjects() {
-    setLoading(true);
     await Axios({
       method: "get",
       url: "/api/project",
@@ -159,11 +165,9 @@ const CreateAssignment = () => {
     })
       .then((res) => {
         setProjects(res.data.infoProjects);
-        setLoading(false);
       })
       .catch((error) => {
-        console.log("createAssign 127", error);
-        setLoading(false);
+        message.error(error.response.data.message);
       });
   }
 
@@ -253,11 +257,11 @@ const CreateAssignment = () => {
                   Thêm mới
                 </Button>
                 {/* modal thông báo lỗi, thông báo thông tin như tổng effort, ngày bắt đầu trùng */}
-                {/* <Modal
+                <Modal
                   title={<TitleModal value="Thông báo" />}
-                  open={isModalOpen}
-                  onOk={handleOk}
-                  onCancel={handleCancel}
+                  open={isModalOpenHandleError}
+                  onOk={handleOkHandleError}
+                  onCancel={handleCancelHandleError}
                 >
                   <p>{error?.message}</p>
                   {error?.assignment && (
@@ -267,17 +271,15 @@ const CreateAssignment = () => {
                       <p>
                         {`Ngày bắt đầu: ${moment(
                           error?.assignment?.dateStart
-                        ).format("DD-MM-YYYY")}`}
+                        ).format(dateFormat)}`}
                       </p>
                       <p>
                         {"Ngày kết thúc: " +
-                          moment(error?.assignment?.dateEnd).format(
-                            "DD-MM-YYYY"
-                          )}
+                          moment(error?.assignment?.dateEnd).format(dateFormat)}
                       </p>
                     </>
                   )}
-                </Modal> */}
+                </Modal>
               </Col>
             </Row>
           </Col>
@@ -324,10 +326,10 @@ const CreateAssignment = () => {
                 width: "100%",
               }}
             >
-              <Option value="developer">Lập trình viên</Option>
+              <Option value={roleDeveloper}>Lập trình viên</Option>
               {/* <Option value="Leader">Leader</Option> */}
               {/* leader là gì khi đã có manager */}
-              <Option value="manager">Quản lý dự án</Option>
+              <Option value={roleLeader}>Quản lý dự án</Option>
             </Select>
           </Col>
         </Row>

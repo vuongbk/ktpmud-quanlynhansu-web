@@ -142,8 +142,8 @@ function EditPage() {
 
     //thay đổi bảng levelSkill
     if (JSON.stringify(levelSkillChange) !== "[]") {
+      setLoading(true);
       levelSkillChange.forEach(async (value, index) => {
-        setLoading(true);
         await Axios.put(
           `/api/level-skill/${value.idLevelSkill}`,
           { levelSkill: value.levelSkill },
@@ -155,13 +155,12 @@ function EditPage() {
         )
           .then((res) => {
             setLevelSkillChange([]);
-            setLoading(false);
           })
           .catch((error) => {
             message.error(error.response.data.message);
-            setLoading(false);
           });
       });
+      setLoading(false);
     }
     //upload image
     // if (imageUrl !== data.imageUrl) {
@@ -191,7 +190,6 @@ function EditPage() {
       },
     })
       .then((res) => {
-        console.log("editAssignment 81", res.data);
         navigate(-1);
         setLoading(false);
       })
@@ -252,7 +250,7 @@ function EditPage() {
       })
       .catch((error) => {
         setLoading(false);
-        console.log("error getStaff", error);
+        message.error(error.response.data.message);
       });
   }
   useEffect(() => {
