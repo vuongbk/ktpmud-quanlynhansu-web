@@ -275,7 +275,7 @@ function Account() {
                     loading={loading}
                     onClick={handleOkPasswordModal}
                   >
-                    Đổi MK
+                    Đổi mật khẩu
                   </Button>,
                 ]}
               >

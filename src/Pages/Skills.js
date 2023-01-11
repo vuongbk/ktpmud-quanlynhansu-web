@@ -83,7 +83,7 @@ function Skills() {
     } else if (!newSkill.maxLevel) {
       messageApi.open({
         type: "warning",
-        content: "Thiếu maxLevel",
+        content: "Thiếu cấp lớn nhất",
       });
       return;
     }
@@ -199,7 +199,7 @@ function Skills() {
                     </Button>,
                   ]}
                 >
-                  <Input
+                  {/* <Input
                     //không hiểu sao record ở đây nó cứ lấy cái ở cuối danh sách,
                     //đáng lẽ click vào cái nào thì phải là record của cái đấy chứ
                     value={newSkill?.skillName}
@@ -220,7 +220,47 @@ function Skills() {
                         return { ...d, maxLevel: e.target.value };
                       });
                     }}
-                  />
+                  /> */}
+                  <Row>
+                    <Col span={24}>
+                      <Row>
+                        {/* cột 1 */}
+                        <Col
+                          xs={24}
+                          md={{
+                            span: 12,
+                          }}
+                        >
+                          <Title level={5}>Tên kỹ năng</Title>
+                          <Input
+                            //không hiểu sao record ở đây nó cứ lấy cái ở cuối danh sách,
+                            //đáng lẽ click vào cái nào thì phải là record của cái đấy chứ
+                            value={newSkill?.skillName}
+                            placeholder="Tên mới"
+                            // defaultValue={""}
+                            onChange={(e) => {
+                              setNewSkill((d) => {
+                                return { ...d, skillName: e.target.value };
+                              });
+                            }}
+                          />
+                        </Col>
+                        {/* cột 2 */}
+                        <Col xs={24} md={{ span: 8, offset: 4 }}>
+                          <Title level={5}>Cấp lớn nhất</Title>
+                          <Input
+                            placeholder="Cấp lớn nhất"
+                            value={newSkill?.maxLevel}
+                            onChange={(e) => {
+                              setNewSkill((d) => {
+                                return { ...d, maxLevel: e.target.value };
+                              });
+                            }}
+                          />
+                        </Col>
+                      </Row>
+                    </Col>
+                  </Row>
                 </Modal>
               </Space>
             </Col>

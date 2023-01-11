@@ -90,10 +90,8 @@ export default function Login({ setToken, setInfoAccount }) {
     })
       .then((res) => res.data.token)
       .catch((error) => {
-        messageApi.open({
-          type: "error",
-          content: error.response.data.message,
-        });
+        message.error(error.response.data.message);
+        console.log("94", error);
       });
     setToken(token);
   };

@@ -11,7 +11,7 @@ import {
   notification,
   message,
 } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import moment from "moment";
 import Axios from "axios";
@@ -31,9 +31,9 @@ function EditProjectPage() {
   const [loading, setLoading] = useState(false);
   let options = managers ? getOptions() : [];
   const [assignments, setAssignments] = useState([]);
-  const timeWorkingEstimation = workingDay(
-    dataProjectChange.dateStart || data?.dateStart,
-    dataProjectChange.dateEnd || data?.dateEnd
+  const timeWorkingEstimation = useMemo(
+    () => workingDay(dataProjectChange.dateStart, dataProjectChange.dateEnd),
+    [dataProjectChange]
   );
   //Tính tổng thời gian nhân viên đã được phân công làm cho tới hiện tại
   const currentDay = moment().startOf("day");

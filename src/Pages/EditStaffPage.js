@@ -131,10 +131,12 @@ function EditPage() {
         },
       })
         .then((res) => {
+          message.success("Cập nhật thành công");
           setDataStaffChange(data);
           setLoading(false);
         })
         .catch((error) => {
+          console.log("138", error);
           message.error(error.response.data.message);
           setLoading(false);
         });
@@ -154,6 +156,7 @@ function EditPage() {
           }
         )
           .then((res) => {
+            message.success("Cập nhật thành công");
             setLevelSkillChange([]);
           })
           .catch((error) => {
@@ -162,6 +165,7 @@ function EditPage() {
       });
       setLoading(false);
     }
+    navigate(0);
     //upload image
     // if (imageUrl !== data.imageUrl) {
     //   let formData = new FormData();
