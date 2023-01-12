@@ -40,7 +40,7 @@ const listRole = [
 const roleAdmin = "Admin";
 const TitleTable = (props) => {
   return (
-    <Typography.Title level={5} style={{ margin: 0, fontSize: "1.25em" }}>
+    <Typography.Title level={5} style={{ margin: 0, fontSize: "1.1em" }}>
       {props.value}
     </Typography.Title>
   );

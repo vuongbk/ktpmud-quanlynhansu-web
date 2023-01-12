@@ -10,9 +10,11 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 function AssignmentPage() {
-  console.log("12", moment().startOf("year").year());
   const [infoAccount, setInfoAccount] = useState();
   const [data, setData] = useState();
+  const [idProjectOfLeader, setIdProjectOfLeader] = useState();
+
+  // console.log("15", idProjectOfLeader);
   const [loading, setLoading] = useState(false);
   const [monthColumnStart, setMonthColumnStart] = useState(
     moment().startOf("month").subtract(3, "months")
@@ -37,6 +39,32 @@ function AssignmentPage() {
         message.error(error.response.data.message);
       });
   }
+
+  const getProjectsOfLeader = async () => {
+    //lấy các dự án mà ông này lead
+    await Axios({
+      method: "get",
+      url: "/api/project",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        console.log("53", res.data);
+        const listProject = res.data.infoProjects.filter(
+          (pj) => pj.idLeader === infoAccount?._id
+        );
+        let objPj = {}; //lấy các idProject cho làm key của obj
+        listProject.forEach((pj) => {
+          objPj[pj._id] = 2;
+        });
+        setIdProjectOfLeader(objPj);
+      })
+      .catch((error) => {
+        message.error(error.response.data.message);
+      });
+  };
+
   const columnAssignments = [
     {
       title: <TitleTable value="Nhân viên" />,
@@ -56,6 +84,7 @@ function AssignmentPage() {
     },
     ...getEffortInMonth(),
   ];
+
   function getEffortInMonth() {
     let millisecondsPerDay = 24 * 60 * 60 * 1000;
     let monthArray = [];
@@ -139,7 +168,16 @@ function AssignmentPage() {
       },
     })
       .then((res) => {
-        setData(res.data);
+        if (infoAccount.role !== roleAdmin) {
+          const listStaffInProject = res.data.filter((staff) => {
+            return staff.totalEffort.some((pj) => {
+              return idProjectOfLeader.hasOwnProperty(pj.idProject);
+            });
+          });
+          setData(listStaffInProject);
+        } else {
+          setData(res.data);
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -149,13 +187,20 @@ function AssignmentPage() {
   }
 
   useEffect(() => {
-    if (!data) {
-      getAssignmentAndStaff();
-    }
     if (!infoAccount) {
+      console.log("187", infoAccount);
       getInfoAccount();
     }
-  }, [data]);
+    if (!idProjectOfLeader) {
+      console.log("191", idProjectOfLeader);
+
+      getProjectsOfLeader();
+    }
+    if (!data) {
+      console.log("196", data);
+      getAssignmentAndStaff();
+    }
+  }, [infoAccount, idProjectOfLeader]);
 
   if (loading) {
     return <Loading />;

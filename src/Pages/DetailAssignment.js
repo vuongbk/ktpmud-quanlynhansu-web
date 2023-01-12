@@ -18,6 +18,7 @@ function DetailAssignment() {
   );
   const [dateColumnEnd, setDateColumnEnd] = useState(moment().add(35, "days"));
   const [projects, setProjects] = useState([]);
+  console.log("21", projects);
   const [loading, setLoading] = useState(false);
   const dateFormat = "DD/MM/YYYY";
 
@@ -139,7 +140,8 @@ function DetailAssignment() {
             return (
               <Link
                 to={
-                  infoAccount?.role === roleAdmin
+                  infoAccount?.role === roleAdmin ||
+                  infoAccount?._id === record.idLeader
                     ? `/edit-assignment/${totalEffort[indexOfAssignment]?._id}`
                     : "#"
                 }
@@ -152,6 +154,16 @@ function DetailAssignment() {
                 }}
                 style={{
                   color: sumEffort < 100 ? "red" : "blue",
+                }}
+                onClick={() => {
+                  if (
+                    infoAccount?.role !== roleAdmin &&
+                    infoAccount?._id !== record.idLeader
+                  ) {
+                    message.error(
+                      "Chỉ có thể chỉnh sửa phân công trong dự án bạn lead"
+                    );
+                  }
                 }}
               >
                 {totalEffort[indexOfAssignment]?.effort}%

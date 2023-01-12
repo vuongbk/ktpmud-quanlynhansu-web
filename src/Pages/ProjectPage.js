@@ -59,7 +59,6 @@ function ProjectPage() {
       title: <TitleTable value="Ngày bắt đầu" />,
       dataIndex: "dateStart",
       render: (dateStart) => {
-        let dtStart = new Date(dateStart);
         return <Text>{moment(dateStart).format("DD/MM/YYYY")}</Text>;
       },
       key: "dateStart",
@@ -79,9 +78,7 @@ function ProjectPage() {
       return (total += workingDay(value.dateStart, currentDay));
     }, 0);
   };
-  if (!infoAccount) {
-    getInfoAccount();
-  }
+
   async function getInfoAccount() {
     await Axios({
       method: "get",
@@ -97,6 +94,7 @@ function ProjectPage() {
         message.error(error.response.data.message);
       });
   }
+
   async function getProjects(assignments) {
     setLoading(true);
     await Axios.get("/api/project", {
@@ -116,7 +114,11 @@ function ProjectPage() {
           };
         });
 
-        setData(projects);
+        if (infoAccount?.role !== roleAdmin) {
+          setData(projects.filter((pj) => pj.idLeader === infoAccount._id));
+        } else {
+          setData(projects);
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -142,8 +144,10 @@ function ProjectPage() {
       });
   }
 
-  //Làm tiếp chỗ này
   useEffect(() => {
+    if (!infoAccount) {
+      getInfoAccount();
+    }
     if (!assignments) {
       getAssignments();
     }

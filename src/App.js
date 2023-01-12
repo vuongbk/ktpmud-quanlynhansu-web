@@ -22,6 +22,7 @@ import CreateAssignment from "./Pages/CreateAssignment";
 import Account from "./Pages/Account";
 import AssignmentsOfStaff from "./Pages/AssignmentsOfStaff";
 import Skills from "./Pages/Skills";
+import { roleAdmin } from "./utils";
 
 const { Header, Footer, Content } = Layout;
 function App() {
@@ -125,18 +126,20 @@ function App() {
                   >
                     Phân công
                   </NavLink>
-                  <NavLink
-                    style={({ isActive }) => {
-                      return {
-                        fontSize: "16px",
-                        display: "block",
-                        color: isActive ? "#40a9ff" : "white",
-                      };
-                    }}
-                    to="/staff"
-                  >
-                    Nhân sự
-                  </NavLink>
+                  {infoAccount?.role === roleAdmin && (
+                    <NavLink
+                      style={({ isActive }) => {
+                        return {
+                          fontSize: "16px",
+                          display: "block",
+                          color: isActive ? "#40a9ff" : "white",
+                        };
+                      }}
+                      to="/staff"
+                    >
+                      Nhân sự
+                    </NavLink>
+                  )}
                   <NavLink
                     style={({ isActive }) => {
                       return {
@@ -149,18 +152,20 @@ function App() {
                   >
                     Dự án
                   </NavLink>
-                  <NavLink
-                    style={({ isActive }) => {
-                      return {
-                        fontSize: "16px",
-                        display: "block",
-                        color: isActive ? "#40a9ff" : "white",
-                      };
-                    }}
-                    to="/skills-of-staffs"
-                  >
-                    Kỹ năng
-                  </NavLink>
+                  {infoAccount?.role === roleAdmin && (
+                    <NavLink
+                      style={({ isActive }) => {
+                        return {
+                          fontSize: "16px",
+                          display: "block",
+                          color: isActive ? "#40a9ff" : "white",
+                        };
+                      }}
+                      to="/skills-of-staffs"
+                    >
+                      Kỹ năng
+                    </NavLink>
+                  )}
                 </Space>
               </Col>
             </Row>
