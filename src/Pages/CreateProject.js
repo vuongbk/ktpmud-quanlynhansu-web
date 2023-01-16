@@ -193,22 +193,6 @@ function CreateProject() {
                 },
               ]}
             ></Select>
-            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
-              <Col span={10}>
-                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
-                  Quay lại
-                </Button>
-              </Col>
-              <Col span={10}>
-                <Button
-                  style={{ width: "100%" }}
-                  type="primary"
-                  onClick={handleSubmit}
-                >
-                  Thêm mới
-                </Button>
-              </Col>
-            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -247,6 +231,31 @@ function CreateProject() {
               ) / 100}{" "}
               mm
             </Text>
+          </Col>
+        </Row>
+        <Row>
+          <Col
+            xs={24}
+            md={{
+              span: 10,
+            }}
+          >
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                  Quay lại
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Button
+                  style={{ width: "100%" }}
+                  type="primary"
+                  onClick={handleSubmit}
+                >
+                  Thêm mới
+                </Button>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Col>

@@ -271,46 +271,6 @@ function EditProjectPage() {
             <Text>
               Ước tính: {Math.round(timeWorkingEstimation * 100) / 100} mm
             </Text>
-            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
-              <Col span={10}>
-                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
-                  Quay lại
-                </Button>
-              </Col>
-              <Col span={10}>
-                <Row>
-                  <Button
-                    type="primary"
-                    style={{ width: "100%" }}
-                    onClick={handleSubmit}
-                  >
-                    Cập nhật
-                  </Button>
-                </Row>
-                <Row>
-                  <Popconfirm
-                    title="Bạn có chắc muốn xóa dự án？"
-                    cancelText="Hủy"
-                    okText="Xóa"
-                    okButtonProps={{ type: "danger" }}
-                    onConfirm={handleDelete}
-                  >
-                    <Button
-                      style={{
-                        width: "100%",
-                        textAlign: "right",
-                        fontSize: "0.75em",
-                        padding: "0",
-                      }}
-                      type="link"
-                      danger
-                    >
-                      Xóa dự án
-                    </Button>
-                  </Popconfirm>
-                </Row>
-              </Col>
-            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -373,6 +333,55 @@ function EditProjectPage() {
                 100}{" "}
               {" mm"}
             </Text>
+          </Col>
+        </Row>
+        <Row>
+          <Col
+            xs={24}
+            md={{
+              span: 10,
+            }}
+          >
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                  Quay lại
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Row>
+                  <Button
+                    type="primary"
+                    style={{ width: "100%" }}
+                    onClick={handleSubmit}
+                  >
+                    Cập nhật
+                  </Button>
+                </Row>
+                <Row>
+                  <Popconfirm
+                    title="Bạn có chắc muốn xóa dự án？"
+                    cancelText="Hủy"
+                    okText="Xóa"
+                    okButtonProps={{ type: "danger" }}
+                    onConfirm={handleDelete}
+                  >
+                    <Button
+                      style={{
+                        width: "100%",
+                        textAlign: "right",
+                        fontSize: "0.75em",
+                        padding: "0",
+                      }}
+                      type="link"
+                      danger
+                    >
+                      Xóa dự án
+                    </Button>
+                  </Popconfirm>
+                </Row>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Col>

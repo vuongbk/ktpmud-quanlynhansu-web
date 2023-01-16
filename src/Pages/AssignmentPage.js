@@ -13,8 +13,6 @@ function AssignmentPage() {
   const [infoAccount, setInfoAccount] = useState();
   const [data, setData] = useState();
   const [idProjectOfLeader, setIdProjectOfLeader] = useState();
-
-  // console.log("15", idProjectOfLeader);
   const [loading, setLoading] = useState(false);
   const [monthColumnStart, setMonthColumnStart] = useState(
     moment().startOf("month").subtract(3, "months")

@@ -177,6 +177,7 @@ function App() {
                   items,
                 }}
                 trigger={["click"]}
+                arrow={true}
               >
                 <Space
                   style={{
@@ -191,7 +192,6 @@ function App() {
                     alt="avat"
                   />
                   {infoAccount?.fullName}
-                  <DownOutlined />
                 </Space>
               </Dropdown>
             </Row>

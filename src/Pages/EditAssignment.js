@@ -186,6 +186,52 @@ const EditAssignment = () => {
                 });
               }}
             />
+          </Col>
+          {/* cột 2 */}
+          <Col xs={24} md={{ span: 10, offset: 4 }}>
+            <Title level={5}>Dự án</Title>
+            <Input
+              defaultValue={data?.projectName}
+              disabled
+              // onChange={(e) => {
+              //   setDataChange((d) => {
+              //     return { ...d, projectName: e.target.value };
+              //   });
+              // }}
+            />
+            <Title level={5}>Đến ngày</Title>
+            <DatePicker
+              format={dateFormat}
+              value={moment(dataChange.dateEnd)}
+              style={{ width: "100%" }}
+              onChange={(date, dateString) => {
+                setDataChange((d) => {
+                  return {
+                    ...d,
+                    dateEnd: moment(date).format(iso8601Format),
+                  };
+                });
+              }}
+            />
+            <Title level={5}>Vai trò</Title>
+            <Input
+              defaultValue={data?.asignment.role}
+              disabled
+              // onChange={(e) => {
+              //   setDataChange((d) => {
+              //     return { ...d, projectName: e.target.value };
+              //   });
+              // }}
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col
+            xs={24}
+            md={{
+              span: 10,
+            }}
+          >
             <Row style={{ marginTop: "70px" }} justify={"space-between"}>
               <Col span={10}>
                 <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
@@ -252,43 +298,6 @@ const EditAssignment = () => {
                 </Row>
               </Col>
             </Row>
-          </Col>
-          {/* cột 2 */}
-          <Col xs={24} md={{ span: 10, offset: 4 }}>
-            <Title level={5}>Dự án</Title>
-            <Input
-              defaultValue={data?.projectName}
-              disabled
-              // onChange={(e) => {
-              //   setDataChange((d) => {
-              //     return { ...d, projectName: e.target.value };
-              //   });
-              // }}
-            />
-            <Title level={5}>Đến ngày</Title>
-            <DatePicker
-              format={dateFormat}
-              value={moment(dataChange.dateEnd)}
-              style={{ width: "100%" }}
-              onChange={(date, dateString) => {
-                setDataChange((d) => {
-                  return {
-                    ...d,
-                    dateEnd: moment(date).format(iso8601Format),
-                  };
-                });
-              }}
-            />
-            <Title level={5}>Vai trò</Title>
-            <Input
-              defaultValue={data?.asignment.role}
-              disabled
-              // onChange={(e) => {
-              //   setDataChange((d) => {
-              //     return { ...d, projectName: e.target.value };
-              //   });
-              // }}
-            />
           </Col>
         </Row>
       </Col>

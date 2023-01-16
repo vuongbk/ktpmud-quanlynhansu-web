@@ -242,46 +242,6 @@ const CreateAssignment = () => {
                 });
               }}
             />
-            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
-              <Col span={10}>
-                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
-                  <Text>Quay lại</Text>
-                </Button>
-              </Col>
-              <Col span={10}>
-                <Button
-                  style={{ width: "100%" }}
-                  type={"primary"}
-                  onClick={handleSubmit}
-                >
-                  Thêm mới
-                </Button>
-                {/* modal thông báo lỗi, thông báo thông tin như tổng effort, ngày bắt đầu trùng */}
-                <Modal
-                  title={<TitleModal value="Thông báo" />}
-                  open={isModalOpenHandleError}
-                  onOk={handleOkHandleError}
-                  onCancel={handleCancelHandleError}
-                >
-                  <p>{error?.message}</p>
-                  {error?.assignment && (
-                    <>
-                      <hr></hr>
-                      <p>Phân công: {error?.assignment?.effort}%</p>
-                      <p>
-                        {`Ngày bắt đầu: ${moment(
-                          error?.assignment?.dateStart
-                        ).format(dateFormat)}`}
-                      </p>
-                      <p>
-                        {"Ngày kết thúc: " +
-                          moment(error?.assignment?.dateEnd).format(dateFormat)}
-                      </p>
-                    </>
-                  )}
-                </Modal>
-              </Col>
-            </Row>
           </Col>
           {/* cột 2 */}
           <Col xs={24} md={{ span: 10, offset: 4 }}>
@@ -331,6 +291,55 @@ const CreateAssignment = () => {
               {/* leader là gì khi đã có manager */}
               <Option value={roleLeader}>Quản lý dự án</Option>
             </Select>
+          </Col>
+        </Row>
+        <Row>
+          <Col
+            xs={24}
+            md={{
+              span: 10,
+            }}
+          >
+            <Row style={{ marginTop: "70px" }} justify={"space-between"}>
+              <Col span={10}>
+                <Button style={{ width: "100%" }} onClick={() => navigate(-1)}>
+                  <Text>Quay lại</Text>
+                </Button>
+              </Col>
+              <Col span={10}>
+                <Button
+                  style={{ width: "100%" }}
+                  type={"primary"}
+                  onClick={handleSubmit}
+                >
+                  Thêm mới
+                </Button>
+                {/* modal thông báo lỗi, thông báo thông tin như tổng effort, ngày bắt đầu trùng */}
+                <Modal
+                  title={<TitleModal value="Thông báo" />}
+                  open={isModalOpenHandleError}
+                  onOk={handleOkHandleError}
+                  onCancel={handleCancelHandleError}
+                >
+                  <p>{error?.message}</p>
+                  {error?.assignment && (
+                    <>
+                      <hr></hr>
+                      <p>Phân công: {error?.assignment?.effort}%</p>
+                      <p>
+                        {`Ngày bắt đầu: ${moment(
+                          error?.assignment?.dateStart
+                        ).format(dateFormat)}`}
+                      </p>
+                      <p>
+                        {"Ngày kết thúc: " +
+                          moment(error?.assignment?.dateEnd).format(dateFormat)}
+                      </p>
+                    </>
+                  )}
+                </Modal>
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Col>
