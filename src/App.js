@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Staffs from "./Pages/Staffs";
 import "./App.css";
@@ -28,6 +28,8 @@ const { Header, Footer, Content } = Layout;
 function App() {
   const { token, setToken } = useToken();
   const [infoAccount, setInfoAccount] = useState();
+  console.log("31 app", infoAccount);
+  console.log("32 app", token);
   const { logoutOne, logoutAll } = Logout({ setToken, setInfoAccount });
   const items = [
     {
@@ -68,9 +70,11 @@ function App() {
   ];
 
   if (!token) {
+    console.log("73 app");
     return <Login setToken={setToken} setInfoAccount={setInfoAccount} />;
   }
   if (!infoAccount) {
+    console.log("76 app");
     getInfoAccount();
   }
   async function getInfoAccount() {
@@ -205,8 +209,12 @@ function App() {
         }}
       >
         <Routes>
-          <Route index element={<AssignmentPage />} />
-          <Route path="/assignment" element={<AssignmentPage />} />
+          <Route index element={<AssignmentPage infoAccount={infoAccount} />} />
+          {console.log("210 app", infoAccount)}
+          <Route
+            path="/assignment"
+            element={<AssignmentPage infoAccount={infoAccount} />}
+          />
           <Route path="/staff" element={<Staffs />} />
           <Route path="/edit-staff/:idStaff" element={<EditStaffPage />} />
           <Route path="/create-staff" element={<CreateStaff />} />

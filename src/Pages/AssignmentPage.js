@@ -1,5 +1,5 @@
 import { Button, Row, Table, Typography, DatePicker, message } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
@@ -9,7 +9,8 @@ import { roleAdmin, TitleTable } from "../utils";
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
-function AssignmentPage() {
+function AssignmentPage(info) {
+  console.log("assingnmentPage ", info);
   const [infoAccount, setInfoAccount] = useState();
   const [data, setData] = useState();
   const [idProjectOfLeader, setIdProjectOfLeader] = useState();
@@ -98,11 +99,6 @@ function AssignmentPage() {
     ) {
       const currentMonth = j.valueOf();
       const nextMonth = j.clone().add(1, "months").valueOf();
-      function getTitle() {
-        let date = new Date(j);
-        let title = date.getMonth() + 1 + "/" + date.getFullYear();
-        return title;
-      }
       monthArray.push({
         title: <TitleTable value={j.format(monthFormat)} />,
         width: "100px",
@@ -184,7 +180,7 @@ function AssignmentPage() {
       });
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!infoAccount) {
       console.log("187", infoAccount);
       getInfoAccount();

@@ -27,12 +27,15 @@ export default function Login({ setToken, setInfoAccount }) {
       method: "POST",
       data: { email, password },
     })
-      .then((res) => res.data.token)
+      .then((res) => {
+        setToken(res.data.token);
+        setInfoAccount(res.data.user);
+      })
       .catch((error) => {
         message.error(error.response.data.message);
         console.log("94", error);
       });
-    setToken(token);
+    // setToken(token);
   };
   return (
     // <div
