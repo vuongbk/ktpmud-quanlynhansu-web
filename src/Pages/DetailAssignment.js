@@ -1,5 +1,5 @@
 import { Table, Typography, Row, DatePicker, Button, message } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
@@ -9,8 +9,9 @@ import { roleAdmin, TitleTable } from "../utils";
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
-function DetailAssignment() {
-  const [infoAccount, setInfoAccount] = useState();
+function DetailAssignment(props) {
+  const [infoAccount, setInfoAccount] = useState(props?.infoAccount);
+  console.log("13 detail", infoAccount);
   const [data, setData] = useState(null);
   const { idStaff } = useParams();
   const [dateColumnStart, setDateColumnStart] = useState(
@@ -31,8 +32,19 @@ function DetailAssignment() {
       render: (projectName, record) => {
         return (
           <Link
+            onClick={() => {
+              if (
+                !(
+                  infoAccount?.role === roleAdmin ||
+                  infoAccount?._id === record.idLeader
+                )
+              ) {
+                message.error("Leader chỉ được xem phân công dự án mình lead");
+              }
+            }}
             to={
-              infoAccount?.role === roleAdmin
+              infoAccount?.role === roleAdmin ||
+              infoAccount?._id === record.idLeader
                 ? `/assignments-of-staff?idStaff=${idStaff}&idProject=${record._id}`
                 : "#"
             }
@@ -45,9 +57,7 @@ function DetailAssignment() {
     ...getEffortInDay(),
   ];
   const navigate = useNavigate();
-  if (!infoAccount) {
-    getInfoAccount();
-  }
+
   async function getInfoAccount() {
     await Axios({
       method: "get",
@@ -182,7 +192,7 @@ function DetailAssignment() {
     return dateColumnList;
   }
 
-  async function getProjectName() {
+  const getProjectName = useCallback(async () => {
     setLoading(true);
     let urlGet = "/api/project?";
     let listId = removeDuplicateIds(data?.totalEffort);
@@ -200,6 +210,7 @@ function DetailAssignment() {
       },
     })
       .then((res) => {
+        console.log("202", res.data);
         let projects = res.data.infoProjects.map((value, index) => {
           return {
             ...value,
@@ -217,16 +228,20 @@ function DetailAssignment() {
         message.error(error.response.data.message);
         setLoading(false);
       });
-  }
+  }, [data?.totalEffort]);
 
-  async function getAssignmentAndStaff() {
+  const getAssignmentAndStaff = useCallback(async () => {
     setLoading(true);
-    await Axios.get("/api/assignment-staff", {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
+    await Axios.get(
+      `/api/assignment-staff?role=${infoAccount?.role}&idLeader=${infoAccount?._id}`,
+      {
+        headers: {
+          Authorization: "Bearer " + getToken(),
+        },
+      }
+    )
       .then((res) => {
+        console.log("230", res.data);
         let rawData = res.data.find((value, index) => {
           return idStaff === value.idStaff;
         });
@@ -237,15 +252,19 @@ function DetailAssignment() {
         message.error(error.response.data.message);
         setLoading(false);
       });
-  }
+  }, [idStaff, infoAccount]);
   useEffect(() => {
+    //Lấy thông tin tài khoản đang đăng nhập để phân quyền
+    if (!infoAccount) {
+      getInfoAccount();
+    }
     if (!data) {
       getAssignmentAndStaff();
     }
     if (data) {
       getProjectName();
     }
-  }, [data]);
+  }, [data, getAssignmentAndStaff, getProjectName, infoAccount]);
 
   if (loading) {
     return <Loading />;
@@ -266,13 +285,11 @@ function DetailAssignment() {
             setDateColumnEnd(dates[1]);
           }}
         />
-        {infoAccount?.role === roleAdmin && (
-          <Button type="primary">
-            <Link to={`/create-assignment?idStaff=${idStaff}`} state={{ data }}>
-              Thêm mới
-            </Link>
-          </Button>
-        )}
+        <Button type="primary">
+          <Link to={`/create-assignment?idStaff=${idStaff}`} state={{ data }}>
+            Thêm mới
+          </Link>
+        </Button>
       </Row>
 
       <Table

@@ -10,10 +10,11 @@ import { roleAdmin, TitleTable } from "../utils";
 const { Title, Text } = Typography;
 const { Column } = Table;
 
-function ProjectPage() {
+function ProjectPage(props) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [infoAccount, setInfoAccount] = useState();
+  const [infoAccount, setInfoAccount] = useState(props?.infoAccount);
+  console.log("project 17", infoAccount);
   const columns = [
     {
       title: <TitleTable value="Tên dự án" />,
@@ -88,6 +89,7 @@ function ProjectPage() {
       },
     })
       .then((res) => {
+        console.log("project 92");
         setInfoAccount(res.data);
       })
       .catch((error) => {
@@ -97,11 +99,14 @@ function ProjectPage() {
 
   async function getProjects(assignments) {
     setLoading(true);
-    await Axios.get("/api/project", {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
+    await Axios.get(
+      `/api/project?role=${infoAccount?.role}&idLeader=${infoAccount?._id}`,
+      {
+        headers: {
+          Authorization: "Bearer " + getToken(),
+        },
+      }
+    )
       .then((res) => {
         let projects = res.data.infoProjects.map((value, index) => {
           return {
@@ -114,11 +119,8 @@ function ProjectPage() {
           };
         });
 
-        if (infoAccount?.role !== roleAdmin) {
-          setData(projects.filter((pj) => pj.idLeader === infoAccount._id));
-        } else {
-          setData(projects);
-        }
+        setData(projects);
+
         setLoading(false);
       })
       .catch((error) => {
@@ -169,6 +171,7 @@ function ProjectPage() {
           </Button>
         )}
       </Row>
+      {console.log("project 174")}
       <Table
         dataSource={data}
         pagination={{ pageSize: 6 }}

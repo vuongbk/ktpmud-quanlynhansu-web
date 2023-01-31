@@ -2,8 +2,6 @@ import { Typography } from "antd";
 import moment from "moment";
 
 function workingDay(date1, date2) {
-  console.log("utls/index 2", date1);
-  console.log("utls/index 2", date2);
   let dt1 = Date.parse(moment(date1));
   let dt2 = Date.parse(moment(date2));
   let t7 = Date.parse("1970-01-03"); //ngay t7 đầu tiên

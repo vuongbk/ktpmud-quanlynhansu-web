@@ -12,7 +12,7 @@ import {
   Modal,
   message,
 } from "antd";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Link,
   useLocation,
@@ -28,7 +28,8 @@ import { getToken } from "../Components/useToken";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
-const CreateAssignment = () => {
+const CreateAssignment = (props) => {
+  const [infoAccount, setInfoAccount] = useState(props?.infoAccount);
   const effortRef = useRef();
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
@@ -63,6 +64,22 @@ const CreateAssignment = () => {
       };
     });
   }
+
+  const getInfoAccount = useCallback(async () => {
+    await Axios({
+      method: "get",
+      url: "../api/staff?infoAccount=true",
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
+    })
+      .then((res) => {
+        setInfoAccount(res.data);
+      })
+      .catch((error) => {
+        message.error(error.response.data.message);
+      });
+  }, []);
 
   const handleCancelHandleError = () => {
     setIsModalOpenHandleError(false);
@@ -115,11 +132,15 @@ const CreateAssignment = () => {
       effortRef.current.focus();
     } else {
       setLoading(true);
-      await Axios.post(`../api/assignment`, dataChange, {
-        headers: {
-          Authorization: "Bearer " + getToken(),
-        },
-      })
+      await Axios.post(
+        `../api/assignment?role=${infoAccount?.role}&idLeader=${infoAccount?._id}`,
+        dataChange,
+        {
+          headers: {
+            Authorization: "Bearer " + getToken(),
+          },
+        }
+      )
         .then((res) => {
           setLoading(false);
           navigate(-1);
@@ -136,7 +157,7 @@ const CreateAssignment = () => {
     }
   };
 
-  async function getStaff() {
+  const getStaff = useCallback(async () => {
     await Axios.get(
       `/api/staff/${
         searchParams.get("idStaff") ? searchParams.get("idStaff") : ""
@@ -153,12 +174,12 @@ const CreateAssignment = () => {
       .catch((error) => {
         message.error(error.response.data.message);
       });
-  }
+  }, [searchParams]);
 
-  async function getProjects() {
+  const getProjects = useCallback(async () => {
     await Axios({
       method: "get",
-      url: "/api/project",
+      url: `/api/project?role=${infoAccount?.role}&idLeader=${infoAccount?._id}`,
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -169,14 +190,19 @@ const CreateAssignment = () => {
       .catch((error) => {
         message.error(error.response.data.message);
       });
-  }
+  }, [infoAccount]);
 
   useEffect(() => {
+    if (!infoAccount) {
+      console.log("187 ass ");
+
+      getInfoAccount();
+    }
     if (!data) {
       getStaff();
     }
     getProjects();
-  }, []);
+  }, [data, getInfoAccount, getProjects, getStaff, infoAccount]);
 
   if (loading) {
     return <Loading />;

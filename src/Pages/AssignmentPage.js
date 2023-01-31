@@ -1,5 +1,5 @@
 import { Button, Row, Table, Typography, DatePicker, message } from "antd";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useLayoutEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Axios from "axios";
 import Loading from "../Components/Modal/Loading";
@@ -9,9 +9,10 @@ import { roleAdmin, TitleTable } from "../utils";
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
-function AssignmentPage(info) {
-  console.log("assingnmentPage ", info);
-  const [infoAccount, setInfoAccount] = useState();
+function AssignmentPage(props) {
+  console.log("assingnmentPage ", props);
+  const [infoAccount, setInfoAccount] = useState(props?.infoAccount);
+  console.log("assignment 15", infoAccount);
   const [data, setData] = useState();
   const [idProjectOfLeader, setIdProjectOfLeader] = useState();
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ function AssignmentPage(info) {
   );
   const monthFormat = "MM-YYYY";
 
-  async function getInfoAccount() {
+  const getInfoAccount = useCallback(async () => {
     await Axios({
       method: "get",
       url: "../api/staff?infoAccount=true",
@@ -37,9 +38,9 @@ function AssignmentPage(info) {
       .catch((error) => {
         message.error(error.response.data.message);
       });
-  }
+  }, []);
 
-  const getProjectsOfLeader = async () => {
+  const getProjectsOfLeader = useCallback(async () => {
     //lấy các dự án mà ông này lead
     await Axios({
       method: "get",
@@ -49,7 +50,6 @@ function AssignmentPage(info) {
       },
     })
       .then((res) => {
-        console.log("53", res.data);
         const listProject = res.data.infoProjects.filter(
           (pj) => pj.idLeader === infoAccount?._id
         );
@@ -62,7 +62,7 @@ function AssignmentPage(info) {
       .catch((error) => {
         message.error(error.response.data.message);
       });
-  };
+  }, [infoAccount]);
 
   const columnAssignments = [
     {
@@ -153,48 +153,50 @@ function AssignmentPage(info) {
     }
     return monthArray;
   }
-
-  async function getAssignmentAndStaff() {
+  const getAssignmentAndStaff = useCallback(async () => {
     setLoading(true);
-    await Axios.get("/api/assignment-staff", {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    })
+    await Axios.get(
+      `/api/assignment-staff?role=${infoAccount?.role}&idLeader=${infoAccount?._id}`,
+      {
+        headers: {
+          Authorization: "Bearer " + getToken(),
+        },
+      }
+    )
       .then((res) => {
-        if (infoAccount.role !== roleAdmin) {
-          const listStaffInProject = res.data.filter((staff) => {
-            return staff.totalEffort.some((pj) => {
-              return idProjectOfLeader.hasOwnProperty(pj.idProject);
-            });
-          });
-          setData(listStaffInProject);
-        } else {
-          setData(res.data);
-        }
+        setData(res.data);
+
         setLoading(false);
       })
       .catch((error) => {
         setLoading(false);
+        console.log("178 ass ", error);
         message.error(error.response.data.message);
       });
-  }
+  }, [infoAccount]);
 
   useLayoutEffect(() => {
+    console.log("183 ass ");
     if (!infoAccount) {
-      console.log("187", infoAccount);
+      console.log("187 ass ");
+
       getInfoAccount();
     }
-    if (!idProjectOfLeader) {
-      console.log("191", idProjectOfLeader);
-
-      getProjectsOfLeader();
-    }
-    if (!data) {
-      console.log("196", data);
+    // if (!idProjectOfLeader && infoAccount) {
+    //   getProjectsOfLeader();
+    // }
+    if (!data && infoAccount) {
+      console.log("192 ass", infoAccount);
       getAssignmentAndStaff();
     }
-  }, [infoAccount, idProjectOfLeader]);
+  }, [
+    infoAccount,
+    idProjectOfLeader,
+    data,
+    getProjectsOfLeader,
+    getAssignmentAndStaff,
+    getInfoAccount,
+  ]);
 
   if (loading) {
     return <Loading />;
@@ -216,11 +218,11 @@ function AssignmentPage(info) {
             setMonthColumnEnd(dates[1]);
           }}
         />
-        {infoAccount?.role === roleAdmin && (
-          <Button type="primary">
-            <Link to="/create-assignment">Thêm mới</Link>
-          </Button>
-        )}
+        {/* {infoAccount?.role === roleAdmin && ( */}
+        <Button type="primary">
+          <Link to="/create-assignment">Thêm mới</Link>
+        </Button>
+        {/* )} */}
       </Row>
 
       <Table

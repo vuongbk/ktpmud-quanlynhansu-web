@@ -69,6 +69,7 @@ function App() {
     },
   ];
 
+  // useLayoutEffect(() => {
   if (!token) {
     console.log("73 app");
     return <Login setToken={setToken} setInfoAccount={setInfoAccount} />;
@@ -77,6 +78,8 @@ function App() {
     console.log("76 app");
     getInfoAccount();
   }
+  // }, []);
+
   async function getInfoAccount() {
     await Axios({
       method: "get",
@@ -89,10 +92,7 @@ function App() {
         setInfoAccount(res.data);
       })
       .catch((error) => {
-        //Chỗ này vẫn chưa test được
-        //Trước là đg bật tab local, xong bật sang tab build thì nó ko dùng được token kia, nó ko hiển thị dữ liệu
-        //cx ko render ra trang login, cứ phải vào localStorage xóa token bằng tay
-        return <Login setToken={setToken} setInfoAccount={setInfoAccount} />;
+        console.log("error 95");
       });
   }
 
@@ -209,16 +209,41 @@ function App() {
         }}
       >
         <Routes>
-          <Route index element={<AssignmentPage infoAccount={infoAccount} />} />
+          {infoAccount && (
+            <Route
+              index
+              element={<AssignmentPage infoAccount={infoAccount} />}
+            />
+          )}
           {console.log("210 app", infoAccount)}
           <Route
             path="/assignment"
             element={<AssignmentPage infoAccount={infoAccount} />}
           />
+          <Route
+            path="/detail-assignment/:idStaff"
+            element={<DetailAssignment infoAccount={infoAccount} />}
+          />
+          <Route
+            path="/assignments-of-staff"
+            element={<AssignmentsOfStaff />}
+          />
+          <Route
+            path="/create-assignment"
+            element={<CreateAssignment infoAccount={infoAccount} />}
+          />
+
+          <Route
+            path="/edit-assignment/:idAssignment"
+            element={<EditAssignment />}
+          />
           <Route path="/staff" element={<Staffs />} />
           <Route path="/edit-staff/:idStaff" element={<EditStaffPage />} />
           <Route path="/create-staff" element={<CreateStaff />} />
-          <Route path="/project" element={<ProjectPage />} />
+          <Route
+            path="/project"
+            element={<ProjectPage infoAccount={infoAccount} />}
+          />
           <Route path="/create-project" element={<CreateProject />} />
           <Route
             path="/edit-project/:idProject"
@@ -226,19 +251,7 @@ function App() {
           />
           <Route path="/skills-of-staffs" element={<SkillsOfStaffs />} />
           <Route path="/skills" element={<Skills />} />
-          <Route
-            path="/assignments-of-staff"
-            element={<AssignmentsOfStaff />}
-          />
-          <Route path="/create-assignment" element={<CreateAssignment />} />
-          <Route
-            path="/detail-assignment/:idStaff"
-            element={<DetailAssignment />}
-          />
-          <Route
-            path="/edit-assignment/:idAssignment"
-            element={<EditAssignment />}
-          />
+
           <Route path="/account" element={<Account />} />
 
           <Route path="*" element={<p>There's nothing here!</p>} />
