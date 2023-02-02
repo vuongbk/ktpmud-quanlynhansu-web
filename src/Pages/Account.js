@@ -25,6 +25,7 @@ import { ControlOutlined } from "@ant-design/icons";
 const { Option } = Select;
 const { Title, Text } = Typography;
 
+console.log('test git tí')
 // const getBase64 = (img, callback) => {
 //   console.log("editstaff 23 img", img);
 //   const reader = new FileReader();
