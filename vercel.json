@@ -1,7 +1,7 @@
 {
     "rewrites":  [
         {
-            "source": "/proxy/:match*",
+            "source": "https://ktpm-qlns-web-xpb7.vercel.app/:match*",
             "destination": "https://quanlynhansuphongitnew.onrender.com/:match*"
           }
     ]
