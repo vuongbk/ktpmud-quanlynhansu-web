@@ -5,6 +5,7 @@ import Axios from "axios";
 import { Button, Input, Typography, message, Form } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import md5 from "md5";
+
 const { Title } = Typography;
 
 async function loginUser(credentials) {
@@ -17,9 +18,11 @@ async function loginUser(credentials) {
       console.log("login 77", error);
     });
 }
+
 export default function Login({ setToken, setInfoAccount }) {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+
   const handleSubmit = async (e) => {
     // e.preventDefault();
     console.log("login 23");

@@ -26,6 +26,7 @@ import { roleAdmin } from "./utils";
 
 const { Header, Footer, Content } = Layout;
 function App() {
+  Axios.defaults.baseURL = "https://quanlynhansuphongitnew.onrender.com/";
   const { token, setToken } = useToken();
   const [infoAccount, setInfoAccount] = useState();
   console.log("31 app", infoAccount);

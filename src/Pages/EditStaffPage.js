@@ -63,7 +63,6 @@ function EditPage() {
   const [departments, setDepartments] = useState(["Thanh Hóa", "Hà Nội"]);
   const [isModalPasswordOpen, setIsModalPasswordOpen] = useState(false);
   const [password, setPassword] = useState({});
-
   const dateFormat = "DD/MM/YYYY";
 
   const handleOkPasswordModal = async () => {
