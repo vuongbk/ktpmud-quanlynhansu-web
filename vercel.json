@@ -1,5 +1,8 @@
 {
     "rewrites":  [
-      {"source": "*/api/*", "destination": "https://quanlynhansuphongitnew.onrender.com/api/"}
+        {
+            "source": "/proxy/:match*",
+            "destination": "https://quanlynhansuphongitnew.onrender.com/:match*"
+          }
     ]
   }
